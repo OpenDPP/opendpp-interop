@@ -1,0 +1,27 @@
+OpenDPP Interop Boundary Kit (opendpp-interop)
+Copyright 2026 OpenDPP UAB
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+------------------------------------------------------------------------------
+Third-party content (vendored verbatim; NOT covered by the Apache-2.0 license
+above — each retains its own upstream license and terms):
+
+1. schemas/aas-v3.schema.json
+   Asset Administration Shell (AAS) v3.0 JSON Schema — IDTA-01001-3-1.
+   © IDTA (Industrial Digital Twin Association) and contributors.
+   Canonical source: https://github.com/admin-shell-io/aas-specs
+   Vendored verbatim for offline validation. Upstream is authoritative.
+
+2. schemas/untp-dpp-v0.7.0.schema.json
+   UN Transparency Protocol (UNTP) — Digital Product Passport v0.7.0 JSON Schema.
+   © UN/CEFACT and contributors.
+   Canonical source: https://github.com/uncefact/spec-untp
+   Vendored verbatim for offline validation. Upstream is authoritative.
+
+------------------------------------------------------------------------------
+Samples (samples/*) are synthetic demo data describing a fictional battery
+("OpenDPP Demo Manufacturing — NOT A REAL COMPANY"), fetched verbatim from the
+live demo service. They contain no real personal data and no private keys: the
+did:web document holds only the public verification key, and the base58/JWT
+proof values are signatures over public demo data, not secrets.

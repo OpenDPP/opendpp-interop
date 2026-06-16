@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate samples + schemas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install validator deps
+        working-directory: validate
+        run: npm ci
+      - name: Validate every sample against the official schemas
+        run: |
+          set -e
+          node validate/validate.mjs aas  samples/battery-aas-environment.json
+          node validate/validate.mjs untp samples/battery-vc-credential.json
+          node validate/validate.mjs untp samples/battery-unit-vc-credential.json
+      - name: JSON sanity (spec + schemas parse)
+        run: |
+          set -e
+          for f in openapi.json schemas/aas-v3.schema.json schemas/untp-dpp-v0.7.0.schema.json; do
+            node -e "JSON.parse(require('fs').readFileSync('$f','utf8')); console.log('ok: $f')"
+          done
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run gitleaks
+        run: |
+          set -e
+          ver=$(curl -sSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep -oP '"tag_name": "v\K[^"]+')
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${ver}/gitleaks_${ver}_linux_x64.tar.gz" | tar -xz gitleaks
+          ./gitleaks detect --source . --config .gitleaks.toml --redact --no-banner

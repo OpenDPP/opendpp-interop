@@ -1,0 +1,22 @@
+# gitleaks config for the public OpenDPP interop kit.
+#
+# The only "findings" in this repo are the sample Verifiable Credentials under samples/. A VC is
+# meant to be shared, and these are signed with an EPHEMERAL throwaway demo key (it never leaves the
+# emitter and is not a production key) over synthetic demo data — the `eyJ…` JWTs and the base58
+# `proofValue`s are signatures, not secrets. gitleaks' generic `jwt` rule flags them by shape, so we
+# allowlist the sample-artifact paths. Real credentials never live in this repo.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public sample Verifiable Credentials (demo-key-signed synthetic data — not secrets)"
+paths = [
+  '''^samples/battery-vc\.jwt$''',
+  '''^samples/battery-unit-vc\.jwt$''',
+  '''^samples/battery-vc-di\.jsonld$''',
+  '''^samples/battery-unit-vc-di\.jsonld$''',
+  '''^samples/battery-vc-credential\.json$''',
+  '''^samples/battery-unit-vc-credential\.json$''',
+  '''^samples/battery-issuer-did\.json$''',
+]

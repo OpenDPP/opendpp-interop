@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Live API & reference
+    url: https://opendpp-node.eu/api-reference
+    about: Browse the live OpenAPI reference and try the endpoints.
+  - name: Integration guides
+    url: https://opendpp-node.eu/app/developers
+    about: Hands-on AAS / UNTP walkthroughs (the contract lives in this repo).
+  - name: Report a security issue
+    url: https://opendpp-node.eu/security
+    about: Please disclose vulnerabilities responsibly — do not open a public issue.

@@ -1,0 +1,66 @@
+name: Drift check
+
+# Tells you when to refresh the kit: weekly, compares the committed openapi.json against the LIVE
+# spec at https://opendpp-node.eu/openapi.json. On divergence it opens (or updates) a tracking issue,
+# so you never have to remember to re-sync. Run it on demand from the Actions tab too.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  openapi-drift:
+    name: openapi.json vs live
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch live spec + compare canonically
+        id: cmp
+        run: |
+          curl -sSL https://opendpp-node.eu/openapi.json -o live-openapi.json
+          node -e '
+            const fs = require("fs");
+            const sort = (o) => Array.isArray(o) ? o.map(sort)
+              : (o && typeof o === "object")
+                ? Object.fromEntries(Object.keys(o).sort().map((k) => [k, sort(o[k])]))
+                : o;
+            const canon = (f) => JSON.stringify(sort(JSON.parse(fs.readFileSync(f, "utf8"))));
+            const committed = JSON.parse(fs.readFileSync("openapi.json", "utf8"));
+            const live = JSON.parse(fs.readFileSync("live-openapi.json", "utf8"));
+            const drift = canon("openapi.json") !== canon("live-openapi.json");
+            const out = process.env.GITHUB_OUTPUT;
+            fs.appendFileSync(out, `drift=${drift}\n`);
+            fs.appendFileSync(out, `committed=${committed.info?.version}\n`);
+            fs.appendFileSync(out, `live=${live.info?.version}\n`);
+            console.log(drift ? `DRIFT: committed ${committed.info?.version} vs live ${live.info?.version}` : "in sync");
+          '
+      - name: Open or update a drift issue
+        if: steps.cmp.outputs.drift == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "openapi.json has drifted from the live spec";
+            const body = [
+              `The committed \`openapi.json\` (version **${{ steps.cmp.outputs.committed }}**) no longer matches`,
+              `the live spec at https://opendpp-node.eu/openapi.json (version **${{ steps.cmp.outputs.live }}**).`,
+              ``,
+              `Refresh the kit from the source of truth: re-copy \`openapi.json\` (and regenerate the`,
+              `\`samples/\` if the emitters changed) from the OpenDPP product, then update \`CONFORMANCE.md\``,
+              `and \`CHANGELOG.md\`.`,
+              ``,
+              `_Opened automatically by the weekly drift check._`,
+            ].join("\n");
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, state: "open", labels: "drift",
+            });
+            const hit = existing.data.find((i) => i.title === title);
+            if (hit) {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: hit.number, body });
+            } else {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: ["drift"] });
+            }
