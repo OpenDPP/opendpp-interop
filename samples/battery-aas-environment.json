@@ -910,13 +910,13 @@
           "idShort": "digitalSealHash",
           "modelType": "Property",
           "valueType": "xs:string",
-          "value": "20646da12c74e5a3a7cca69e36e0d62c2b3140529d5247dae2f6b1e4fe71be41"
+          "value": "f9a1528abf228c96c87ef1ae048d93df8f9b9a3fd7c28556915ae8e966bbd03e"
         },
         {
           "idShort": "cryptographicSignature",
           "modelType": "Property",
           "valueType": "xs:string",
-          "value": "MEUCIHn5wOqUy1z7Zq/3iRBF8/HjjMoFlH+lYhJ9wzjxqpsWAiEArV1h7AbqZ16wJabqFf7vZPoQYZz2EnGi6D+0WOguo4g="
+          "value": "MEUCIAYfNpSPJGhw4UcyOmikWyb0vbkpG+ld+PrUODTNzesKAiEAsxzkw8rdcnTHI5C92OH/CMDghbgy37PigJjp7kS6k80="
         },
         {
           "idShort": "pemPublicKey",
@@ -945,7 +945,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -979,7 +979,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1013,7 +1013,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1047,7 +1047,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1081,7 +1081,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1115,7 +1115,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1149,7 +1149,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1183,7 +1183,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1217,7 +1217,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1251,7 +1251,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1285,7 +1285,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1320,7 +1320,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1355,7 +1355,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1390,7 +1390,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1425,7 +1425,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1459,7 +1459,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1493,7 +1493,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1528,7 +1528,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1562,7 +1562,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1596,7 +1596,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1631,7 +1631,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1666,7 +1666,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1701,7 +1701,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1736,7 +1736,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1770,7 +1770,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1804,7 +1804,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1838,7 +1838,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1873,7 +1873,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1908,7 +1908,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1943,7 +1943,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -1978,7 +1978,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2013,7 +2013,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2048,7 +2048,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2083,7 +2083,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2118,7 +2118,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2153,7 +2153,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2188,7 +2188,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2222,7 +2222,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2240,7 +2240,7 @@
                 "language": "en"
               }
             ],
-            "dataType": "REAL_MEASURE"
+            "dataType": "REAL_COUNT"
           }
         }
       ]
@@ -2256,7 +2256,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2274,7 +2274,7 @@
                 "language": "en"
               }
             ],
-            "dataType": "REAL_MEASURE"
+            "dataType": "REAL_COUNT"
           }
         }
       ]
@@ -2290,7 +2290,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2325,7 +2325,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2360,7 +2360,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2394,7 +2394,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2428,7 +2428,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2463,7 +2463,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2498,7 +2498,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2532,7 +2532,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2566,7 +2566,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2601,7 +2601,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2635,7 +2635,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2670,7 +2670,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2704,7 +2704,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2738,7 +2738,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2772,7 +2772,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2806,7 +2806,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2840,7 +2840,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2875,7 +2875,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2909,7 +2909,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2943,7 +2943,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -2978,7 +2978,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3013,7 +3013,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3048,7 +3048,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3082,7 +3082,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3117,7 +3117,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3152,7 +3152,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3187,7 +3187,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3222,7 +3222,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3257,7 +3257,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3292,7 +3292,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3326,7 +3326,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3361,7 +3361,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3395,7 +3395,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3429,7 +3429,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3463,7 +3463,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3497,7 +3497,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3531,7 +3531,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3565,7 +3565,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3599,7 +3599,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3633,7 +3633,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3667,7 +3667,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3701,7 +3701,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3735,7 +3735,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3769,7 +3769,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3803,7 +3803,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3837,7 +3837,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3872,7 +3872,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3906,7 +3906,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3941,7 +3941,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -3975,7 +3975,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -4010,7 +4010,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
@@ -4044,7 +4044,7 @@
             "keys": [
               {
                 "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3/0"
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
               }
             ]
           },
