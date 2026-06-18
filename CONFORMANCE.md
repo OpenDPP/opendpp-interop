@@ -14,7 +14,7 @@ Legend: ✅ Conform · 🟡 Partial · 🗺 Roadmap.
 | AAS v3.0 Environment + AASX package | ✅ | `node validate/validate.mjs aas samples/battery-aas-environment.json`; the schema is the official IDTA-01001-3-1 (`schemas/aas-v3.schema.json`). Live: `GET /passport/{id}` with `Accept: application/aas+json`. |
 | `aas-test-engines` (IDTA gold standard) | ✅ | the committed AAS sample passes the official Python `aas-test-engines` validator. |
 | Per-category submodel views | ✅ | additive PUBLIC-tier submodel views over the authoritative compliance metadata (the bundled battery sample carries `BatteryCharacteristics` + `CarbonFootprint`; other ESPR categories add e.g. `TechnicalData`), one set per category. |
-| Honest semantic ids | ✅ | `semanticId`s are real IDTA IRIs **only** where version-verified (CarbonFootprint IDTA 02023 v1.0, TechnicalData 02003-1-2); everything OpenDPP coins is an explicit `urn:opendpp:concept:*` / `urn:opendpp:submodel:*`. |
+| IDTA submodel-template **identity** (`semanticId` provenance) | ✅ | `node validate/validate.mjs semanticids samples/battery-aas-environment.json` — every IDTA-namespace `semanticId` is matched against the published [IDTA Submodel-Template registry](https://github.com/admin-shell-io/submodel-templates) via the vendored CC-BY allowlist [`idta-semantic-ids.json`](./idta-semantic-ids.json) (pinned ref `784d22e`). CarbonFootprint (IDTA 02023) classifies `real-idta-published`; everything OpenDPP coins is an explicit `urn:opendpp:concept:*` / `urn:opendpp:submodel:*` (`vendor-coined`); genuine eCl@ss property IRDIs are `eclass`. Verifies semanticId **identity** (the id is the authentic IDTA template id), **not** structural conformance to the template. TechnicalData (IDTA 02003-1-2) is `real-idta-published` on a still-valid older version — a newer major (v2.0.1) exists which moved to an eCl@ss IRDI, so OpenDPP deliberately keeps the `/1/2` IRI. |
 
 ## UNTP + W3C Verifiable Credentials
 
@@ -42,6 +42,9 @@ Honesty is part of the contract. OpenDPP does **not**:
   `MerkleTreeAttestationProof` (an offline-verifiable ECDSA Merkle-root signature); the *conformant*
   VC is the **separate** `vc+jwt` / `vc+ld+json` artifact described above.
 - claim "full AAS metamodel support," or present any `urn:opendpp:concept:*` id as eCl@ss.
+- claim **structural conformance** to an IDTA submodel template merely because a submodel reuses that
+  template's `semanticId`. The `semanticids` check above verifies template **identity** (the id is the
+  authentic, registry-pinned IDTA id) — not that the submodel body fills the template's mandated elements.
 - present itself as a certified compliance authority. OpenDPP is an ESPR-readiness / interoperability
   node: it produces validator-conformant, independently verifiable output. Regulatory compliance is a
   determination for the operator and the competent authority.

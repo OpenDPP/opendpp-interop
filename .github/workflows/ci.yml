@@ -26,10 +26,24 @@ jobs:
           node validate/validate.mjs aas  samples/battery-aas-environment.json
           node validate/validate.mjs untp samples/battery-vc-credential.json
           node validate/validate.mjs untp samples/battery-unit-vc-credential.json
-      - name: JSON sanity (spec + schemas parse)
+      - name: Classify AAS semanticIds against the IDTA allowlist (identity)
+        run: node validate/validate.mjs semanticids samples/battery-aas-environment.json --strict
+      - name: Assert classifier behaviour (CarbonFootprint is a published IDTA id)
+        run: |
+          node -e "
+            import('./validate/semantic-ids.mjs').then(m => {
+              const cf = 'https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0';
+              const v = m.classifySemanticId(cf);
+              if (v !== 'real-idta-published') { console.error('expected real-idta-published, got ' + v); process.exit(1); }
+              if (m.classifySemanticId('urn:opendpp:submodel:batteries:characteristics') !== 'vendor-coined') process.exit(1);
+              if (m.classifySemanticId('0173-1#02-BAF123#001') !== 'eclass') process.exit(1);
+              console.log('ok: semanticId classifier verdicts');
+            });
+          "
+      - name: JSON sanity (spec + schemas + allowlist parse)
         run: |
           set -e
-          for f in openapi.json schemas/aas-v3.schema.json schemas/untp-dpp-v0.7.0.schema.json; do
+          for f in openapi.json idta-semantic-ids.json schemas/aas-v3.schema.json schemas/untp-dpp-v0.7.0.schema.json; do
             node -e "JSON.parse(require('fs').readFileSync('$f','utf8')); console.log('ok: $f')"
           done
 

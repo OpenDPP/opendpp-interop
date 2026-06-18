@@ -19,6 +19,14 @@ above — each retains its own upstream license and terms):
    Canonical source: https://github.com/uncefact/spec-untp
    Vendored verbatim for offline validation. Upstream is authoritative.
 
+3. idta-semantic-ids.json
+   IDTA Submodel-Template semanticId allowlist (IRI + version + published/deprecated status).
+   © IDTA (Industrial Digital Twin Association) and contributors.
+   Canonical source: https://github.com/admin-shell-io/submodel-templates (pinned ref 784d22e).
+   Licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). A DERIVED allowlist: only the
+   submodel semanticId IRI, version, and published/deprecated status were extracted — the underlying
+   template definitions were not modified. Upstream is authoritative.
+
 ------------------------------------------------------------------------------
 Samples (samples/*) are synthetic demo data describing a fictional battery
 ("OpenDPP Demo Manufacturing — NOT A REAL COMPANY"), fetched verbatim from the

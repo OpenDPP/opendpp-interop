@@ -36,8 +36,9 @@ Check an AAS Environment or a UNTP credential **you** produce against the offici
 cd validate
 npm install                       # ajv + ajv-formats only — no OpenDPP code
 
-node validate.mjs aas   ../samples/battery-aas-environment.json
-node validate.mjs untp  ../samples/battery-vc-credential.json
+node validate.mjs aas         ../samples/battery-aas-environment.json
+node validate.mjs untp        ../samples/battery-vc-credential.json
+node validate.mjs semanticids ../samples/battery-aas-environment.json   # IDTA template-identity check
 ```
 
 Exit `0` = conformant · `1` = schema errors (printed) · `2` = usage error. See
@@ -49,11 +50,12 @@ Exit `0` = conformant · `1` = schema errors (printed) · `2` = usage error. See
 opendpp-interop/
 ├── openapi.json            the public API contract (curated integration surface)
 ├── CONFORMANCE.md          per-capability conformance matrix + how to verify each
+├── idta-semantic-ids.json  CC-BY IDTA submodel-template semanticId allowlist (identity checks)
 ├── schemas/                the official JSON Schemas OpenDPP's CI validates against (vendored)
 │   ├── aas-v3.schema.json
 │   └── untp-dpp-v0.7.0.schema.json
 ├── samples/                validated reference artifacts (one battery, both doors)
-└── validate/               the offline conformance validator (validate.mjs)
+└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids)
 ```
 
 ## Official schemas (vendored)
@@ -107,7 +109,10 @@ does.
 
 - **AAS:** General Product Information, ComplianceMetadata, per-category submodel views, and the eIDAS
   seal submodel. Concepts OpenDPP coins are honestly `urn:opendpp:concept:*` — **never** presented as
-  eCl@ss. `semanticId`s are real IDTA IRIs only where version-verified (CarbonFootprint, TechnicalData).
+  eCl@ss. Submodel `semanticId`s carry a real IDTA template IRI only where machine-checked against the
+  published IDTA registry — verify it yourself with `node validate/validate.mjs semanticids <aas-file>`
+  against the CC-BY allowlist [`idta-semantic-ids.json`](./idta-semantic-ids.json) (template **identity**,
+  not structural conformance).
 - **UNTP:** the passport maps to a `DigitalProductPassport` `credentialSubject`; SKU/type credentials
   are `idGranularity:"model"`, per-unit credentials are `idGranularity:"item"` with the GS1 AI-21
   serial as `itemNumber`, linked back to their type credential.
