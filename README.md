@@ -38,7 +38,8 @@ npm install                       # ajv + ajv-formats only — no OpenDPP code
 
 node validate.mjs aas         ../samples/battery-aas-environment.json
 node validate.mjs untp        ../samples/battery-vc-credential.json
-node validate.mjs semanticids ../samples/battery-aas-environment.json   # IDTA template-identity check
+node validate.mjs semanticids ../samples/battery-aas-environment.json        # IDTA template-identity check
+node validate.mjs registry    ../samples/battery-registry-pointer-model.json # CIRPASS-2 EU-registry (NON-NORMATIVE)
 ```
 
 Exit `0` = conformant · `1` = schema errors (printed) · `2` = usage error. See
@@ -51,11 +52,12 @@ opendpp-interop/
 ├── openapi.json            the public API contract (curated integration surface)
 ├── CONFORMANCE.md          per-capability conformance matrix + how to verify each
 ├── idta-semantic-ids.json  CC-BY IDTA submodel-template semanticId allowlist (identity checks)
-├── schemas/                the official JSON Schemas OpenDPP's CI validates against (vendored)
+├── schemas/                the official / reference JSON Schemas OpenDPP's CI validates against (vendored)
 │   ├── aas-v3.schema.json
-│   └── untp-dpp-v0.7.0.schema.json
-├── samples/                validated reference artifacts (one battery, both doors)
-└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids)
+│   ├── untp-dpp-v0.7.0.schema.json
+│   └── cirpass2-eu-registry-pointer.schema.json   (CIRPASS-2, NON-NORMATIVE)
+├── samples/                validated reference artifacts (one battery, both doors + the EU-registry pointer)
+└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry)
 ```
 
 ## Official schemas (vendored)
@@ -67,6 +69,9 @@ see [`schemas/README.md`](./schemas/README.md) and [`NOTICE`](./NOTICE)):
   IDTA-01001-3-1, JSON Schema draft-2019-09).
 - **UNTP DPP v0.7.0** — [`schemas/untp-dpp-v0.7.0.schema.json`](./schemas/untp-dpp-v0.7.0.schema.json)
   (draft-2020-12).
+- **CIRPASS-2 EU-registry pointer** *(NON-NORMATIVE)* —
+  [`schemas/cirpass2-eu-registry-pointer.schema.json`](./schemas/cirpass2-eu-registry-pointer.schema.json)
+  (the CIRPASS-2 `mock-eu-registry` `default-schema.json`, draft-2020-12, pinned commit `b383c4d`).
 
 ## Validated samples
 
@@ -82,6 +87,9 @@ unit `VM-LFP100-2026-000001`), so you can **reproduce and verify every one** aga
 - `battery-unit-vc-credential.json`, `battery-unit-vc.jwt`, `battery-unit-vc-di.jsonld` — a **per-unit**
   credential for one serialised battery (item granularity, the real GS1 AI-21 serial as `itemNumber`).
 - `battery-issuer-did.json` — the issuer `did:web` document (the verification key).
+- `battery-registry-pointer-model.json`, `battery-registry-pointer-item.json` — the **CIRPASS-2
+  EU-registry pointer** (NON-NORMATIVE) for the model and a per-unit item (`node validate/validate.mjs
+  registry …`).
 - `AAS-VALIDATION.md`, `VC-VALIDATION.md` — how each artifact was validated.
 
 ## Verify a signature
@@ -116,6 +124,79 @@ does.
 - **UNTP:** the passport maps to a `DigitalProductPassport` `credentialSubject`; SKU/type credentials
   are `idGranularity:"model"`, per-unit credentials are `idGranularity:"item"` with the GS1 AI-21
   serial as `itemNumber`, linked back to their type credential.
+
+### OpenDPP → CIRPASS-2 EU-registry pointer (ESPR Art. 13)
+
+A **third, non-normative** mapping: the **registry-side projection**. ESPR Art. 13 anticipates a
+decentralised EU registry holding only a thin *pointer* per product — not the passport data, just
+enough to find and identify it. OpenDPP projects a passport (or a per-unit `BatteryUnit`) into the
+**pointer-only** index record the CIRPASS-2 `mock-eu-registry` reference expects, and validates it
+against the vendored
+[`cirpass2-eu-registry-pointer.schema.json`](./schemas/cirpass2-eu-registry-pointer.schema.json)
+(the registry's `default-schema.json`, draft-2020-12).
+
+> **NON-NORMATIVE.** CIRPASS-2 is an EU-funded *reference* ecosystem for exploration; it is not the
+> EU registry, not CEN-CENELEC JTC 24, and confers no certification. OpenDPP claims its pointer
+> *validates against the reference* — never "CIRPASS-2-certified" / "EU-registry-compliant" /
+> "EU-official". See [CONFORMANCE.md](./CONFORMANCE.md).
+
+**Pointer fields** — the mapping is deterministic; OpenDPP **refuses to register** rather than emit a
+placeholder for any required field it cannot honestly source:
+
+| Pointer field | OpenDPP source | Encoding / notes |
+| --- | --- | --- |
+| `upi` | canonical GS1 Digital Link product key | `https://id.gs1.org/01/<gtin>` for a GTIN-keyed product (or `/8003/<grai>` for a GRAI); the ITEM form appends the real GS1 **AI-21** serial: `…/21/<BatteryUnit.serialNumber>`. |
+| `reoId` | `EconomicOperator.regId` namespaced by `regIdScheme` | `<SCHEME>-<regId>`, e.g. `EORI-IT12345678`. Recognised schemes `EORI \| VAT \| DUNS \| LEI \| GLN`; max 50 chars. **Refuses if no `regId`.** |
+| `liveURL` | the public resolver | `${BASE_URL}/passport/<id>` (MODEL) or `/unit/<id>` (ITEM) — the same URL the `vc+jwt` / AAS content-negotiation serve. |
+| `backupURL` | a **distinct** retrieval URL | the stored GS1 Digital Link (`Passport.digitalLinkUri` / `BatteryUnit.digitalLinkUri`), or `${backupBaseUrl}/…` if configured. **Must differ from `liveURL`.** |
+| `commodityCode` | `Passport.metadata.commodityCode` (or `hsCode` / `taricCode` / `hs`) | HS / TARIC code; schema pattern `^[0-9]{4,10}$`. **Refuses to register if absent** — no placeholder. |
+| `facilitiesId` | `["GLN-<Facility.gln>"]` | GS1 GLN-13 (mod-10 valid). **Refuses if the passport has no bound `Facility`** — the same non-registrable state that makes the `vc+jwt` / AAS paths return 406; never emits a placeholder GLN. |
+| `granularityLevel` | the entity kind | `MODEL` for a SKU/type `Passport`, `ITEM` for a `BatteryUnit`. **`BATCH` is reserved** — OpenDPP has no first-class batch entity yet, so it never emits `BATCH`. |
+| `deactivated` *(ITEM only)* | unit lifecycle | `true` when the unit is `RECYCLED` or has `ceasedAt` set (Art. 77(8) cease-to-exist), else `false`. An archived / decommissioned / recycled passport or unit still **resolves** (the persistence duty) — it is never silently dropped from the index. |
+| `modelUpi` *(ITEM only)* | the parent type `Passport`'s `upi` | links the item back to its model entry. |
+| `batchUpi` *(ITEM only)* | defaults to `modelUpi` | OpenDPP has no batch entity, so the item's batch UPI is its model UPI. |
+
+**Granularity model (MODEL / BATCH / ITEM).** The pointer schema enforces this end-to-end via
+conditional `allOf` rules, and OpenDPP honours them exactly:
+
+- **MODEL** — a SKU/type passport. The schema **forbids** `modelUpi` and `batchUpi`; OpenDPP emits
+  neither.
+- **BATCH** — *reserved, unused.* The schema requires `modelUpi` and forbids `batchUpi`. OpenDPP has
+  no first-class batch entity, so it never produces a `BATCH` pointer (it is not faked as a model or
+  an item).
+- **ITEM** — a serialised `BatteryUnit`. The schema **requires** `deactivated`, `modelUpi`, **and**
+  `batchUpi`; OpenDPP supplies all three (with `batchUpi` defaulting to `modelUpi`).
+
+**Discovery search-keys (CIRPASS-2 `dpp-data-extractor`).** The extractor crawls the resolved passport
+for **14** search-keys. OpenDPP populates **6 of 14** today; the remaining **8** are roadmap (tracked
+by #116 / R7). The 6 are resolved from OpenDPP's **AAS** output: the extractor matches an AAS leaf
+`semanticId` by `equalsIgnoreCase || endsWith` against bare eCl@ss IRDIs, and OpenDPP carries exactly
+those bare IRDIs on its discoverability-critical leaves (Nameplate `ManufacturerName` /
+`ManufacturerProductDesignation`, CarbonFootprint nested `PcfCO2eq` / `ReferenceImpactUnitForCalculation`,
+ProductClassifications `ProductClassId` / `ClassificationSystem`) in the OpenDPP emitters
+`src/utils/aas-mapper.ts` + `src/utils/aas-category-templates.ts`. (The CIRPASS-2 **viewer**
+`dpp-renderer-fe` separately consumes JSON-LD / RDF via an inline `@context` — it reads OpenDPP's
+JSON-LD door, **not** its AAS or VC door; OpenDPP's JSON-LD context is built in `src/utils/jsonld.ts`.)
+
+| Search-key | Status | Search-key | Status |
+| --- | --- | --- | --- |
+| `manufacturerName` | ✅ | `recyclingRate` | 🗺 |
+| `productName` | ✅ | `recyclingRateUom` | 🗺 |
+| `carbonFootprint` | ✅ | `energyConsumption` | 🗺 |
+| `carbonFootprintUom` | ✅ | `energyConsumptionUom` | 🗺 |
+| `codeValue` | ✅ | `weight` | 🗺 |
+| `codeSet` | ✅ | `weightUom` | 🗺 |
+| | | `durability` | 🗺 |
+| | | `durabilityUom` | 🗺 |
+
+Legend: ✅ populated today · 🗺 roadmap (#116 / R7).
+
+**Validate it yourself** (offline, no OpenDPP code):
+
+```bash
+node validate/validate.mjs registry samples/battery-registry-pointer-model.json
+node validate/validate.mjs registry samples/battery-registry-pointer-item.json
+```
 
 ## Generate a typed SDK
 

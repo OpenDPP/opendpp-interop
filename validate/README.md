@@ -1,7 +1,8 @@
 # `validate/` — offline conformance validator
 
-A tiny, dependency-light CLI that checks an **AAS Environment** or a **UNTP DigitalProductPassport
-credential** against the *same* official JSON Schemas OpenDPP's own CI validates against
+A tiny, dependency-light CLI that checks an **AAS Environment**, a **UNTP DigitalProductPassport
+credential**, or a **CIRPASS-2 EU-registry pointer** (NON-NORMATIVE) against the *same*
+official / reference JSON Schemas OpenDPP's own CI validates against
 ([`../schemas/`](../schemas/)). Use it to prove your output is structurally conformant **before you
 ship** — without any access to the OpenDPP product source.
 
@@ -11,8 +12,9 @@ ship** — without any access to the OpenDPP product source.
 cd validate
 npm install                       # ajv + ajv-formats only
 
-node validate.mjs aas   ../samples/battery-aas-environment.json
-node validate.mjs untp  ../samples/battery-vc-credential.json
+node validate.mjs aas      ../samples/battery-aas-environment.json
+node validate.mjs untp     ../samples/battery-vc-credential.json
+node validate.mjs registry ../samples/battery-registry-pointer-model.json   # CIRPASS-2 (NON-NORMATIVE)
 ```
 
 Exit codes: **`0`** conformant · **`1`** schema errors (first 10 printed) · **`2`** usage / read error.

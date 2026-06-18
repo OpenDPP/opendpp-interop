@@ -1,0 +1,14 @@
+{
+  "upi": "https://id.gs1.org/01/09521234543213/21/SN-LFP-100-0001",
+  "reoId": "EORI-IT12345678",
+  "liveURL": "https://opendpp-node.eu/unit/demo-battery-unit-0001",
+  "backupURL": "https://id.gs1.org/01/09521234543213/21/SN-LFP-100-0001",
+  "commodityCode": "85076000",
+  "facilitiesId": [
+    "GLN-5412345000013"
+  ],
+  "granularityLevel": "ITEM",
+  "deactivated": false,
+  "modelUpi": "https://id.gs1.org/01/09521234543213",
+  "batchUpi": "https://id.gs1.org/01/09521234543213"
+}

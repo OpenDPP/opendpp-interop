@@ -34,6 +34,26 @@ Legend: ✅ Conform · 🟡 Partial · 🗺 Roadmap.
 | Cryptographic selective disclosure (BBS / SD-JWT) | 🗺 Roadmap | not yet implemented; the vendor Merkle scheme covers redaction today. |
 | `did:webvh` (web + verifiable history) | 🗺 Roadmap | deferred — `did:web` + key rotation suffices now. |
 
+## CIRPASS-2 reference ecosystem (non-normative)
+
+The EU ESPR Art. 13 registry is a **decentralised pointer index**: it holds a thin pointer per
+product (identifiers + retrieval URLs), not the passport. OpenDPP projects each passport / unit into
+that pointer and exercises the **CIRPASS-2 reference** implementation of the ecosystem (registry,
+extractor, viewer). **CIRPASS-2 is non-normative** — see the caveat below.
+
+| Capability | Status | Evidence |
+| --- | --- | --- |
+| Pointer validates against the CIRPASS-2 registry `default-schema.json` (draft-2020-12) | ✅ | `node validate/validate.mjs registry samples/battery-registry-pointer-model.json` (and `…-item.json`) passes against the vendored `schemas/cirpass2-eu-registry-pointer.schema.json`; the backend gate is `tests/functional/interop-kit.test.ts`. |
+| Registers in the CIRPASS-2 *reference* registry (`mock-eu-registry` `POST /metadata/v1`) and receives a verifiable Proof-of-Registration (RS256/JWKS) | ✅ | the backend live harness `tests/functional/cirpass2-harness.test.ts` (gated, T3) — verified live end-to-end. The Proof JWT is *received from the reference registry*, **never** OpenDPP-issued or EU-official. |
+| Discovery search-key coverage — 6 of 14 (`dpp-data-extractor`) | 🟡 Partial | the coverage table in [README → search-keys](./README.md#opendpp--cirpass-2-eu-registry-pointer-espr-art-13) + the backend offline extractor port `tests/functional/aas-cirpass-discoverability.test.ts` + the live `cirpass2-harness` capabilities check. |
+| Renders in the CIRPASS-2 *reference* viewer (`dpp-renderer`) via OpenDPP JSON-LD | 🗺 Roadmap | tracked by #174 — **not yet proven**. (The viewer consumes JSON-LD / RDF; OpenDPP serves a JSON-LD door, but end-to-end render is not yet demonstrated.) |
+
+> **Non-normative caveat.** Every CIRPASS-2 repository is "for exploration … not complete,
+> exhaustive, or normative … does not reflect CEN-CENELEC JTC 24." OpenDPP claims its pointer is
+> **validated against the reference** registry and extractor — **never** *certified*, *compliant*, or
+> *EU-official*. The Proof-of-Registration is issued by the *reference* `mock-eu-registry`, not by the
+> EU and not by OpenDPP.
+
 ## What we do **not** claim
 
 Honesty is part of the contract. OpenDPP does **not**:
@@ -48,6 +68,15 @@ Honesty is part of the contract. OpenDPP does **not**:
 - present itself as a certified compliance authority. OpenDPP is an ESPR-readiness / interoperability
   node: it produces validator-conformant, independently verifiable output. Regulatory compliance is a
   determination for the operator and the competent authority.
+
+For the **CIRPASS-2** reference ecosystem specifically:
+
+- **Allowed:** "validated against the CIRPASS-2 reference registry & extractor (non-normative)";
+  "registers in the CIRPASS-2 *reference* `mock-eu-registry` and receives a verifiable
+  Proof-of-Registration".
+- **Forbidden:** "CIRPASS-2-certified", "EU-registry-compliant", "EU-official" — CIRPASS-2 is
+  non-normative, the registry is a *reference* implementation, and OpenDPP issues none of these
+  attestations.
 
 ## Reproduce it
 

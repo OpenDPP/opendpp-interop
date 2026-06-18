@@ -27,6 +27,15 @@ above — each retains its own upstream license and terms):
    submodel semanticId IRI, version, and published/deprecated status were extracted — the underlying
    template definitions were not modified. Upstream is authoritative.
 
+4. schemas/cirpass2-eu-registry-pointer.schema.json
+   CIRPASS-2 mock-eu-registry pointer schema (ESPR Art. 13 index record),
+   JSON Schema draft-2020-12 — verbatim copy of `default-schema.json`.
+   © CIRPASS-2 Consortium, EU Digital Europe GA 101158775. Apache-2.0.
+   Canonical source: https://github.com/CIRPASS-2/mock-eu-registry (pinned commit b383c4d)
+   NON-NORMATIVE reference artifact: the CIRPASS-2 project repos are for
+   exploration and do not reflect CEN-CENELEC JTC 24. Vendored verbatim for
+   offline validation. Upstream is authoritative.
+
 ------------------------------------------------------------------------------
 Samples (samples/*) are synthetic demo data describing a fictional battery
 ("OpenDPP Demo Manufacturing — NOT A REAL COMPANY"), fetched verbatim from the

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EU DPP Registry Metadata",
+  "description": "Schema for Digital Product Passport registration metadata in the EU Registry",
+  "type": "object",
+  "required": [
+    "upi",
+    "reoId",
+    "liveURL",
+    "backupURL",
+    "commodityCode",
+    "facilitiesId",
+    "granularityLevel"
+  ],
+  "properties": {
+    "upi": {
+      "type": "string",
+      "description": "Unique Product Identifier - the unique identifier of the product",
+      "minLength": 1,
+      "maxLength": 200,
+      "examples": ["urn:epc:id:sgtin:0614141.107346.2017"]
+    },
+    "reoId": {
+      "type": "string",
+      "description": "Responsible Economic Operator ID",
+      "minLength": 1,
+      "maxLength": 50,
+      "examples": ["LEI-529900T8BM49AURSDO55", "EORI-IT123456789"]
+    },
+    "facilitiesId": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "maxLength": 250
+      },
+      "description": "Facility ID where the product is manufactured/assembled",
+      "examples": ["GLN-5412345000013", "FAC-MILANO-001"]
+    },
+    "liveURL": {
+      "type": "string",
+      "format": "uri",
+      "description": "Primary URL to retrieve the related DPP data",
+      "pattern": "^http",
+      "examples": ["https://dpp.example.com/product/12345"]
+    },
+    "backupURL": {
+      "type": "string",
+      "format": "uri",
+      "description": "Backup URL to retrieve the related DPP data",
+      "pattern": "^http",
+      "examples": ["https://backup-dpp.example.com/product/12345"]
+    },
+    "commodityCode": {
+      "type": "string",
+      "description": "The commodity code of the product (e.g., HS Code, TARIC)",
+      "pattern": "^[0-9]{4,10}$",
+      "examples": ["85176200", "8517620090"]
+    },
+    "granularityLevel": {
+      "type": "string",
+      "description": "The granularity level of the DPP",
+      "enum": ["MODEL", "BATCH", "ITEM"],
+      "examples": ["MODEL"]
+    },
+    "deactivated": {
+      "type": ["boolean", "null"],
+      "description": "True if the DPP has been deactivated, false/null otherwise. Required when granularityLevel = ITEM",
+      "examples": [true, false, null]
+    },
+    "modelUpi": {
+      "type": "string",
+      "description": "The UPI of the model-level registry entry. Required when granularityLevel = BATCH or ITEM",
+      "minLength": 1,
+      "maxLength": 200,
+      "examples": ["urn:epc:id:sgtin:0614141.107346.2017"]
+    },
+    "batchUpi": {
+      "type": "string",
+      "description": "The UPI of the batch-level registry entry. Required when granularityLevel = ITEM",
+      "minLength": 1,
+      "maxLength": 200,
+      "examples": ["urn:epc:id:sgtin:0614141.107346.2017"]
+    }
+  },
+  "allOf": [
+    {
+      "comment": "ITEM: deactivated + modelUpi + batchUpi required; else deactivated forbidden",
+      "if": {
+        "properties": { "granularityLevel": { "const": "ITEM" } },
+        "required": ["granularityLevel"]
+      },
+      "then": {
+        "required": ["deactivated", "modelUpi", "batchUpi"]
+      },
+      "else": {
+        "not": { "required": ["deactivated"] }
+      }
+    },
+    {
+      "comment": "BATCH: modelUpi required, batchUpi forbidden",
+      "if": {
+        "properties": { "granularityLevel": { "const": "BATCH" } },
+        "required": ["granularityLevel"]
+      },
+      "then": {
+        "required": ["modelUpi"],
+        "not": { "required": ["batchUpi"] }
+      }
+    },
+    {
+      "comment": "MODEL: modelUpi e batchUpi forbidden",
+      "if": {
+        "properties": { "granularityLevel": { "const": "MODEL" } },
+        "required": ["granularityLevel"]
+      },
+      "then": {
+        "not": {
+          "anyOf": [
+            { "required": ["modelUpi"] },
+            { "required": ["batchUpi"] }
+          ]
+        }
+      }
+    }
+  ]
+}
