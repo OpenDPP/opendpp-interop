@@ -6,14 +6,17 @@
  * SAME official, vendored JSON Schemas OpenDPP's own CI validates against (see ../schemas/), so you
  * can prove conformance offline before you ship — without any access to the OpenDPP product source.
  *
- *   node validate.mjs aas   path/to/aas-environment.json
- *   node validate.mjs untp  path/to/dpp-credential.json
+ *   node validate.mjs aas         path/to/aas-environment.json
+ *   node validate.mjs untp        path/to/dpp-credential.json
+ *   node validate.mjs semanticids path/to/aas-environment.json   [--strict]
  *
  * Exit codes: 0 = conformant · 1 = schema errors (printed) · 2 = usage / read error.
  *
- * NOTE: this checks STRUCTURAL conformance against the JSON Schema. Verifying a `vc+jwt` SIGNATURE
- * (resolve did:web → verify the JWS → validate the payload) is a separate concern — see the recipe
- * in the README ("Verify a signature") which uses only standard WebCrypto / JOSE, no OpenDPP code.
+ * NOTE: `aas`/`untp` check STRUCTURAL conformance against the JSON Schema. `semanticids` checks IDTA
+ * template IDENTITY only — it classifies each `semanticId` against the CC-BY IDTA allowlist
+ * (../idta-semantic-ids.json), never structural conformance to the template body. Verifying a `vc+jwt`
+ * SIGNATURE (resolve did:web → verify the JWS → validate the payload) is a separate concern — see the
+ * README recipe ("Verify a signature"), which uses only standard WebCrypto / JOSE, no OpenDPP code.
  *
  * Apache-2.0 © OpenDPP UAB. The vendored schemas in ../schemas/ retain their upstream terms (see NOTICE).
  */
@@ -23,6 +26,7 @@ import { pathToFileURL } from "node:url";
 import Ajv2019 from "ajv/dist/2019.js";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
+import { classifyAasFile, VERDICTS } from "./semantic-ids.mjs";
 
 const SCHEMAS = {
   // AAS v3.0: official IDTA-01001-3-1 JSON Schema (draft-2019-09).
@@ -32,6 +36,8 @@ const SCHEMAS = {
 };
 
 export const INTEROP_KINDS = Object.keys(SCHEMAS);
+// Schema-validated kinds + the identity-only semanticId classifier (no schema, no ajv).
+export const ALL_KINDS = [...INTEROP_KINDS, "semanticids"];
 
 /** Validate `data` of the given `kind` ("aas" | "untp"). Returns { valid, label, errors }. */
 export function validateInterop(kind, data) {
@@ -49,9 +55,11 @@ export function validateInterop(kind, data) {
 // --- CLI -----------------------------------------------------------------------------------------
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
-  const [kind, file] = process.argv.slice(2);
-  if (!kind || !file || !INTEROP_KINDS.includes(kind)) {
-    console.error(`usage: node validate.mjs <${INTEROP_KINDS.join("|")}> <file.json>`);
+  const argv = process.argv.slice(2);
+  const strict = argv.includes("--strict");
+  const [kind, file] = argv.filter((a) => a !== "--strict");
+  if (!kind || !file || !ALL_KINDS.includes(kind)) {
+    console.error(`usage: node validate.mjs <${ALL_KINDS.join("|")}> <file.json> [--strict]`);
     process.exit(2);
   }
   let data;
@@ -61,6 +69,25 @@ if (isMain) {
     console.error(`could not read/parse ${file}: ${e?.message ?? e}`);
     process.exit(2);
   }
+
+  if (kind === "semanticids") {
+    const { counts, items, allowlistRef } = classifyAasFile(data);
+    console.log(`semanticId identity — ${file} (IDTA allowlist ${allowlistRef.slice(0, 7)}):`);
+    for (const it of items) console.log(`  ${it.verdict.padEnd(20)} ${it.iri}`);
+    console.log(`\n  ${VERDICTS.map((v) => `${v}:${counts[v]}`).join("  ")}`);
+    const deprecated = items.filter((it) => it.verdict === "idta-deprecated");
+    const unverified = items.filter((it) => it.unverifiedIdta);
+    if (deprecated.length || unverified.length) {
+      console.log(`\n  ⚠ ${unverified.length} unverified IDTA-namespace id(s); ${deprecated.length} deprecated IDTA id(s).`);
+      if (strict) {
+        console.error(`✗ STRICT — an IDTA-namespace semanticId is deprecated or absent from the allowlist.`);
+        process.exit(1);
+      }
+    }
+    console.log(`✓ classified ${items.length} semanticId(s) (identity only; not structural conformance).`);
+    process.exit(0);
+  }
+
   const { valid, label, errors } = validateInterop(kind, data);
   if (valid) {
     console.log(`✓ VALID — ${label} (${file})`);

@@ -1,0 +1,34 @@
+{
+  "_comment": "Authoritative IDTA Submodel-Template semanticId allowlist OpenDPP anchors to. The IRIs are EXTRACTED (never hand-typed) from the IDTA submodel-templates registry at the pinned commit below, recording each anchor's published/deprecated status + version. It mirrors the OpenDPP backend's machine-checked snapshot (anchors kept in lockstep); refreshed when the registry is re-pinned. Classify any AAS file's semanticIds against it with `node validate/validate.mjs semanticids <aas-file>`. This is IDENTITY (the semanticId is the genuine IDTA template id), NOT structural conformance to that template.",
+  "_source": "https://github.com/admin-shell-io/submodel-templates",
+  "_license": "CC-BY-4.0",
+  "_attribution": "Submodel Template metadata © Industrial Digital Twin Association (IDTA) and contributors, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Only the submodel semanticId IRI, version label, and published/deprecated status were extracted into this derived snapshot; the underlying template definitions were not modified.",
+  "_pinnedRef": "784d22e24f809fb7ed79b6991f6cc6fa27e1e036",
+  "_pinnedRefDate": "2026-06-10",
+  "anchors": [
+    {
+      "key": "carbonFootprint",
+      "iri": "https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0",
+      "idtaSpec": "IDTA 02023",
+      "status": "published",
+      "version": "1.0.1",
+      "latestVersion": "1.0.1",
+      "latestSemanticId": "https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0",
+      "iriIsLatest": true,
+      "sourcePath": "published/Carbon Footprint/1/0/1/IDTA 02023-1-0-1 _Template_CarbonFootprint.json",
+      "recommendation": "keep"
+    },
+    {
+      "key": "technicalData",
+      "iri": "https://admin-shell.io/ZVEI/TechnicalData/Submodel/1/2",
+      "idtaSpec": "IDTA 02003-1-2",
+      "status": "published",
+      "version": "1.2.1",
+      "latestVersion": "2.0.1",
+      "latestSemanticId": "0173-1#01-AHX837#002",
+      "iriIsLatest": false,
+      "sourcePath": "published/Technical_Data/1/2/1/IDTA_02003-1-2-1_Template_TechnicalData.json",
+      "recommendation": "migrate-available"
+    }
+  ]
+}
