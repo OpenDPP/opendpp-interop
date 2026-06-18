@@ -1,0 +1,11 @@
+{
+  "upi": "https://id.gs1.org/01/09521234543213",
+  "reoId": "EORI-IT12345678",
+  "liveURL": "https://opendpp-node.eu/passport/demo-battery-passport",
+  "backupURL": "https://id.gs1.org/01/09521234543213",
+  "commodityCode": "85076000",
+  "facilitiesId": [
+    "GLN-5412345000013"
+  ],
+  "granularityLevel": "MODEL"
+}

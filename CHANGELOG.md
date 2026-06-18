@@ -5,7 +5,16 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.0 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
-## [Unreleased]
+## [1.4.1] — API contract 1.4.1 + CIRPASS-2 registry interop
+
+Carries OpenDPP API contract **1.4.1**.
+
+### Changed
+
+- **`openapi.json` refreshed to contract 1.4.1** — synced to the live API: the AAS-environment schema
+  descriptions now enumerate the full submodel set (the IDTA Digital Nameplate + the per-category submodel
+  views), and the JSON-LD context-endpoint description is corrected. Documentation-only contract change — no
+  breaking change.
 
 ### Added
 
@@ -19,8 +28,19 @@ IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachange
   or unverified IDTA-namespace id).
 - **CONFORMANCE.md** — an "IDTA submodel-template identity" row tied to the new check, plus an explicit
   "identity ≠ structural conformance" honesty bullet.
+- **`schemas/cirpass2-eu-registry-pointer.schema.json`** + **`validate/validate.mjs registry <pointer-file>`**
+  — the CIRPASS-2 `mock-eu-registry` pointer schema (ESPR Art. 13 index record, JSON Schema draft-2020-12;
+  vendored verbatim from `default-schema.json`, pinned `b383c4d`; Apache-2.0, **NON-NORMATIVE**) and a third
+  offline validator door, so an OpenDPP → EU-registry pointer is independently checkable (#175).
+- **`samples/battery-registry-pointer-model.json`**, **`samples/battery-registry-pointer-item.json`** — the
+  MODEL and ITEM pointer projections of the demo battery, both schema-valid.
+- **README.md + CONFORMANCE.md** — the OpenDPP → EU-registry-pointer field mapping, the MODEL/BATCH/ITEM
+  granularity model, the **6-of-14** `dpp-data-extractor` discovery-key coverage table, and a "CIRPASS-2
+  reference ecosystem (non-normative)" conformance block. CIRPASS-2 is **NON-NORMATIVE** — "validated against
+  the reference", never "certified" / "EU-official".
 
-No API-contract change — kit tooling only; `openapi.json` stays 1.4.0.
+(The `semanticids` and CIRPASS-2 items above are reference/tooling — non-contract; this release's contract
+change is the `openapi.json` refresh to 1.4.1.)
 
 ## [1.4.0] — initial public release
 

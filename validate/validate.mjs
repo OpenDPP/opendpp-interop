@@ -2,17 +2,19 @@
 /**
  * OpenDPP interop conformance validator — the runnable core of this boundary kit.
  *
- * Validate an AAS Environment or a UNTP DigitalProductPassport credential YOU produce against the
- * SAME official, vendored JSON Schemas OpenDPP's own CI validates against (see ../schemas/), so you
- * can prove conformance offline before you ship — without any access to the OpenDPP product source.
+ * Validate an AAS Environment, a UNTP DigitalProductPassport credential, or a CIRPASS-2 EU-registry
+ * pointer YOU produce against the SAME official/reference, vendored JSON Schemas OpenDPP's own CI
+ * validates against (see ../schemas/), so you can prove conformance offline before you ship — without
+ * any access to the OpenDPP product source.
  *
  *   node validate.mjs aas         path/to/aas-environment.json
  *   node validate.mjs untp        path/to/dpp-credential.json
- *   node validate.mjs semanticids path/to/aas-environment.json   [--strict]
+ *   node validate.mjs semanticids path/to/aas-environment.json       [--strict]
+ *   node validate.mjs registry    path/to/eu-registry-pointer.json   (CIRPASS-2, NON-NORMATIVE)
  *
  * Exit codes: 0 = conformant · 1 = schema errors (printed) · 2 = usage / read error.
  *
- * NOTE: `aas`/`untp` check STRUCTURAL conformance against the JSON Schema. `semanticids` checks IDTA
+ * NOTE: `aas`/`untp`/`registry` check STRUCTURAL conformance against the JSON Schema. `semanticids` checks IDTA
  * template IDENTITY only — it classifies each `semanticId` against the CC-BY IDTA allowlist
  * (../idta-semantic-ids.json), never structural conformance to the template body. Verifying a `vc+jwt`
  * SIGNATURE (resolve did:web → verify the JWS → validate the payload) is a separate concern — see the
@@ -33,6 +35,8 @@ const SCHEMAS = {
   aas: { file: "aas-v3.schema.json", Ajv: Ajv2019, label: "AAS v3.0 Environment (IDTA-01001-3-1)" },
   // UNTP DigitalProductPassport v0.7.0 (draft-2020-12).
   untp: { file: "untp-dpp-v0.7.0.schema.json", Ajv: Ajv2020, label: "UNTP DigitalProductPassport v0.7.0" },
+  // CIRPASS-2 mock-eu-registry pointer (ESPR Art. 13 index record), draft-2020-12. NON-NORMATIVE reference.
+  registry: { file: "cirpass2-eu-registry-pointer.schema.json", Ajv: Ajv2020, label: "CIRPASS-2 EU registry pointer (default-schema.json)" },
 };
 
 export const INTEROP_KINDS = Object.keys(SCHEMAS);
