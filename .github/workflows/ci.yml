@@ -31,6 +31,14 @@ jobs:
           node validate/validate.mjs registry samples/battery-registry-pointer-model.json
           node validate/validate.mjs registry samples/battery-registry-pointer-item.json
           node validate/validate.mjs shacl    samples/battery-passport.jsonld
+          node validate/validate.mjs sdjwt    samples/battery-vc.sdjwt
+          node validate/validate.mjs sdjwt    samples/battery-vc-presented.sdjwt
+      - name: SD-JWT-VC negative control (a forged disclosure MUST be rejected)
+        run: |
+          set -e
+          node -e "const fs=require('fs');const p=fs.readFileSync('samples/battery-vc.sdjwt','utf8').trim().split('~');p[1]=Buffer.from('[\"x\",\"materialProvenance\",[{\"name\":\"Gold\"}]]').toString('base64url');fs.writeFileSync('samples/_bad.sdjwt',p.join('~'))"
+          if node validate/validate.mjs sdjwt samples/_bad.sdjwt; then echo "ERROR: forged SD-JWT-VC unexpectedly verified" && rm -f samples/_bad.sdjwt && exit 1; else echo "ok: SD-JWT-VC rejected the forged disclosure"; fi
+          rm -f samples/_bad.sdjwt
       - name: SHACL negative control (a tampered passport MUST be rejected)
         run: |
           set -e

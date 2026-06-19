@@ -41,6 +41,7 @@ node validate.mjs untp        ../samples/battery-vc-credential.json
 node validate.mjs semanticids ../samples/battery-aas-environment.json        # IDTA template-identity check
 node validate.mjs registry    ../samples/battery-registry-pointer-model.json # CIRPASS-2 EU-registry (NON-NORMATIVE)
 node validate.mjs shacl       ../samples/battery-passport.jsonld             # OpenDPP SHACL shapes (NON-NORMATIVE)
+node validate.mjs sdjwt       ../samples/battery-vc.sdjwt                    # SD-JWT-VC: disclosures + ES256 signature
 ```
 
 Exit `0` = conformant · `1` = schema errors (printed) · `2` = usage error. See
@@ -61,7 +62,7 @@ opendpp-interop/
 │   └── opendpp-dpp-shapes.ttl
 ├── samples/                validated reference artifacts (a battery via both doors + a textile UNTP credential + the EU-registry pointer + the JSON-LD passport)
 │   └── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
-└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl)
+└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl · sdjwt)
 ```
 
 ## Official schemas (vendored)
@@ -118,6 +119,9 @@ the `curl`). Synthetic demo data — see [`NOTICE`](./NOTICE):
 - `battery-vc-credential.json` — the UNTP DPP credential (unsigned form, SKU/type, `idGranularity:"model"`).
 - `battery-vc.jwt` — the enveloping **`vc+jwt`** (paste into a JOSE debugger).
 - `battery-vc-di.jsonld` — the **embedded W3C Data Integrity** form (`ecdsa-jcs-2019`).
+- `battery-vc.sdjwt`, `battery-vc-presented.sdjwt` — the credential as a conformant **SD-JWT-VC**
+  (cryptographic selective disclosure) and a 2-of-4 **holder presentation** (`node validate/validate.mjs
+  sdjwt …` reconstructs the disclosures + verifies the ES256 signature against `did.json`).
 - `battery-unit-vc-credential.json`, `battery-unit-vc.jwt`, `battery-unit-vc-di.jsonld` — a **per-unit**
   credential for one serialised battery (item granularity, the real GS1 AI-21 serial as `itemNumber`).
 - `battery-issuer-did.json` — the issuer `did:web` document (the verification key; the textile credential
