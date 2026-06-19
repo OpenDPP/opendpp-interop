@@ -21,4 +21,6 @@ paths = [
   '''^samples/battery-issuer-did\.json$''',
   '''^samples/textile-vc\.jwt$''',
   '''^samples/textile-vc-credential\.json$''',
+  '''^samples/battery-vc\.sdjwt$''',
+  '''^samples/battery-vc-presented\.sdjwt$''',
 ]

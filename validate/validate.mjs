@@ -12,6 +12,7 @@
  *   node validate.mjs semanticids path/to/aas-environment.json       [--strict]
  *   node validate.mjs registry    path/to/eu-registry-pointer.json   (CIRPASS-2, NON-NORMATIVE)
  *   node validate.mjs shacl       path/to/passport.jsonld            (OpenDPP SHACL, NON-NORMATIVE)
+ *   node validate.mjs sdjwt       path/to/credential.sdjwt           (SD-JWT-VC: disclosures + ES256 signature)
  *
  * Exit codes: 0 = conformant · 1 = schema/shape errors (printed) · 2 = usage / read error.
  *
@@ -34,6 +35,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { classifyAasFile, VERDICTS } from "./semantic-ids.mjs";
 import { validateShaclFile } from "./shacl.mjs";
+import { validateSdJwtFile } from "./sdjwt.mjs";
 
 const SCHEMAS = {
   // AAS v3.0: official IDTA-01001-3-1 JSON Schema (draft-2019-09).
@@ -45,8 +47,9 @@ const SCHEMAS = {
 };
 
 export const INTEROP_KINDS = Object.keys(SCHEMAS);
-// Schema-validated kinds + the identity-only semanticId classifier + the SHACL shapes door (no ajv).
-export const ALL_KINDS = [...INTEROP_KINDS, "semanticids", "shacl"];
+// Schema-validated kinds + the identity-only semanticId classifier + the SHACL shapes door + the
+// SD-JWT-VC selective-disclosure door (the last two are not ajv JSON-Schema kinds).
+export const ALL_KINDS = [...INTEROP_KINDS, "semanticids", "shacl", "sdjwt"];
 
 /** Validate `data` of the given `kind` ("aas" | "untp"). Returns { valid, label, errors }. */
 export function validateInterop(kind, data) {
@@ -94,6 +97,18 @@ if (isMain) {
     }
     console.error(`\n✗ NON-CONFORMING — ${report.violations.length} violation(s).`);
     process.exit(1);
+  }
+
+  // --- SD-JWT-VC door (selective disclosure; a `~`-joined token, not JSON) ------------------------
+  if (kind === "sdjwt") {
+    let ok;
+    try {
+      ok = await validateSdJwtFile(resolve(file));
+    } catch (e) {
+      console.error(`could not validate ${file}: ${e?.message ?? e}`);
+      process.exit(2);
+    }
+    process.exit(ok ? 0 : 1);
   }
 
   let data;

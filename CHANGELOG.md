@@ -7,6 +7,12 @@ IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [1.5.0] — API contract 1.5.0 + SD-JWT-VC selective disclosure
+
+Carries OpenDPP API contract **1.5.0**.
+
 ### Added
 
 - **`shapes/opendpp-dpp-shapes.ttl`** — OpenDPP-authored, **NON-NORMATIVE** SHACL starter shapes for the
@@ -29,9 +35,21 @@ IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachange
   `…/01/09501101531000`), schema-valid against UNTP DPP v0.7.0, and signed by the same demo tenant so it
   verifies against the existing `battery-issuer-did.json`. CONFORMANCE.md's product-category row updated
   accordingly (backend #119).
+- **`samples/battery-vc.sdjwt` + `samples/battery-vc-presented.sdjwt`** — the demo battery as a conformant
+  IETF **SD-JWT-VC** (cryptographic selective disclosure): the issuer's full SD-JWT plus a 2-of-4 **holder
+  presentation** (a withheld claim survives only as an opaque `_sd` digest, yet it still verifies). Carries
+  the SD-JWT-VC required `iss` + `vct`; media type `application/dc+sd-jwt` (legacy `vc+sd-jwt` accepted).
+  Live-fetched from the demo service (`…/01/09501101532007`), verified against the bundled `did.json`.
+- **`validate/validate.mjs sdjwt <file.sdjwt>`** — a sixth offline validator door (zero extra deps): decodes
+  the SD-JWT-VC, checks the profile (`typ`/`iss`/`vct`), reconstructs disclosures (rejecting forged/duplicate
+  ones + an unsupported `_sd_alg`, per IETF SD-JWT §8.1), and verifies the ES256 signature against the
+  committed `did:web` document via Node WebCrypto — `✓ VALID` / `✗ NON-CONFORMING` (exit 0 / 1). The
+  CONFORMANCE selective-disclosure row flips to ✅ (backend #118).
 
-No API-contract change — the SHACL shapes + `shacl` door and the additional sample are reference/tooling
-(non-contract), so `openapi.json` and the carried API contract version are unchanged.
+**API contract bumped 1.4.1 → 1.5.0** — the backend added `application/dc+sd-jwt` as a content type on the
+public resolution endpoints (a backward-compatible addition), so `openapi.json` is refreshed to **1.5.0**. The
+SHACL shapes, the textile sample, and the SD-JWT-VC door/samples are reference/tooling that ride along with
+this release.
 
 ## [1.4.1] — API contract 1.4.1 + CIRPASS-2 registry interop
 

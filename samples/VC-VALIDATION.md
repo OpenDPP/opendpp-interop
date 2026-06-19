@@ -22,6 +22,11 @@ issued by the demo tenant `tenant-demo-opendpp`.
   the per-category **typed mapping**: `fiberComposition` → typed `materialProvenance`, and
   `recycledContent` → a self-declared circularity `performanceClaim` (an OpenDPP self-declaration
   criterion — **not** an ESPR/third-party criterion) — rather than the `characteristics` open bag.
+- `battery-vc.sdjwt` / `battery-vc-presented.sdjwt` — the battery as a conformant IETF **SD-JWT-VC**
+  (cryptographic selective disclosure; `iss` + `vct`, media type `dc+sd-jwt`). The first is the issuer's
+  full SD-JWT (all disclosures); the second is a **holder presentation** revealing only
+  `countryOfProduction` + `materialProvenance` — the other claims survive as opaque `_sd` digests, yet it
+  still verifies against the same issuer signature.
 
 ## Reproduce them (they're live)
 
@@ -29,6 +34,7 @@ issued by the demo tenant `tenant-demo-opendpp`.
 G="https://opendpp-node.eu/01/09501101532007"
 curl -sL -H 'Accept: application/vc+jwt'      "$G"                            # = battery-vc.jwt
 curl -sL -H 'Accept: application/vc+ld+json'  "$G"                            # = battery-vc-di.jsonld
+curl -sL -H 'Accept: application/dc+sd-jwt'   "$G"                            # = battery-vc.sdjwt (holder then drops disclosures)
 curl -sL -H 'Accept: application/vc+jwt'      "$G/21/VM-LFP100-2026-000001"   # = battery-unit-vc.jwt
 curl -sL -H 'Accept: application/vc+jwt'      https://opendpp-node.eu/01/09501101531000   # = textile-vc.jwt
 curl -s  https://opendpp-node.eu/tenants/tenant-demo-opendpp/did.json          # = battery-issuer-did.json
@@ -38,9 +44,11 @@ curl -s  https://opendpp-node.eu/tenants/tenant-demo-opendpp/did.json          #
 
 ```bash
 cd ../validate && npm install
-node validate.mjs untp ../samples/battery-vc-credential.json        # ✓ UNTP DPP v0.7.0
-node validate.mjs untp ../samples/battery-unit-vc-credential.json   # ✓ item granularity
-node validate.mjs untp ../samples/textile-vc-credential.json        # ✓ non-battery typed mapping
+node validate.mjs untp  ../samples/battery-vc-credential.json        # ✓ UNTP DPP v0.7.0
+node validate.mjs untp  ../samples/battery-unit-vc-credential.json   # ✓ item granularity
+node validate.mjs untp  ../samples/textile-vc-credential.json        # ✓ non-battery typed mapping
+node validate.mjs sdjwt ../samples/battery-vc.sdjwt                  # ✓ SD-JWT-VC: disclosures + ES256 signature
+node validate.mjs sdjwt ../samples/battery-vc-presented.sdjwt        # ✓ holder presentation (2-of-4 disclosed)
 ```
 
 ## Verify (signature)
