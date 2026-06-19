@@ -1,0 +1,122 @@
+{
+  "@context": [
+    "https://opendpp-node.eu/contexts/dpp/v1",
+    {
+      "DigitalProductPassport": "https://opendpp-node.eu/ns/dpp#DigitalProductPassport",
+      "economicOperator": "https://opendpp-node.eu/ns/dpp#economicOperator",
+      "manufacturingFacility": "https://opendpp-node.eu/ns/dpp#manufacturingFacility",
+      "metadata": "https://opendpp-node.eu/ns/dpp#metadata",
+      "digitalSeal": "https://opendpp-node.eu/ns/dpp#digitalSeal",
+      "signingPublicKey": "https://opendpp-node.eu/ns/dpp#signingPublicKey",
+      "status": "https://opendpp-node.eu/ns/dpp#status",
+      "archivedAt": "https://opendpp-node.eu/ns/dpp#archivedAt",
+      "retentionUntil": "https://opendpp-node.eu/ns/dpp#retentionUntil",
+      "category": "https://opendpp-node.eu/contexts/dpp/v1#category",
+      "batteryCategory": "https://opendpp-node.eu/contexts/dpp/v1#batteryCategory",
+      "chemistry": "https://opendpp-node.eu/contexts/dpp/v1#chemistry",
+      "ratedCapacity": "https://opendpp-node.eu/contexts/dpp/v1#ratedCapacity",
+      "carbonFootprint": "https://opendpp-node.eu/contexts/dpp/v1#carbonFootprint",
+      "durability": "https://opendpp-node.eu/contexts/dpp/v1#durability",
+      "materialComposition": "https://opendpp-node.eu/contexts/dpp/v1#materialComposition",
+      "facilityDetails": "https://opendpp-node.eu/contexts/dpp/v1#facilityDetails"
+    }
+  ],
+  "@type": "DigitalProductPassport",
+  "@id": "https://id.gs1.org/01/09521234543213",
+  "id": "demo-battery-passport",
+  "productId": "09521234543213",
+  "digitalLinkUri": "https://id.gs1.org/01/09521234543213",
+  "digitalSeal": "MEQCIElESAMPLEdemoSealSignatureBase64DerNotARealSignatureAAAA==",
+  "signingPublicKey": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIEXAMPLEdemoPublicKeyNotReal0000000000000000\n-----END PUBLIC KEY-----",
+  "status": "ACTIVE",
+  "archivedAt": null,
+  "retentionUntil": null,
+  "proof": {
+    "@type": [
+      "MerkleTreeAttestationProof"
+    ],
+    "type": "MerkleTreeAttestationProof",
+    "signatureAlgorithm": "ECDSA-P256-SHA256-over-MerkleRoot",
+    "created": "2026-02-18T00:00:00.000Z",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "https://opendpp-node.eu/passport/demo-battery-passport#key-1",
+    "signatureValue": "MEQCIElESAMPLEdemoSealSignatureBase64DerNotARealSignatureAAAA==",
+    "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIEXAMPLEdemoPublicKeyNotReal0000000000000000\n-----END PUBLIC KEY-----",
+    "merkleRoot": "9fff6119fbf1c08fa9cf6c5c8c94ff05349563c7e5cd1b0225a46f3b9c8b7b4e"
+  },
+  "createdAt": "2026-02-18T00:00:00.000Z",
+  "updatedAt": "2026-02-18T00:00:00.000Z",
+  "economicOperator": {
+    "@type": "EconomicOperator",
+    "id": "op-eu-default",
+    "name": "OpenDPP Demo Manufacturing — NOT A REAL COMPANY",
+    "regId": "IT12345678",
+    "role": "manufacturer"
+  },
+  "manufacturingFacility": {
+    "@type": "Facility",
+    "id": "fac-1",
+    "gln": "5412345000013",
+    "name": "Cell Plant EU (SAMPLE)",
+    "activity": null,
+    "country": "DE"
+  },
+  "metadata": {
+    "category": "batteries",
+    "batteryCategory": "ev",
+    "chemistry": "LFP (Lithium Iron Phosphate)",
+    "ratedCapacity": 100000,
+    "carbonFootprint": {
+      "co2eKg": 4200.5,
+      "unit": "kg CO2e",
+      "calculationMethod": "ISO 14067"
+    },
+    "durability": {
+      "cycleLife": 3000,
+      "calendarLifeYears": 12
+    },
+    "materialComposition": [
+      {
+        "material": "Lithium",
+        "percent": 7
+      },
+      {
+        "material": "Iron",
+        "percent": 30
+      },
+      {
+        "material": "Phosphate",
+        "percent": 20
+      }
+    ],
+    "facilityDetails": "[REDACTED - Privileged Access Required]"
+  },
+  "category": "batteries",
+  "batteryCategory": "ev",
+  "chemistry": "LFP (Lithium Iron Phosphate)",
+  "ratedCapacity": 100000,
+  "carbonFootprint": {
+    "co2eKg": 4200.5,
+    "unit": "kg CO2e",
+    "calculationMethod": "ISO 14067"
+  },
+  "durability": {
+    "cycleLife": 3000,
+    "calendarLifeYears": 12
+  },
+  "materialComposition": [
+    {
+      "material": "Lithium",
+      "percent": 7
+    },
+    {
+      "material": "Iron",
+      "percent": 30
+    },
+    {
+      "material": "Phosphate",
+      "percent": 20
+    }
+  ],
+  "facilityDetails": "[REDACTED - Privileged Access Required]"
+}

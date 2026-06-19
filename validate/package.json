@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Validate AAS / UNTP DPP output against the official schemas OpenDPP's CI uses — offline, no product source required.",
+  "description": "Validate AAS / UNTP DPP / CIRPASS-2-pointer output against the official schemas OpenDPP's CI uses, plus OpenDPP's own non-normative SHACL shapes — offline, no product source required.",
   "license": "Apache-2.0",
   "homepage": "https://github.com/OpenDPP/opendpp-interop",
   "bin": {
@@ -16,7 +16,10 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@zazuko/env-node": "^3.0.0",
     "ajv": "^8.20.0",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "jsonld": "^9.0.0",
+    "rdf-validate-shacl": "^0.6.5"
   }
 }

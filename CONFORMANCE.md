@@ -47,6 +47,7 @@ extractor, viewer). **CIRPASS-2 is non-normative** — see the caveat below.
 | Registers in the CIRPASS-2 *reference* registry (`mock-eu-registry` `POST /metadata/v1`) and receives a verifiable Proof-of-Registration (RS256/JWKS) | ✅ | the backend live harness `tests/functional/cirpass2-harness.test.ts` (gated, T3) — verified live end-to-end. The Proof JWT is *received from the reference registry*, **never** OpenDPP-issued or EU-official. |
 | Discovery search-key coverage — 6 of 14 (`dpp-data-extractor`) | 🟡 Partial | the coverage table in [README → search-keys](./README.md#opendpp--cirpass-2-eu-registry-pointer-espr-art-13) + the backend offline extractor port `tests/functional/aas-cirpass-discoverability.test.ts` + the live `cirpass2-harness` capabilities check. |
 | Renders in the CIRPASS-2 *reference* viewer (`dpp-renderer`) via OpenDPP JSON-LD | 🗺 Roadmap | tracked by #174 — **not yet proven**. (The viewer consumes JSON-LD / RDF; OpenDPP serves a JSON-LD door, but end-to-end render is not yet demonstrated.) |
+| OpenDPP JSON-LD validates against OpenDPP's authoritative SHACL shapes (non-normative, starter) | ✅ | `node validate/validate.mjs shacl samples/battery-passport.jsonld` validates the public `application/ld+json` passport against OpenDPP's OWN SHACL shapes ([`shapes/opendpp-dpp-shapes.ttl`](./shapes/opendpp-dpp-shapes.ttl)). **OpenDPP-authored, NON-NORMATIVE** — a starter set offered to CIRPASS-2 (filling the `dpp-validator`'s placeholder `example.org` shapes), **NOT** a CIRPASS-2 / EU conformance oracle. CIRPASS-2's own `dpp-validator` is not used as an oracle. |
 
 > **Non-normative caveat.** Every CIRPASS-2 repository is "for exploration … not complete,
 > exhaustive, or normative … does not reflect CEN-CENELEC JTC 24." OpenDPP claims its pointer is
@@ -77,6 +78,11 @@ For the **CIRPASS-2** reference ecosystem specifically:
 - **Forbidden:** "CIRPASS-2-certified", "EU-registry-compliant", "EU-official" — CIRPASS-2 is
   non-normative, the registry is a *reference* implementation, and OpenDPP issues none of these
   attestations.
+- **SHACL shapes:** [`shapes/opendpp-dpp-shapes.ttl`](./shapes/opendpp-dpp-shapes.ttl) are
+  **OpenDPP-authored and NON-NORMATIVE** — a starter set *offered as a contribution* to CIRPASS-2 to
+  fill the `dpp-validator`'s placeholder `example.org` shapes. They are **not** accepted, normative, an
+  EU / CIRPASS-2 conformance suite, "certified", or "EU-official", and validating against them confers
+  no certification.
 
 ## Reproduce it
 

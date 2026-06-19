@@ -37,6 +37,21 @@ above — each retains its own upstream license and terms):
    offline validation. Upstream is authoritative.
 
 ------------------------------------------------------------------------------
+OpenDPP-authored content (NOT third-party; covered by the Apache-2.0 license
+above):
+
+  shapes/opendpp-dpp-shapes.ttl
+  OpenDPP DPP / battery (ESPR) SHACL starter shapes.
+  © OpenDPP UAB. Apache-2.0 (this kit's own license).
+  NON-NORMATIVE. These shapes are authored by OpenDPP against OpenDPP's own
+  public JSON-LD DPP vocabulary (https://opendpp-node.eu/ns/dpp# and
+  https://opendpp-node.eu/contexts/dpp/v1#) and are offered as a starter
+  contribution to CIRPASS-2 — filling the gap left by the CIRPASS-2
+  dpp-validator's placeholder example.org shapes. They are NOT accepted,
+  normative, or an EU / CIRPASS-2 conformance suite, and no certification is
+  conferred. Unlike the vendored schemas above, this is OpenDPP's OWN content.
+
+------------------------------------------------------------------------------
 Samples (samples/*) are synthetic demo data describing a fictional battery
 ("OpenDPP Demo Manufacturing — NOT A REAL COMPANY"), fetched verbatim from the
 live demo service. They contain no real personal data and no private keys: the

@@ -40,6 +40,7 @@ node validate.mjs aas         ../samples/battery-aas-environment.json
 node validate.mjs untp        ../samples/battery-vc-credential.json
 node validate.mjs semanticids ../samples/battery-aas-environment.json        # IDTA template-identity check
 node validate.mjs registry    ../samples/battery-registry-pointer-model.json # CIRPASS-2 EU-registry (NON-NORMATIVE)
+node validate.mjs shacl       ../samples/battery-passport.jsonld             # OpenDPP SHACL shapes (NON-NORMATIVE)
 ```
 
 Exit `0` = conformant · `1` = schema errors (printed) · `2` = usage error. See
@@ -56,8 +57,11 @@ opendpp-interop/
 │   ├── aas-v3.schema.json
 │   ├── untp-dpp-v0.7.0.schema.json
 │   └── cirpass2-eu-registry-pointer.schema.json   (CIRPASS-2, NON-NORMATIVE)
-├── samples/                validated reference artifacts (one battery, both doors + the EU-registry pointer)
-└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry)
+├── shapes/                 OpenDPP-authored SHACL shapes (NON-NORMATIVE) for the DPP / battery vertical
+│   └── opendpp-dpp-shapes.ttl
+├── samples/                validated reference artifacts (one battery, both doors + the EU-registry pointer + the JSON-LD passport)
+│   └── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
+└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl)
 ```
 
 ## Official schemas (vendored)
@@ -73,6 +77,35 @@ see [`schemas/README.md`](./schemas/README.md) and [`NOTICE`](./NOTICE)):
   [`schemas/cirpass2-eu-registry-pointer.schema.json`](./schemas/cirpass2-eu-registry-pointer.schema.json)
   (the CIRPASS-2 `mock-eu-registry` `default-schema.json`, draft-2020-12, pinned commit `b383c4d`).
 
+## SHACL shapes (battery/ESPR)
+
+[`shapes/opendpp-dpp-shapes.ttl`](./shapes/opendpp-dpp-shapes.ttl) is an **OpenDPP-authored,
+NON-NORMATIVE** SHACL shapes set for the DPP / battery (ESPR) vertical. It validates OpenDPP's public
+`application/ld+json` passport (the JSON-LD door, e.g. `GET /passport/{id}` with
+`Accept: application/ld+json`) against shapes that target OpenDPP's real DPP vocabulary
+(`https://opendpp-node.eu/ns/dpp#` + `https://opendpp-node.eu/contexts/dpp/v1#`): the lifecycle
+`status`, the responsible `economicOperator`, the `manufacturingFacility`, and the battery metadata
+block (category, battery category, rated capacity, carbon footprint, durability, material composition).
+It is a reasonable **starter** set — not an exhaustive ESPR-battery rulebook.
+
+It exists to **fill the gap left by the CIRPASS-2 `dpp-validator`**, which ships placeholder
+`example.org` SHACL shapes. CIRPASS-2's own validator is **not** used as an oracle.
+
+Validate the bundled JSON-LD passport (offline — the loader stubs the remote `@context` URL, so
+expansion uses the inline context with no network):
+
+```bash
+node validate/validate.mjs shacl samples/battery-passport.jsonld
+```
+
+Exit `0` = conforms · `1` = shape violations (printed per-violation). The shapes are designed against
+the actual RDF the sample expands to, so the bundled passport **conforms**.
+
+> **Intent to offer upstream.** These shapes are offered as a starter contribution to CIRPASS-2 — they
+> are **NOT** accepted, normative, an EU / CIRPASS-2 conformance suite, "certified", or "EU-official".
+> They are OpenDPP's own content (Apache-2.0), unlike the vendored third-party schemas. See
+> [CONFORMANCE.md](./CONFORMANCE.md) and [NOTICE](./NOTICE).
+
 ## Validated samples
 
 Reference artifacts in [`samples/`](./samples/) — one fictional battery, described both ways. These
@@ -87,6 +120,8 @@ unit `VM-LFP100-2026-000001`), so you can **reproduce and verify every one** aga
 - `battery-unit-vc-credential.json`, `battery-unit-vc.jwt`, `battery-unit-vc-di.jsonld` — a **per-unit**
   credential for one serialised battery (item granularity, the real GS1 AI-21 serial as `itemNumber`).
 - `battery-issuer-did.json` — the issuer `did:web` document (the verification key).
+- `battery-passport.jsonld` — the public `application/ld+json` passport (the JSON-LD door), validated by
+  the OpenDPP **SHACL** shapes (`node validate/validate.mjs shacl …`).
 - `battery-registry-pointer-model.json`, `battery-registry-pointer-item.json` — the **CIRPASS-2
   EU-registry pointer** (NON-NORMATIVE) for the model and a per-unit item (`node validate/validate.mjs
   registry …`).
