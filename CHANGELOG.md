@@ -5,6 +5,26 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.0 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [Unreleased]
+
+### Added
+
+- **`shapes/opendpp-dpp-shapes.ttl`** — OpenDPP-authored, **NON-NORMATIVE** SHACL starter shapes for the
+  DPP / battery (ESPR) vertical, targeting OpenDPP's real public JSON-LD DPP vocabulary
+  (`https://opendpp-node.eu/ns/dpp#` + `…/contexts/dpp/v1#`). They fill the gap left by the CIRPASS-2
+  `dpp-validator`'s placeholder `example.org` shapes and are offered as a starter contribution to
+  CIRPASS-2 — NOT accepted, normative, "certified", or "EU-official". CIRPASS-2's own `dpp-validator` is
+  not used as an oracle (#175 R5).
+- **`validate/validate.mjs shacl <passport.jsonld>`** — a fifth offline validator door: expands an
+  OpenDPP `application/ld+json` passport to RDF (offline — the remote `@context` URL is stubbed so the
+  inline context is used, no network) and validates it against the SHACL shapes, printing a per-violation
+  report + `✓ CONFORMS` / `✗ NON-CONFORMING` (exit 0 / 1).
+- **`samples/battery-passport.jsonld`** — the public `application/ld+json` passport projection of the demo
+  battery, which conforms to the new shapes.
+
+No API-contract change — the SHACL shapes + `shacl` door are reference/tooling (non-contract), so
+`openapi.json` and the carried API contract version are unchanged.
+
 ## [1.4.1] — API contract 1.4.1 + CIRPASS-2 registry interop
 
 Carries OpenDPP API contract **1.4.1**.

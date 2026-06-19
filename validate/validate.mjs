@@ -11,14 +11,18 @@
  *   node validate.mjs untp        path/to/dpp-credential.json
  *   node validate.mjs semanticids path/to/aas-environment.json       [--strict]
  *   node validate.mjs registry    path/to/eu-registry-pointer.json   (CIRPASS-2, NON-NORMATIVE)
+ *   node validate.mjs shacl       path/to/passport.jsonld            (OpenDPP SHACL, NON-NORMATIVE)
  *
- * Exit codes: 0 = conformant · 1 = schema errors (printed) · 2 = usage / read error.
+ * Exit codes: 0 = conformant · 1 = schema/shape errors (printed) · 2 = usage / read error.
  *
  * NOTE: `aas`/`untp`/`registry` check STRUCTURAL conformance against the JSON Schema. `semanticids` checks IDTA
  * template IDENTITY only — it classifies each `semanticId` against the CC-BY IDTA allowlist
- * (../idta-semantic-ids.json), never structural conformance to the template body. Verifying a `vc+jwt`
- * SIGNATURE (resolve did:web → verify the JWS → validate the payload) is a separate concern — see the
- * README recipe ("Verify a signature"), which uses only standard WebCrypto / JOSE, no OpenDPP code.
+ * (../idta-semantic-ids.json), never structural conformance to the template body. `shacl` validates the
+ * OpenDPP `application/ld+json` passport against OpenDPP's OWN, NON-NORMATIVE SHACL shapes
+ * (../shapes/opendpp-dpp-shapes.ttl) — a starter contribution offered to CIRPASS-2, NOT an EU/CIRPASS-2
+ * conformance oracle. Verifying a `vc+jwt` SIGNATURE (resolve did:web → verify the JWS → validate the
+ * payload) is a separate concern — see the README recipe ("Verify a signature"), which uses only
+ * standard WebCrypto / JOSE, no OpenDPP code.
  *
  * Apache-2.0 © OpenDPP UAB. The vendored schemas in ../schemas/ retain their upstream terms (see NOTICE).
  */
@@ -29,6 +33,7 @@ import Ajv2019 from "ajv/dist/2019.js";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { classifyAasFile, VERDICTS } from "./semantic-ids.mjs";
+import { validateShaclFile } from "./shacl.mjs";
 
 const SCHEMAS = {
   // AAS v3.0: official IDTA-01001-3-1 JSON Schema (draft-2019-09).
@@ -40,8 +45,8 @@ const SCHEMAS = {
 };
 
 export const INTEROP_KINDS = Object.keys(SCHEMAS);
-// Schema-validated kinds + the identity-only semanticId classifier (no schema, no ajv).
-export const ALL_KINDS = [...INTEROP_KINDS, "semanticids"];
+// Schema-validated kinds + the identity-only semanticId classifier + the SHACL shapes door (no ajv).
+export const ALL_KINDS = [...INTEROP_KINDS, "semanticids", "shacl"];
 
 /** Validate `data` of the given `kind` ("aas" | "untp"). Returns { valid, label, errors }. */
 export function validateInterop(kind, data) {
@@ -63,9 +68,34 @@ if (isMain) {
   const strict = argv.includes("--strict");
   const [kind, file] = argv.filter((a) => a !== "--strict");
   if (!kind || !file || !ALL_KINDS.includes(kind)) {
-    console.error(`usage: node validate.mjs <${ALL_KINDS.join("|")}> <file.json> [--strict]`);
+    console.error(`usage: node validate.mjs <${ALL_KINDS.join("|")}> <file> [--strict]`);
     process.exit(2);
   }
+
+  // --- SHACL door (JSON-LD → RDF + SHACL shapes; NOT a JSON-Schema kind) --------------------------
+  if (kind === "shacl") {
+    let report;
+    try {
+      report = await validateShaclFile(resolve(file));
+    } catch (e) {
+      console.error(`could not validate ${file}: ${e?.message ?? e}`);
+      process.exit(2);
+    }
+    console.log(`OpenDPP SHACL shapes (NON-NORMATIVE, starter) — ${file}:`);
+    for (const v of report.violations) {
+      const where = v.focusNode ? ` @ ${v.focusNode}` : "";
+      const path = v.path ? ` [${v.path}]` : "";
+      const val = v.value !== undefined ? ` (value: ${v.value})` : "";
+      console.log(`  ✗ ${v.severity}${path}${where}: ${v.message}${val}`);
+    }
+    if (report.conforms) {
+      console.log(`\n✓ CONFORMS — OpenDPP DigitalProductPassport SHACL shapes (${report.dataTriples} triples).`);
+      process.exit(0);
+    }
+    console.error(`\n✗ NON-CONFORMING — ${report.violations.length} violation(s).`);
+    process.exit(1);
+  }
+
   let data;
   try {
     data = JSON.parse(readFileSync(resolve(file), "utf8"));

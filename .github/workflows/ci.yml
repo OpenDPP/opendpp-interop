@@ -20,12 +20,20 @@ jobs:
       - name: Install validator deps
         working-directory: validate
         run: npm ci
-      - name: Validate every sample against the official schemas
+      - name: Validate every sample (official schemas + CIRPASS-2 pointer + OpenDPP SHACL shapes)
         run: |
           set -e
-          node validate/validate.mjs aas  samples/battery-aas-environment.json
-          node validate/validate.mjs untp samples/battery-vc-credential.json
-          node validate/validate.mjs untp samples/battery-unit-vc-credential.json
+          node validate/validate.mjs aas      samples/battery-aas-environment.json
+          node validate/validate.mjs untp     samples/battery-vc-credential.json
+          node validate/validate.mjs untp     samples/battery-unit-vc-credential.json
+          node validate/validate.mjs registry samples/battery-registry-pointer-model.json
+          node validate/validate.mjs registry samples/battery-registry-pointer-item.json
+          node validate/validate.mjs shacl    samples/battery-passport.jsonld
+      - name: SHACL negative control (a tampered passport MUST be rejected)
+        run: |
+          set -e
+          node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('samples/battery-passport.jsonld','utf8'));j.status='BOGUS_STATUS';fs.writeFileSync('/tmp/bad.jsonld',JSON.stringify(j))"
+          if node validate/validate.mjs shacl /tmp/bad.jsonld; then echo "ERROR: tampered passport unexpectedly conformed" && exit 1; else echo "ok: SHACL rejected the tampered passport"; fi
       - name: Classify AAS semanticIds against the IDTA allowlist (identity)
         run: node validate/validate.mjs semanticids samples/battery-aas-environment.json --strict
       - name: Assert classifier behaviour (CarbonFootprint is a published IDTA id)
@@ -43,7 +51,7 @@ jobs:
       - name: JSON sanity (spec + schemas + allowlist parse)
         run: |
           set -e
-          for f in openapi.json idta-semantic-ids.json schemas/aas-v3.schema.json schemas/untp-dpp-v0.7.0.schema.json; do
+          for f in openapi.json idta-semantic-ids.json schemas/aas-v3.schema.json schemas/untp-dpp-v0.7.0.schema.json schemas/cirpass2-eu-registry-pointer.schema.json; do
             node -e "JSON.parse(require('fs').readFileSync('$f','utf8')); console.log('ok: $f')"
           done
 
