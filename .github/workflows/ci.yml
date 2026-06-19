@@ -26,6 +26,8 @@ jobs:
           node validate/validate.mjs aas      samples/battery-aas-environment.json
           node validate/validate.mjs untp     samples/battery-vc-credential.json
           node validate/validate.mjs untp     samples/battery-unit-vc-credential.json
+          node validate/validate.mjs untp     samples/textile-vc-credential.json
+
           node validate/validate.mjs registry samples/battery-registry-pointer-model.json
           node validate/validate.mjs registry samples/battery-registry-pointer-item.json
           node validate/validate.mjs shacl    samples/battery-passport.jsonld

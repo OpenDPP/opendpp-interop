@@ -21,9 +21,17 @@ IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachange
   report + `✓ CONFORMS` / `✗ NON-CONFORMING` (exit 0 / 1).
 - **`samples/battery-passport.jsonld`** — the public `application/ld+json` passport projection of the demo
   battery, which conforms to the new shapes.
+- **`samples/textile-vc-credential.json` + `samples/textile-vc.jwt`** — a NON-BATTERY (textiles) UNTP DPP
+  credential, the first non-battery sample. It demonstrates OpenDPP's per-category **typed mapping**: fiber
+  composition → typed `materialProvenance`, and recycled content → a self-declared circularity
+  `performanceClaim` (against an OpenDPP self-declaration criterion, **not** an ESPR/third-party one) —
+  instead of the `characteristics` open bag. Live-fetched from the demo service (passport
+  `…/01/09501101531000`), schema-valid against UNTP DPP v0.7.0, and signed by the same demo tenant so it
+  verifies against the existing `battery-issuer-did.json`. CONFORMANCE.md's product-category row updated
+  accordingly (backend #119).
 
-No API-contract change — the SHACL shapes + `shacl` door are reference/tooling (non-contract), so
-`openapi.json` and the carried API contract version are unchanged.
+No API-contract change — the SHACL shapes + `shacl` door and the additional sample are reference/tooling
+(non-contract), so `openapi.json` and the carried API contract version are unchanged.
 
 ## [1.4.1] — API contract 1.4.1 + CIRPASS-2 registry interop
 
