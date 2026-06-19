@@ -19,4 +19,6 @@ paths = [
   '''^samples/battery-vc-credential\.json$''',
   '''^samples/battery-unit-vc-credential\.json$''',
   '''^samples/battery-issuer-did\.json$''',
+  '''^samples/textile-vc\.jwt$''',
+  '''^samples/textile-vc-credential\.json$''',
 ]
