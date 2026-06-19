@@ -59,7 +59,7 @@ opendpp-interop/
 │   └── cirpass2-eu-registry-pointer.schema.json   (CIRPASS-2, NON-NORMATIVE)
 ├── shapes/                 OpenDPP-authored SHACL shapes (NON-NORMATIVE) for the DPP / battery vertical
 │   └── opendpp-dpp-shapes.ttl
-├── samples/                validated reference artifacts (one battery, both doors + the EU-registry pointer + the JSON-LD passport)
+├── samples/                validated reference artifacts (a battery via both doors + a textile UNTP credential + the EU-registry pointer + the JSON-LD passport)
 │   └── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
 └── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl)
 ```
@@ -108,10 +108,11 @@ the actual RDF the sample expands to, so the bundled passport **conforms**.
 
 ## Validated samples
 
-Reference artifacts in [`samples/`](./samples/) — one fictional battery, described both ways. These
-are **real, live outputs** fetched verbatim from the demo service (type passport `…/01/09501101532007`,
-unit `VM-LFP100-2026-000001`), so you can **reproduce and verify every one** against the live API (each
-`samples/*-VALIDATION.md` has the `curl`). Synthetic demo data — see [`NOTICE`](./NOTICE):
+Reference artifacts in [`samples/`](./samples/) — a fictional battery (described both ways) and a
+textile garment. These are **real, live outputs** fetched verbatim from the demo service (battery type
+passport `…/01/09501101532007`, unit `VM-LFP100-2026-000001`; textile passport `…/01/09501101531000`),
+so you can **reproduce and verify every one** against the live API (each `samples/*-VALIDATION.md` has
+the `curl`). Synthetic demo data — see [`NOTICE`](./NOTICE):
 
 - `battery-aas-environment.json`, `battery.aasx` — the battery as an AAS v3.0 Environment / AASX package.
 - `battery-vc-credential.json` — the UNTP DPP credential (unsigned form, SKU/type, `idGranularity:"model"`).
@@ -119,7 +120,11 @@ unit `VM-LFP100-2026-000001`), so you can **reproduce and verify every one** aga
 - `battery-vc-di.jsonld` — the **embedded W3C Data Integrity** form (`ecdsa-jcs-2019`).
 - `battery-unit-vc-credential.json`, `battery-unit-vc.jwt`, `battery-unit-vc-di.jsonld` — a **per-unit**
   credential for one serialised battery (item granularity, the real GS1 AI-21 serial as `itemNumber`).
-- `battery-issuer-did.json` — the issuer `did:web` document (the verification key).
+- `battery-issuer-did.json` — the issuer `did:web` document (the verification key; the textile credential
+  shares it — same demo tenant).
+- `textile-vc-credential.json`, `textile-vc.jwt` — a **non-battery (textiles)** UNTP credential, proving
+  the per-category **typed mapping**: fiber composition → typed `materialProvenance`, recycled content →
+  a self-declared circularity `performanceClaim` (not just the `characteristics` open bag).
 - `battery-passport.jsonld` — the public `application/ld+json` passport (the JSON-LD door), validated by
   the OpenDPP **SHACL** shapes (`node validate/validate.mjs shacl …`).
 - `battery-registry-pointer-model.json`, `battery-registry-pointer-item.json` — the **CIRPASS-2
