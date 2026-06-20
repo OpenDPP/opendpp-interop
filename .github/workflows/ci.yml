@@ -73,8 +73,20 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run gitleaks
+        env:
+          # Pinned so the scan never depends on an unauthenticated, rate-limited
+          # `releases/latest` API call at runtime (the old lookup flaked and aborted
+          # the job before gitleaks even ran). Bump deliberately.
+          GITLEAKS_VERSION: "8.30.1"
         run: |
-          set -e
-          ver=$(curl -sSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep -oP '"tag_name": "v\K[^"]+')
-          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${ver}/gitleaks_${ver}_linux_x64.tar.gz" | tar -xz gitleaks
+          set -euo pipefail
+          url="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          for attempt in 1 2 3; do
+            if curl -fsSL --retry 3 --retry-all-errors "$url" | tar -xz gitleaks; then
+              break
+            fi
+            echo "gitleaks download failed (attempt $attempt) — retrying" >&2
+            sleep $((attempt * 5))
+          done
+          test -x ./gitleaks
           ./gitleaks detect --source . --config .gitleaks.toml --redact --no-banner
