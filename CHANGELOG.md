@@ -9,6 +9,26 @@ IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachange
 
 _Nothing yet._
 
+## [1.6.0] — API contract 1.6.0 + documentation-completeness additions
+
+Refreshed `openapi.json` to OpenDPP API contract **1.6.0**. The contract gained backward-compatible
+documentation of public surface it already served (no endpoint behaviour changed):
+
+- **`GET /contexts/dpp/v1`** — the canonical, resolvable `@vocab`-based JSON-LD context that every
+  public passport/unit document references in its `@context` (the one to dereference when expanding
+  OpenDPP JSON-LD). `GET /context/v1` is now labelled the secondary fixed term list.
+- **`GET /tenants/{tenantId}/did.json`** and **`GET /tenants/{tenantId}/status/revocation`** — the
+  issuer `did:web` document (public keys only) and the W3C Bitstring Status List used to verify and
+  revocation-check OpenDPP-issued Verifiable Credentials (new "Verifiable Credentials" tag).
+- Verifiable-Credential content negotiation (`application/vc+jwt`, `application/vc+ld+json`,
+  `application/dc+sd-jwt`) and a structured **`406 Not Acceptable`** are now documented on the
+  passport resolvers and the owner-side `GET /api/v1/passports/{id}` alias.
+- Description corrections (grants pagination; the `passport.updated` webhook on live passport edits;
+  the operator-not-found 404 message).
+
+Additive only — no paths, fields or status codes removed; existing integrations are unaffected. The
+vendored standards and the IDTA `semanticId` allowlist are unchanged.
+
 ## [1.5.0] — API contract 1.5.0 + SD-JWT-VC selective disclosure
 
 Carries OpenDPP API contract **1.5.0**.
