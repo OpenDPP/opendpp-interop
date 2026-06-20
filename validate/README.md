@@ -1,9 +1,11 @@
 # `validate/` — offline conformance validator
 
-A tiny, dependency-light CLI that checks an **AAS Environment**, a **UNTP DigitalProductPassport
-credential**, or a **CIRPASS-2 EU-registry pointer** (NON-NORMATIVE) against the *same*
-official / reference JSON Schemas OpenDPP's own CI validates against
-([`../schemas/`](../schemas/)). Use it to prove your output is structurally conformant **before you
+A tiny, dependency-light CLI with **six modes**: it validates an **AAS Environment** (`aas`), a **UNTP
+DigitalProductPassport credential** (`untp`), or a **CIRPASS-2 EU-registry pointer** (`registry`,
+NON-NORMATIVE) against the *same* official / reference JSON Schemas OpenDPP's own CI validates against
+([`../schemas/`](../schemas/)); classifies IDTA **`semanticId`s** (`semanticids`); checks the passport
+JSON-LD against OpenDPP's NON-NORMATIVE **SHACL** shapes (`shacl`); and verifies an **SD-JWT-VC**
+selective-disclosure presentation (`sdjwt`). Use it to prove your output is conformant **before you
 ship** — without any access to the OpenDPP product source.
 
 ## Use it
@@ -15,7 +17,11 @@ npm install                       # ajv + ajv-formats only
 node validate.mjs aas      ../samples/battery-aas-environment.json
 node validate.mjs untp     ../samples/battery-vc-credential.json
 node validate.mjs registry ../samples/battery-registry-pointer-model.json   # CIRPASS-2 (NON-NORMATIVE)
+node validate.mjs shacl    ../samples/battery-passport.jsonld               # OpenDPP SHACL shapes (NON-NORMATIVE)
+node validate.mjs sdjwt    ../samples/battery-vc.sdjwt                      # SD-JWT-VC: disclosures + ES256 signature
 ```
+
+(`semanticids` has its own section below.)
 
 Exit codes: **`0`** conformant · **`1`** schema errors (first 10 printed) · **`2`** usage / read error.
 
@@ -28,7 +34,7 @@ const { valid, label, errors } = validateInterop("untp", myCredential);
 
 ## Classify IDTA `semanticId`s
 
-A third mode checks IDTA template **identity** — is each AAS submodel `semanticId` a genuine,
+Another mode checks IDTA template **identity** — is each AAS submodel `semanticId` a genuine,
 published IDTA template id, or vendor-coined?
 
 ```bash
@@ -59,10 +65,12 @@ import { classifyAasFile, classifySemanticId } from "./semantic-ids.mjs";
 
 ## Scope
 
-This validates **structural** conformance (JSON Schema). It does **not** verify a `vc+jwt`
-*signature* — that's a separate step (resolve `did:web` → verify the JWS → validate the payload),
-described in the repo [README → "Verify a signature"](../README.md#verify-a-signature) using only
-standard WebCrypto / JOSE.
+The `aas` / `untp` / `registry` modes validate **structural** conformance (JSON Schema) and do **not**
+verify a `vc+jwt` *signature* — for the enveloping `vc+jwt` / `vc+ld+json` that's a separate step
+(resolve `did:web` → verify the JWS → validate the payload), described in the repo
+[README → "Verify a signature"](../README.md#verify-a-signature) using only standard WebCrypto / JOSE.
+The `sdjwt` mode **does** verify the SD-JWT-VC's ES256 signature (and reconstructs its disclosures), and
+`shacl` runs RDF/SHACL validation of the passport JSON-LD.
 
 The vendored schemas retain their upstream terms — see [`../NOTICE`](../NOTICE). This tool is
 Apache-2.0.
