@@ -1,0 +1,80 @@
+name: Release on version bump
+
+# Tags + publishes a GitHub Release for the kit version (openapi.json info.version, "v<x.y.z>")
+# whenever it isn't already released. This closes the gap where a version-bump PR merges to main but
+# no git tag / Release is ever created. The release notes are taken from the matching CHANGELOG.md
+# section, and the tag is always anchored to the tip of main. The job is idempotent: it is a no-op
+# once the tag/Release for the current version exists.
+
+on:
+  push:
+    # main: auto-release every future version bump the moment it lands.
+    # claude/**: bootstrap — lets the automation branch that introduces this workflow create the
+    #            already-merged-but-untagged v1.5.0 release. Harmless to keep (guarded + idempotent).
+    branches:
+      - main
+      - "claude/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Tag + publish the carried contract version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main (the tag is always anchored to main's tip)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Read carried version from openapi.json
+        id: ver
+        run: |
+          set -euo pipefail
+          version="$(node -e "process.stdout.write(require('./openapi.json').info.version)")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "Carried API contract version: $version"
+
+      - name: Create the tag + Release if it does not exist yet
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — nothing to do."
+            exit 0
+          fi
+
+          # Title from the CHANGELOG heading "## [x.y.z]<rest>" → "vx.y.z<rest>" (keeps the heading's
+          # own " — " separator verbatim; byte-safe, so the multibyte em-dash is preserved).
+          title="$(awk -v v="$VERSION" '
+            index($0, "## [" v "]") == 1 {
+              printf "v%s%s", v, substr($0, index($0, "]") + 1);
+              exit
+            }' CHANGELOG.md)"
+          [ -n "$title" ] || title="$TAG"
+
+          # Body = the CHANGELOG section for this version (up to the next "## [" heading).
+          awk -v v="$VERSION" '
+            index($0, "## [" v "]") == 1 { grab = 1; next }
+            grab && /^## \[/ { exit }
+            grab { print }
+          ' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "Release ${TAG}." > notes.md
+
+          echo "Creating $TAG at $(git rev-parse HEAD) with title: $title"
+          gh release create "$TAG" \
+            --target "$(git rev-parse HEAD)" \
+            --title "$title" \
+            --notes-file notes.md
