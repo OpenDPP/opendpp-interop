@@ -1,0 +1,33 @@
+version: 2
+
+# Keeps the kit's two moving parts current: the offline validator's npm tree and the GitHub Actions
+# used by CI / drift-check / release. Dependabot *security* updates are enabled at the repo level;
+# this adds proactive *version* updates so the SHACL/jsonld dependency tree and the SHA-pinned actions
+# don't silently fall behind.
+
+updates:
+  # The offline conformance validator (validate/) — ajv, ajv-formats, jsonld, rdf-validate-shacl, …
+  - package-ecosystem: npm
+    directory: /validate
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: deps
+    groups:
+      # Batch low-risk minor/patch bumps into one PR; majors still arrive individually for review.
+      validator-deps:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  # CI / drift-check / release workflows — bumps the SHA pins (keeping the "# vX.Y.Z" comment in sync).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns: ["*"]
