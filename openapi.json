@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "OpenDPP Integration API",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "summary": "Create, validate, seal and publish EU Digital Product Passports; serialize battery units; manage facilities, access grants and webhooks; resolve and verify passports publicly.",
     "description": "OpenDPP is a B2B platform for EU Digital Product Passports (DPPs), aligned with the ESPR (Regulation (EU) 2024/1781) data requirements and the EU Battery Regulation (Regulation (EU) 2023/1542). This specification documents the **public integration surface**: everything an external system needs to create, validate, seal, publish, resolve and verify passports.\n\n## Authentication\nAuthenticate with a tenant **API key** sent as a Bearer token: `Authorization: Bearer op_dpp_token_…`. Keys are created in the Client Console (Developers → API keys), are shown **once** at creation, carry a role plus optional narrowed permissions and optional expiry, and can be revoked at any time. API-key clients are exempt from CSRF requirements. Public endpoints (tagged **Public Resolution**, plus the public validators and the audit verifier) need no credentials.\n\n## Tenancy\nTenant identity is **token-bound** — it is derived from your API key, never from the request host. The same paths work on the apex host and on tenant workspace hosts (`https://<workspace>.opendpp-node.eu`); when a workspace host is used, it must match the key's tenant (requests across workspaces are rejected with `403`).\n\n## Errors\nAuthenticated endpoints return `{ success: false, error, message }` (some omit `success`). ESPR metadata validation failures return the richer shape documented as **ValidationFailed** with per-field `errors[]`/`warnings[]` (localizable via `?lang=` or `Accept-Language`; 28 languages). Bulk endpoints report row-level problems as `errors: string[]`. Malformed JSON and query-string violations return Fastify's default `{ statusCode, code, error, message }` body.\n\n## Rate limits\nGlobal limit: **100 requests/min per IP** (higher for verified crawlers), with `x-ratelimit-*` response headers. Public passport resolution is additionally limited to **30 requests/min per IP** (no headers). The public validator is limited to **10 requests/min per IP**. Stay under these limits with client-side queueing; on `429`, back off and retry after the indicated window.\n\n## Sealing & verification\nPassport seals are **eIDAS advanced electronic seals** (ECDSA P-256 over a Merkle root of the passport content, optional RFC 3161 timestamp). Anyone can verify a seal — no account required. `POST /api/v1/audit/verify` recomputes every Merkle leaf from the submitted values, so it requires the unredacted document (caller-supplied redacted-leaf hashes are deliberately not trusted). Redacted documents remain verifiable **offline**: masked fields keep their true leaf hashes in `proof.redactedLeaves`, letting any verifier rebuild the sealed root without the privileged values.\n\n## Public access tiers\nPublic resolution endpoints serve **tiered** views of the same URL: the public tier for anonymous callers; a restricted tier for holders of legitimate-interest (`dpp_li_…`) or authority (`dpp_auth_…`) capability tokens (presented as a Bearer token or `?grant=` query parameter); and the owner tier for the issuing tenant's own credentials.\n\n## Webhooks\nSubscribe to passport lifecycle events (`passport.ingested`, `passport.sealed`, `passport.recalled`, or `*`). Deliveries are HMAC-SHA256-signed; see the **webhooks** section of this document for the exact signature scheme, retry schedule, and payloads.\n\nThis document is also served machine-readably at [`/openapi.json`](https://opendpp-node.eu/openapi.json) and [`/openapi.yaml`](https://opendpp-node.eu/openapi.yaml).\n\n## Open interoperability kit\nThe interoperability boundary — the official AAS + UNTP/W3C-VC schemas, live-reproducible samples, an offline conformance validator, and the field mappings — is **open source** at [github.com/OpenDPP/opendpp-interop](https://github.com/OpenDPP/opendpp-interop) (Apache-2.0). It lets any integrator validate and verify OpenDPP's standards-conformant output without access to the product source.",
     "contact": {
@@ -67,6 +67,10 @@
     {
       "name": "Public Resolution",
       "description": "Unauthenticated, content-negotiated passport resolution: GS1 Digital Link paths, passport and unit pages. One URL serves JSON-LD (default), an AAS environment (`Accept: application/aas+json`), a signed UNTP Verifiable Credential (`Accept: application/vc+jwt` enveloping, `application/vc+ld+json` embedded `ecdsa-jcs-2019` Data Integrity, or `application/dc+sd-jwt` SD-JWT-VC selective disclosure; the first two also item-level on `/unit/:id`), or HTML (`Accept: text/html`). Tiered by optional credentials or grant tokens. Rate limit: 30 requests/min per IP."
+    },
+    {
+      "name": "Verifiable Credentials",
+      "description": "Issuer trust endpoints that back the UNTP Verifiable Credential representations: the workspace's `did:web` DID document (public keys only) and its W3C Bitstring Status List for revocation. Unauthenticated; resolve these to verify and revocation-check any OpenDPP-issued credential."
     },
     {
       "name": "Schemas & Vocabulary",
@@ -1391,7 +1395,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The workspace's grants and requests (most recent 500).",
+            "description": "The workspace's grants and requests, paginated newest-first — a `{ success, count, page, limit, total, totalPages, grants }` envelope. `limit` is clamped to its maximum and a non-numeric `limit` falls back to the default; there is no fixed 500-row cap.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2216,7 +2220,8 @@
             "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "$ref": "#/components/responses/NotFound"
+            "$ref": "#/components/responses/NotFound",
+            "description": "No operator with that id exists in your workspace. Body: { success: false, error: \"Not Found\", message: \"Operator <id> not found in your workspace.\" }."
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -4032,7 +4037,7 @@
           "Passports"
         ],
         "summary": "Fetch a single passport (content-negotiated JSON-LD / AAS / HTML)",
-        "description": "Owner-side alias of the public resolver. Accepts either the passport **UUID** or its caller-supplied **`productId`** (GTIN-14 / GRAI / SKU), scoped to operators bound to your workspace. After the scoped lookup the request is **re-dispatched internally to `GET /passport/{uuid}`**, forwarding all request headers, and the inner response (status, content type, body) is returned as-is.\n\n**Permission:** `passport:read` (read-only — no subscription/402 gate).\n\n**Content negotiation** (substring match on `Accept`): `application/aas+json` → role-filtered AAS environment; `text/html` → SSR passport page; anything else (including `application/json`, `*/*`, or no header) → JSON-LD with `Content-Type: application/ld+json` (the default).\n\n**Access-tier caveat (privilege is resolved from the *forwarded* headers, not the already-authenticated context):** only **database API keys** (`Authorization: Bearer op_dpp_token_…`) of the owning or operator-bound tenant are recognized as owner by the inner resolver. Those callers get the **owner-tier** document: `facilityDetails` and battery restricted keys unmasked, `manufacturingFacility` includes `streetAddress`/`city`/`postalCode`, and DRAFT passports are visible. Callers authenticated with a **JWT session** (login cookie or bearer JWT) receive the **public-redacted** tier instead, and DRAFT passports answer 404 with the forwarded public body (no `success` field).\n\nEvery successful resolution records an anonymized-IP access audit entry.\n\n**Rate limits:** global limiter 100 req/min/IP with `x-ratelimit-*` headers, **plus** the forwarded public resolver's own limiter (30 req/min/IP, no headers) — both 429 shapes are possible (see 429).",
+        "description": "Owner-side alias of the public resolver. Accepts either the passport **UUID** or its caller-supplied **`productId`** (GTIN-14 / GRAI / SKU), scoped to operators bound to your workspace. After the scoped lookup the request is **re-dispatched internally to `GET /passport/{uuid}`**, forwarding all request headers, and the inner response (status, content type, body) is returned as-is.\n\n**Permission:** `passport:read` (read-only — no subscription/402 gate).\n\n**Content negotiation** (substring match on `Accept`): `application/aas+json` → role-filtered AAS environment; `application/vc+jwt` → enveloping UNTP Verifiable Credential; `application/vc+ld+json` → the same credential with an embedded `ecdsa-jcs-2019` W3C Data Integrity proof; `application/dc+sd-jwt` (legacy `vc+sd-jwt` accepted) → SD-JWT-VC selective disclosure (these three return `406 Not Acceptable` when the passport has no manufacturing facility with a country of production); `text/html` → SSR passport page; anything else (including `application/json`, `*/*`, or no header) → JSON-LD with `Content-Type: application/ld+json` (the default). The VC and SD-JWT representations are forwarded verbatim from `GET /passport/{id}` — see that operation for the full credential semantics.\n\n**Access-tier caveat (privilege is resolved from the *forwarded* headers, not the already-authenticated context):** only **database API keys** (`Authorization: Bearer op_dpp_token_…`) of the owning or operator-bound tenant are recognized as owner by the inner resolver. Those callers get the **owner-tier** document: `facilityDetails` and battery restricted keys unmasked, `manufacturingFacility` includes `streetAddress`/`city`/`postalCode`, and DRAFT passports are visible. Callers authenticated with a **JWT session** (login cookie or bearer JWT) receive the **public-redacted** tier instead, and DRAFT passports answer 404 with the forwarded public body (no `success` field).\n\nEvery successful resolution records an anonymized-IP access audit entry.\n\n**Rate limits:** global limiter 100 req/min/IP with `x-ratelimit-*` headers, **plus** the forwarded public resolver's own limiter (30 req/min/IP, no headers) — both 429 shapes are possible (see 429).",
         "security": [
           {
             "ApiKeyAuth": []
@@ -4264,6 +4269,24 @@
                   "type": "string",
                   "description": "Server-rendered passport page (returned when `Accept` contains `text/html`)."
                 }
+              },
+              "application/vc+jwt": {
+                "schema": {
+                  "type": "string",
+                  "description": "Forwarded enveloping UNTP DigitalProductPassport credential (compact JWS, ES256), identical to `GET /passport/{id}` with `Accept: application/vc+jwt`."
+                }
+              },
+              "application/vc+ld+json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Forwarded UNTP DigitalProductPassport credential with an embedded W3C Data Integrity proof (`ecdsa-jcs-2019`), identical to `GET /passport/{id}` with `Accept: application/vc+ld+json`."
+                }
+              },
+              "application/dc+sd-jwt": {
+                "schema": {
+                  "type": "string",
+                  "description": "Forwarded SD-JWT-VC (selective disclosure) of the same credential, identical to `GET /passport/{id}` with `Accept: application/dc+sd-jwt` (legacy `vc+sd-jwt` accepted)."
+                }
               }
             }
           },
@@ -4326,6 +4349,9 @@
                 }
               }
             }
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           },
           "429": {
             "description": "Two possible sources. (1) Global limiter (100/min/IP): default rate-limit body (`statusCode`/`error`/`message` — no `code` field) with `x-ratelimit-limit`/`x-ratelimit-remaining`/`x-ratelimit-reset` + `retry-after` headers. (2) Forwarded from the inner public resolver's limiter (30/min/IP): two-field body, **no rate-limit headers**.",
@@ -4419,7 +4445,7 @@
           "Passports"
         ],
         "summary": "Update passport metadata (versioned to history)",
-        "description": "Replaces the passport's `metadata` (the Merkle root and leaf hashes are recomputed) and snapshots the **previous** metadata into the passport's version history (version = count + 1, `changedBy` = user email or `api-key:<id>`, `changeReason` defaults to `\"API Update\"`).\n\n**Permission:** `passport:update` (write — subscription gating applies, see 402). Cookie sessions must send `X-CSRF-Token` (double-submit); Bearer/API-key clients are exempt.\n\n**Lookup:** by passport **UUID only** — `productId` aliasing is NOT supported on this endpoint. The passport must belong to an operator bound to your workspace.\n\n**Draft semantics (`draft` flag):**\n- `draft: true` **skips ESPR validation entirely** and forces `status: \"DRAFT\"` — note this also demotes an already-published (ACTIVE/RECALLED/DECOMMISSIONED) passport back to DRAFT.\n- `draft` absent/false: `metadata` is validated against the ESPR category rules (400 on failure — see below). If the passport was a DRAFT it is **published**: status becomes `ACTIVE`, a `passport.ingested` webhook is enqueued transactionally (public-redacted JSON-LD payload) and an in-app notification is created best-effort afterwards. Live statuses are left untouched.\n\n**Validation divergence:** the 400 validation body here contains `errors` but — unlike `POST /api/v1/passports` — **never a `warnings` array**. `friendlyMessage` is localized via the `lang` query parameter or `Accept-Language` (28 languages, default `en`; unsupported values silently fall back).\n\n**Sealed passports are immutable in place:** if `digitalSeal` is set the update is refused with **403** (message: \"This passport is sealed and cannot be edited in place — editing would invalidate the eIDAS advanced electronic seal. Re-seal explicitly after any change.\").\n\n**Facility:** omit `facilityId` to leave it unchanged; pass `null` or `\"\"` to detach; pass a facility UUID owned by your tenant to attach (400 if not found in your workspace).\n\n**Enrichment:** include the `enrichment` key (even as `null`/`{}`) to overwrite the presentational marketing block; omit it to leave it unchanged. Values are sanitized server-side (truncated/sliced, http(s) URLs only), never rejected.\n\n**Response caveat:** the returned `passport` document is serialized at the **public** redaction tier — `facilityDetails` (and battery restricted keys) appear as `\"[REDACTED - Privileged Access Required]\"` even though you are the owner.\n\n**Rate limits:** global limiter, 100 req/min/IP.",
+        "description": "Replaces the passport's `metadata` (the Merkle root and leaf hashes are recomputed) and snapshots the **previous** metadata into the passport's version history (version = count + 1, `changedBy` = user email or `api-key:<id>`, `changeReason` defaults to `\"API Update\"`).\n\n**Permission:** `passport:update` (write — subscription gating applies, see 402). Cookie sessions must send `X-CSRF-Token` (double-submit); Bearer/API-key clients are exempt.\n\n**Lookup:** by passport **UUID only** — `productId` aliasing is NOT supported on this endpoint. The passport must belong to an operator bound to your workspace.\n\n**Draft semantics (`draft` flag):**\n- `draft: true` **skips ESPR validation entirely** and forces `status: \"DRAFT\"` — note this also demotes an already-published (ACTIVE/RECALLED/DECOMMISSIONED) passport back to DRAFT.\n- `draft` absent/false: `metadata` is validated against the ESPR category rules (400 on failure — see below). If the passport was a DRAFT it is **published**: status becomes `ACTIVE`, a `passport.ingested` webhook is enqueued transactionally (public-redacted JSON-LD payload) and an in-app notification is created best-effort afterwards. Editing an already-published (live) passport leaves its status untouched and enqueues a `passport.updated` webhook instead (same public-redacted JSON-LD payload).\n\n**Validation divergence:** the 400 validation body here contains `errors` but — unlike `POST /api/v1/passports` — **never a `warnings` array**. `friendlyMessage` is localized via the `lang` query parameter or `Accept-Language` (28 languages, default `en`; unsupported values silently fall back).\n\n**Sealed passports are immutable in place:** if `digitalSeal` is set the update is refused with **403** (message: \"This passport is sealed and cannot be edited in place — editing would invalidate the eIDAS advanced electronic seal. Re-seal explicitly after any change.\").\n\n**Facility:** omit `facilityId` to leave it unchanged; pass `null` or `\"\"` to detach; pass a facility UUID owned by your tenant to attach (400 if not found in your workspace).\n\n**Enrichment:** include the `enrichment` key (even as `null`/`{}`) to overwrite the presentational marketing block; omit it to leave it unchanged. Values are sanitized server-side (truncated/sliced, http(s) URLs only), never rejected.\n\n**Response caveat:** the returned `passport` document is serialized at the **public** redaction tier — `facilityDetails` (and battery restricted keys) appear as `\"[REDACTED - Privileged Access Required]\"` even though you are the owner.\n\n**Rate limits:** global limiter, 100 req/min/IP.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -5476,6 +5502,9 @@
               }
             }
           },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
           "429": {
             "$ref": "#/components/responses/PublicRateLimited"
           },
@@ -5746,6 +5775,9 @@
                 }
               }
             }
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           },
           "429": {
             "$ref": "#/components/responses/PublicRateLimited"
@@ -6087,6 +6119,9 @@
               }
             }
           },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          },
           "429": {
             "$ref": "#/components/responses/PublicRateLimited"
           },
@@ -6302,6 +6337,9 @@
                 }
               }
             }
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           },
           "410": {
             "description": "Gone — the unit was RECYCLED (or `ceasedAt` is set): the battery passport has ceased to exist (Art. 77(8)). A minimal tombstone is returned to everyone; grants and owner credentials do not override it. Content-negotiated: HTML tombstone for `Accept: text/html`, JSON-LD otherwise.",
@@ -6638,14 +6676,57 @@
         }
       }
     },
+    "/contexts/dpp/v1": {
+      "get": {
+        "operationId": "getDppJsonLdContext",
+        "tags": [
+          "Schemas & Vocabulary"
+        ],
+        "summary": "Canonical resolvable JSON-LD context for passport & unit documents",
+        "description": "Serves the stable, resolvable W3C JSON-LD `@context` (`application/ld+json`) that **every** public passport and battery-unit JSON-LD document references in its `@context` array — this is the context to dereference when expanding OpenDPP JSON-LD. It declares `@vocab: https://opendpp-node.eu/ns/dpp#` (so even dynamic metadata keys expand under the OpenDPP namespace and are never silently dropped by a strict JSON-LD processor) plus explicit term mappings for the core DPP/unit vocabulary (`DigitalProductPassport`, `BatteryUnit`, `economicOperator`, `manufacturingFacility`, `metadata`, `digitalSeal`, `signingPublicKey`, `proof`, `status`, `MerkleTreeAttestationProof`). Cacheable (`Cache-Control: public, max-age=86400`).\n\n(The separate `/context/v1` serves an older, fixed term-only list and is **not** the context emitted documents point to.)\n\nNo authentication, no permission (public endpoint). No custom rate limiter — only the global platform limit applies (100 req/min/IP, standard `x-ratelimit-*` headers).",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "The canonical `@vocab`-based JSON-LD context document (fixed content).",
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DppVocabContextDocument"
+                },
+                "example": {
+                  "@context": {
+                    "@version": 1.1,
+                    "@vocab": "https://opendpp-node.eu/ns/dpp#",
+                    "dpp": "https://opendpp-node.eu/ns/dpp#",
+                    "DigitalProductPassport": "dpp:DigitalProductPassport",
+                    "BatteryUnit": "dpp:BatteryUnit",
+                    "MerkleTreeAttestationProof": "dpp:MerkleTreeAttestationProof",
+                    "economicOperator": "dpp:economicOperator",
+                    "manufacturingFacility": "dpp:manufacturingFacility",
+                    "metadata": "dpp:metadata",
+                    "digitalSeal": "dpp:digitalSeal",
+                    "signingPublicKey": "dpp:signingPublicKey",
+                    "proof": "dpp:proof",
+                    "status": "dpp:status"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
     "/context/v1": {
       "get": {
         "operationId": "getJsonLdContext",
         "tags": [
           "Schemas & Vocabulary"
         ],
-        "summary": "W3C JSON-LD context document for passport terms",
-        "description": "Serves a static W3C JSON-LD `@context` document (`application/ld+json`) for the core Digital Product Passport term vocabulary: maps the DPP terms to `https://opendpp-node.eu/ns/dpp#…` IRIs and `createdAt`/`updatedAt` to schema.org `dateCreated`/`dateModified`. (Passport/unit JSON-LD documents carry these term mappings inline and reference the resolvable context published at `/contexts/dpp/v1`.)\n\nNo authentication, no permission (public endpoint). No custom rate limiter — only the global platform limit applies (100 req/min/IP, standard `x-ratelimit-*` headers). Like every documented path except `/health`, a request on an unknown tenant workspace host receives a platform-level JSON 404 before this handler runs.",
+        "summary": "W3C JSON-LD context document for passport terms (secondary, fixed term list)",
+        "description": "Serves a static W3C JSON-LD `@context` document (`application/ld+json`) for the core Digital Product Passport term vocabulary: maps the DPP terms to `https://opendpp-node.eu/ns/dpp#…` IRIs and `createdAt`/`updatedAt` to schema.org `dateCreated`/`dateModified`. This is a **secondary** fixed term list — the context that public passport/unit JSON-LD documents actually reference is the `@vocab`-based one at `GET /contexts/dpp/v1`; dereference that when expanding OpenDPP JSON-LD.\n\nNo authentication, no permission (public endpoint). No custom rate limiter — only the global platform limit applies (100 req/min/IP, standard `x-ratelimit-*` headers). Like every documented path except `/health`, a request on an unknown tenant workspace host receives a platform-level JSON 404 before this handler runs.",
         "security": [],
         "responses": {
           "200": {
@@ -7582,6 +7663,140 @@
           },
           "429": {
             "$ref": "#/components/responses/PublicRateLimited"
+          }
+        }
+      }
+    },
+    "/tenants/{tenantId}/did.json": {
+      "get": {
+        "operationId": "getTenantDidDocument",
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "Resolve a tenant's did:web DID document",
+        "description": "Resolves the issuing workspace's `did:web` DID document (`application/did+json`). The DID is `did:web:opendpp-node.eu:tenants:{tenantId}`, which per the did:web method dereferences here. The document exposes **only public key material** — the workspace's eIDAS public key(s) as `JsonWebKey2020` verification methods, each with a stable `#key-<index>` id matching the `kid` of the credentials it signs.\n\nUse it to verify any OpenDPP-issued Verifiable Credential (`Accept: application/vc+jwt`, `application/vc+ld+json`, or `application/dc+sd-jwt` on the public resolution endpoints) without out-of-band key exchange. Both current and retired keys are published and listed in `assertionMethod`/`authentication`, so credentials issued before a key rotation still verify; new credentials always use the current key. The optional `name` is the issuer's authoritative legal name (the same value used in every credential's `issuer.name`).\n\nNo authentication, no permission (public endpoint). Subject only to the global platform rate limit (100 req/min/IP). A workspace that has never provisioned a signing key returns 404. Never returns private key material.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "description": "The issuing workspace (tenant) id — the `{tenantId}` of its `did:web:opendpp-node.eu:tenants:{tenantId}` DID.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "9b2fa884-3c1d-4e0a-9f6b-2d7c5a1e8b40"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tenant's did:web DID document (public keys only).",
+            "content": {
+              "application/did+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DidWebDocument"
+                },
+                "example": {
+                  "@context": [
+                    "https://www.w3.org/ns/did/v1",
+                    "https://w3id.org/security/suites/jws-2020/v1"
+                  ],
+                  "id": "did:web:opendpp-node.eu:tenants:9b2fa884-3c1d-4e0a-9f6b-2d7c5a1e8b40",
+                  "name": "ACME Manufacturing UAB",
+                  "verificationMethod": [
+                    {
+                      "id": "did:web:opendpp-node.eu:tenants:9b2fa884-3c1d-4e0a-9f6b-2d7c5a1e8b40#key-0",
+                      "type": "JsonWebKey2020",
+                      "controller": "did:web:opendpp-node.eu:tenants:9b2fa884-3c1d-4e0a-9f6b-2d7c5a1e8b40",
+                      "publicKeyJwk": {
+                        "kty": "EC",
+                        "crv": "P-256",
+                        "x": "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+                        "y": "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0",
+                        "alg": "ES256",
+                        "use": "sig"
+                      }
+                    }
+                  ],
+                  "assertionMethod": [
+                    "did:web:opendpp-node.eu:tenants:9b2fa884-3c1d-4e0a-9f6b-2d7c5a1e8b40#key-0"
+                  ],
+                  "authentication": [
+                    "did:web:opendpp-node.eu:tenants:9b2fa884-3c1d-4e0a-9f6b-2d7c5a1e8b40#key-0"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No DID document for this tenant (the workspace has not provisioned a signing key).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Not Found",
+                  "message": "No DID document for this tenant."
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/tenants/{tenantId}/status/revocation": {
+      "get": {
+        "operationId": "getTenantRevocationStatusList",
+        "tags": [
+          "Verifiable Credentials"
+        ],
+        "summary": "Tenant revocation status list (W3C Bitstring Status List)",
+        "description": "Serves the workspace's W3C **Bitstring Status List** as a signed enveloping `vc+jwt` (`application/vc+jwt`) — a `BitstringStatusListCredential` whose GZIP+base64 encoded bitstring sets the bit of every passport whose status is RECALLED or DECOMMISSIONED. An OpenDPP-issued DPP credential's `credentialStatus.statusListCredential` points here; a verifier fetches this list and checks the bit at the credential's `statusListIndex` to determine whether it has been revoked. Signed by the workspace's current key (stable `kid`), verifiable via the DID document at `/tenants/{tenantId}/did.json`.\n\nNo authentication, no permission (public endpoint). Subject only to the global platform rate limit (100 req/min/IP). A workspace with no signing key returns 404.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "description": "The issuing workspace (tenant) id.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "9b2fa884-3c1d-4e0a-9f6b-2d7c5a1e8b40"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The signed BitstringStatusListCredential as a compact `vc+jwt` (JWS string). Decode and verify with the issuer's DID key, then read the encoded bitstring.",
+            "content": {
+              "application/vc+jwt": {
+                "schema": {
+                  "type": "string",
+                  "description": "Compact JWS (`vc+jwt`) enveloping the W3C BitstringStatusListCredential."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No status list for this tenant (unknown workspace or no signing key).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Not Found",
+                  "message": "No status list for this tenant."
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         }
       }
@@ -12257,6 +12472,20 @@
           }
         }
       },
+      "DppVocabContextDocument": {
+        "type": "object",
+        "description": "The canonical resolvable JSON-LD context served by `GET /contexts/dpp/v1` — the context every public passport and battery-unit document references in its `@context`. Declares `@vocab` (so unknown terms expand under the OpenDPP namespace) plus core term mappings; `@version` is the numeric JSON-LD 1.1 marker, so `@context` values are a mix of strings and that number.",
+        "additionalProperties": false,
+        "required": [
+          "@context"
+        ],
+        "properties": {
+          "@context": {
+            "type": "object",
+            "description": "Term map: `@vocab` + `@version` (1.1) + the core DPP/unit term → `dpp:` CURIE mappings."
+          }
+        }
+      },
       "HealthStatus": {
         "type": "object",
         "description": "Health-check body of `GET /health`. Carries the running build identity (`apiVersion`/`commit`/`builtAt`) in addition to the liveness fields.",
@@ -12993,6 +13222,79 @@
           }
         }
       },
+      "DidWebDocument": {
+        "type": "object",
+        "description": "A tenant's `did:web` DID document (public-key material only). Verification methods are `JsonWebKey2020` entries with stable `#key-<index>` ids; current and retired keys are both listed so pre-rotation credentials still verify.",
+        "required": [
+          "@context",
+          "id",
+          "verificationMethod",
+          "assertionMethod",
+          "authentication"
+        ],
+        "properties": {
+          "@context": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "JSON-LD contexts: the DID core context plus the JWS-2020 suite."
+          },
+          "id": {
+            "type": "string",
+            "description": "The workspace DID, `did:web:opendpp-node.eu:tenants:{tenantId}`."
+          },
+          "name": {
+            "type": "string",
+            "description": "The issuer's authoritative legal name (present when the workspace has a company name)."
+          },
+          "verificationMethod": {
+            "type": "array",
+            "description": "Public verification keys.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "type",
+                "controller",
+                "publicKeyJwk"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "`<did>#key-<index>` — matches the credential `kid`."
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "JsonWebKey2020"
+                  ]
+                },
+                "controller": {
+                  "type": "string"
+                },
+                "publicKeyJwk": {
+                  "type": "object",
+                  "description": "The public key as a JWK (EC P-256, `alg: ES256`, `use: sig`). Public material only."
+                }
+              }
+            }
+          },
+          "assertionMethod": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Verification-method ids authorized to assert credentials (current + retired keys)."
+          },
+          "authentication": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "WebhookEventFilter": {
         "type": "string",
         "enum": [
@@ -13516,6 +13818,20 @@
             "example": {
               "error": "Too Many Requests",
               "message": "Rate limit exceeded. Public passport resolutions are limited to 30 requests per minute."
+            }
+          }
+        }
+      },
+      "NotAcceptable": {
+        "description": "The requested representation cannot be produced for this resource. Returned when a Verifiable Credential media type (`application/vc+jwt`, `application/vc+ld+json`, or `application/dc+sd-jwt`) is requested for a passport that has no manufacturing facility with a country of production — a conformant UNTP credential cannot be issued without it. Request the default JSON-LD (or another supported representation) instead.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Not Acceptable",
+              "message": "This passport cannot be represented as a UNTP Verifiable Credential: it has no manufacturing facility with a country of production."
             }
           }
         }
