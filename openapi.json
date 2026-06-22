@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "OpenDPP Integration API",
-    "version": "1.6.0",
+    "version": "1.0.0",
     "summary": "Create, validate, seal and publish EU Digital Product Passports; serialize battery units; manage facilities, access grants and webhooks; resolve and verify passports publicly.",
     "description": "OpenDPP is a B2B platform for EU Digital Product Passports (DPPs), aligned with the ESPR (Regulation (EU) 2024/1781) data requirements and the EU Battery Regulation (Regulation (EU) 2023/1542). This specification documents the **public integration surface**: everything an external system needs to create, validate, seal, publish, resolve and verify passports.\n\n## Authentication\nAuthenticate with a tenant **API key** sent as a Bearer token: `Authorization: Bearer op_dpp_token_…`. Keys are created in the Client Console (Developers → API keys), are shown **once** at creation, carry a role plus optional narrowed permissions and optional expiry, and can be revoked at any time. API-key clients are exempt from CSRF requirements. Public endpoints (tagged **Public Resolution**, plus the public validators and the audit verifier) need no credentials.\n\n## Tenancy\nTenant identity is **token-bound** — it is derived from your API key, never from the request host. The same paths work on the apex host and on tenant workspace hosts (`https://<workspace>.opendpp-node.eu`); when a workspace host is used, it must match the key's tenant (requests across workspaces are rejected with `403`).\n\n## Errors\nAuthenticated endpoints return `{ success: false, error, message }` (some omit `success`). ESPR metadata validation failures return the richer shape documented as **ValidationFailed** with per-field `errors[]`/`warnings[]` (localizable via `?lang=` or `Accept-Language`; 28 languages). Bulk endpoints report row-level problems as `errors: string[]`. Malformed JSON and query-string violations return Fastify's default `{ statusCode, code, error, message }` body.\n\n## Rate limits\nGlobal limit: **100 requests/min per IP** (higher for verified crawlers), with `x-ratelimit-*` response headers. Public passport resolution is additionally limited to **30 requests/min per IP** (no headers). The public validator is limited to **10 requests/min per IP**. Stay under these limits with client-side queueing; on `429`, back off and retry after the indicated window.\n\n## Sealing & verification\nPassport seals are **eIDAS advanced electronic seals** (ECDSA P-256 over a Merkle root of the passport content, optional RFC 3161 timestamp). Anyone can verify a seal — no account required. `POST /api/v1/audit/verify` recomputes every Merkle leaf from the submitted values, so it requires the unredacted document (caller-supplied redacted-leaf hashes are deliberately not trusted). Redacted documents remain verifiable **offline**: masked fields keep their true leaf hashes in `proof.redactedLeaves`, letting any verifier rebuild the sealed root without the privileged values.\n\n## Public access tiers\nPublic resolution endpoints serve **tiered** views of the same URL: the public tier for anonymous callers; a restricted tier for holders of legitimate-interest (`dpp_li_…`) or authority (`dpp_auth_…`) capability tokens (presented as a Bearer token or `?grant=` query parameter); and the owner tier for the issuing tenant's own credentials.\n\n## Webhooks\nSubscribe to passport lifecycle events (`passport.ingested`, `passport.sealed`, `passport.recalled`, or `*`). Deliveries are HMAC-SHA256-signed; see the **webhooks** section of this document for the exact signature scheme, retry schedule, and payloads.\n\nThis document is also served machine-readably at [`/openapi.json`](https://opendpp-node.eu/openapi.json) and [`/openapi.yaml`](https://opendpp-node.eu/openapi.yaml).\n\n## Open interoperability kit\nThe interoperability boundary — the official AAS + UNTP/W3C-VC schemas, live-reproducible samples, an offline conformance validator, and the field mappings — is **open source** at [github.com/OpenDPP/opendpp-interop](https://github.com/OpenDPP/opendpp-interop) (Apache-2.0). It lets any integrator validate and verify OpenDPP's standards-conformant output without access to the product source.",
     "contact": {
@@ -2866,7 +2866,7 @@
                     "value": {
                       "success": false,
                       "error": "Validation Failed",
-                      "message": "Dynamic metadata payload failed ESPR category compliance validation",
+                      "message": "Dynamic metadata payload failed ESPR category schema validation",
                       "errors": [
                         {
                           "path": "tensileStrengthClass",
@@ -3116,7 +3116,7 @@
           "Passports"
         ],
         "summary": "Dry-run ESPR validation of passport metadata (nothing is stored)",
-        "description": "Runs the full ESPR category compliance validation on a metadata payload **without persisting anything** — intended for pre-flight checks in integration pipelines.\n\n**Permission:** `passport:create` (Bearer API key or session JWT + CSRF for cookie sessions). Despite being read-only in effect, it is gated as a write permission, so subscription gating (**402**) applies.\n\n**Rate limit:** global 100 requests/min per IP. **Body limit: 262,144 bytes (256 KiB)** → **413** beyond that.\n\n**Behavioral caveats:**\n- The EPCIS **traceability lineage audit is NOT run** here (it only runs at real ingestion), so a payload can pass this dry-run and still fail `POST /api/v1/passports` on traceability errors.\n- `operatorId` is accepted by the body schema but **ignored** by the handler.\n- The 200 body always carries `errors: []`; `warnings` is **omitted entirely** when there are none (it is not an empty array). The same omission applies to `warnings` on the 400 Validation Failed body.\n- `friendlyMessage` localization via `?lang=` / `Accept-Language` (28 languages, default `en`); category-validity errors (`metadata.category` missing or unknown) carry no `friendlyMessage`.\n- Structural rejections of the request body (e.g. missing `productId`, non-object `metadata`) and malformed JSON return just `{\"error\": \"Bad Request\", \"message\": …}`; the only structurally bad input that reaches the handler is a whitespace-only `productId`, answered with the fuller `Bad Request` body shown below.",
+        "description": "Runs the full ESPR category schema validation on a metadata payload **without persisting anything** — intended for pre-flight checks in integration pipelines.\n\n**Permission:** `passport:create` (Bearer API key or session JWT + CSRF for cookie sessions). Despite being read-only in effect, it is gated as a write permission, so subscription gating (**402**) applies.\n\n**Rate limit:** global 100 requests/min per IP. **Body limit: 262,144 bytes (256 KiB)** → **413** beyond that.\n\n**Behavioral caveats:**\n- The EPCIS **traceability lineage audit is NOT run** here (it only runs at real ingestion), so a payload can pass this dry-run and still fail `POST /api/v1/passports` on traceability errors.\n- `operatorId` is accepted by the body schema but **ignored** by the handler.\n- The 200 body always carries `errors: []`; `warnings` is **omitted entirely** when there are none (it is not an empty array). The same omission applies to `warnings` on the 400 Validation Failed body.\n- `friendlyMessage` localization via `?lang=` / `Accept-Language` (28 languages, default `en`); category-validity errors (`metadata.category` missing or unknown) carry no `friendlyMessage`.\n- Structural rejections of the request body (e.g. missing `productId`, non-object `metadata`) and malformed JSON return just `{\"error\": \"Bad Request\", \"message\": …}`; the only structurally bad input that reaches the handler is a whitespace-only `productId`, answered with the fuller `Bad Request` body shown below.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -3190,7 +3190,7 @@
                 },
                 "example": {
                   "success": true,
-                  "message": "Passport metadata payload is 100% valid and ESPR category compliant",
+                  "message": "Passport metadata payload is valid against the ESPR category data schema",
                   "category": "iron-steel",
                   "errors": []
                 }
@@ -3210,7 +3210,7 @@
                     "value": {
                       "success": false,
                       "error": "Validation Failed",
-                      "message": "Dynamic metadata payload failed ESPR category compliance validation",
+                      "message": "Dynamic metadata payload failed ESPR category schema validation",
                       "category": "iron-steel",
                       "errors": [
                         {
@@ -3375,7 +3375,7 @@
                 },
                 "example": {
                   "success": true,
-                  "message": "Passport metadata payload is 100% valid and ESPR category compliant",
+                  "message": "Passport metadata payload is valid against the ESPR category data schema",
                   "category": "iron-steel",
                   "errors": []
                 }
@@ -3395,7 +3395,7 @@
                     "value": {
                       "success": false,
                       "error": "Validation Failed",
-                      "message": "Dynamic metadata payload failed ESPR category compliance validation",
+                      "message": "Dynamic metadata payload failed ESPR category schema validation",
                       "category": "textiles",
                       "errors": [
                         {
@@ -4747,7 +4747,7 @@
                     "value": {
                       "success": false,
                       "error": "Validation Failed",
-                      "message": "Dynamic metadata payload failed ESPR category compliance validation",
+                      "message": "Dynamic metadata payload failed ESPR category schema validation",
                       "errors": [
                         {
                           "path": "fiberComposition",
@@ -7437,7 +7437,7 @@
           "Traceability & Audit"
         ],
         "summary": "Run heuristic UFLPA/EUDR compliance screening over an event's lineage",
-        "description": "Walks the same upstream lineage DAG as `GET /api/v1/events/{id}/lineage` and screens every node's location data against two heuristic rules:\n\n- **UFLPA** — flags any node whose `bizLocation` starts with `CN-65` (ISO 3166-2 Xinjiang), contains the keyword `XINJIANG` (case-insensitive), or whose `readPoint` contains the coordinate pair `43.8256,87.6168`.\n- **EUDR** — flags any node whose `readPoint` parses as `geo:<lat>,<lng>` (or bare `<lat>,<lng>`) coordinates inside the sample deforestation polygon lat −5.0…−3.0, lng −65.0…−60.0.\n\nThese are geographic screening heuristics evaluated against the data registered on this node — not a legal compliance determination.\n\n**Permission:** `passport:read` (a read permission despite the POST verb — no subscription gating). Cookie-session clients must send the `X-CSRF-Token` header; Bearer clients are exempt. Tenant scoping and the `SUPER_ADMIN` bypass are identical to the lineage endpoint. **No request body is read** — send an empty body (an empty or absent JSON body is accepted).\n\n**Rate limit:** global limiter, 100 requests/min per IP (standard `x-ratelimit-*` headers).\n\nWhen zero violations are found, the response embeds a `TraceabilityComplianceCertificate` object (status `VERIFIED_COMPLIANT`, standards `EUDR-2026` / `UFLPA-2026`); otherwise `certificate` is `null` and `errors` lists each violation as a human-readable string. ANY failure — unknown event id, other-tenant id, or even a circular lineage graph — is reported as the same generic 404 body.",
+        "description": "Walks the same upstream lineage DAG as `GET /api/v1/events/{id}/lineage` and screens every node's location data against two heuristic rules:\n\n- **UFLPA** — flags any node whose `bizLocation` starts with `CN-65` (ISO 3166-2 Xinjiang), contains the keyword `XINJIANG` (case-insensitive), or whose `readPoint` contains the coordinate pair `43.8256,87.6168`.\n- **EUDR** — flags any node whose `readPoint` parses as `geo:<lat>,<lng>` (or bare `<lat>,<lng>`) coordinates inside the sample deforestation polygon lat −5.0…−3.0, lng −65.0…−60.0.\n\nThese are geographic screening heuristics evaluated against the data registered on this node — not a legal compliance determination.\n\n**Permission:** `passport:read` (a read permission despite the POST verb — no subscription gating). Cookie-session clients must send the `X-CSRF-Token` header; Bearer clients are exempt. Tenant scoping and the `SUPER_ADMIN` bypass are identical to the lineage endpoint. **No request body is read** — send an empty body (an empty or absent JSON body is accepted).\n\n**Rate limit:** global limiter, 100 requests/min per IP (standard `x-ratelimit-*` headers).\n\nWhen zero violations are found, the response embeds a `TraceabilityComplianceCertificate` object (status `SCREENED_NO_MATCHES`, screens `OpenDPP-EUDR-heuristic` / `OpenDPP-UFLPA-screen`); otherwise `certificate` is `null` and `errors` lists each violation as a human-readable string. ANY failure — unknown event id, other-tenant id, or even a circular lineage graph — is reported as the same generic 404 body.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -7473,10 +7473,10 @@
                       "certificate": {
                         "type": "TraceabilityComplianceCertificate",
                         "rootEventId": "9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
-                        "status": "VERIFIED_COMPLIANT",
+                        "status": "SCREENED_NO_MATCHES",
                         "regulatoryStandards": [
-                          "EUDR-2026",
-                          "UFLPA-2026"
+                          "OpenDPP-EUDR-heuristic",
+                          "OpenDPP-UFLPA-screen"
                         ]
                       }
                     }
@@ -7487,7 +7487,7 @@
                       "eventId": "9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
                       "compliant": false,
                       "errors": [
-                        "UFLPA Compliance Failure: Event [4c81d2e6-9f0a-4b3c-8d5e-1a2b3c4d5e6f] contains raw materials originating from prohibited Xinjiang region (CN-65 Urumqi)."
+                        "UFLPA screen: Event [4c81d2e6-9f0a-4b3c-8d5e-1a2b3c4d5e6f] location matches the Xinjiang sourcing heuristic (CN-65 Urumqi)."
                       ],
                       "auditedAt": "2026-06-12T09:41:00.000Z",
                       "certificate": null
@@ -11036,7 +11036,7 @@
           },
           "message": {
             "type": "string",
-            "const": "Passport metadata payload is 100% valid and ESPR category compliant"
+            "example": "Passport metadata payload is valid against the ESPR category data schema"
           },
           "category": {
             "type": "string",
@@ -11439,7 +11439,7 @@
           },
           "message": {
             "type": "string",
-            "const": "Dynamic metadata payload failed ESPR category compliance validation"
+            "example": "Dynamic metadata payload failed ESPR category schema validation"
           },
           "errors": {
             "type": "array",
@@ -13024,18 +13024,16 @@
           },
           "status": {
             "type": "string",
-            "const": "VERIFIED_COMPLIANT"
+            "example": "SCREENED_NO_MATCHES",
+            "description": "Screening outcome — informational (e.g. `SCREENED_NO_MATCHES` when no geographic screen matched); NOT a legal compliance verdict."
           },
           "regulatoryStandards": {
             "type": "array",
             "items": {
               "type": "string",
-              "enum": [
-                "EUDR-2026",
-                "UFLPA-2026"
-              ]
+              "example": "OpenDPP-EUDR-heuristic"
             },
-            "description": "Always `[\"EUDR-2026\", \"UFLPA-2026\"]`."
+            "description": "Vendor screening-heuristic identifiers applied (e.g. `OpenDPP-EUDR-heuristic`, `OpenDPP-UFLPA-screen`) — informational, NOT EU regulatory standards."
           }
         }
       },
