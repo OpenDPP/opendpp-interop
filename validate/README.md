@@ -1,24 +1,26 @@
 # `validate/` — offline conformance validator
 
-A tiny, dependency-light CLI with **six modes**: it validates an **AAS Environment** (`aas`), a **UNTP
+A tiny, dependency-light CLI with **seven modes**: it validates an **AAS Environment** (`aas`), a **UNTP
 DigitalProductPassport credential** (`untp`), or a **CIRPASS-2 EU-registry pointer** (`registry`,
 NON-NORMATIVE) against the *same* official / reference JSON Schemas OpenDPP's own CI validates against
 ([`../schemas/`](../schemas/)); classifies IDTA **`semanticId`s** (`semanticids`); checks the passport
-JSON-LD against OpenDPP's NON-NORMATIVE **SHACL** shapes (`shacl`); and verifies an **SD-JWT-VC**
-selective-disclosure presentation (`sdjwt`). Use it to prove your output is conformant **before you
-ship** — without any access to the OpenDPP product source.
+JSON-LD against OpenDPP's NON-NORMATIVE **SHACL** shapes (`shacl`); verifies an **SD-JWT-VC**
+selective-disclosure presentation (`sdjwt`); and validates a **GS1 Digital Link** URI / AI element
+string against GS1's OWN Barcode Syntax Engine (`gs1`, the official `gs1encoder`). Use it to prove your
+output is conformant **before you ship** — without any access to the OpenDPP product source.
 
 ## Use it
 
 ```bash
 cd validate
-npm install                       # ajv + ajv-formats only
+npm install                       # the validator's pinned deps — no OpenDPP code
 
 node validate.mjs aas      ../samples/battery-aas-environment.json
 node validate.mjs untp     ../samples/battery-vc-credential.json
 node validate.mjs registry ../samples/battery-registry-pointer-model.json   # CIRPASS-2 (NON-NORMATIVE)
 node validate.mjs shacl    ../samples/battery-passport.jsonld               # OpenDPP SHACL shapes (NON-NORMATIVE)
 node validate.mjs sdjwt    ../samples/battery-vc.sdjwt                      # SD-JWT-VC: disclosures + ES256 signature
+node validate.mjs gs1      ../samples/gs1-digital-link.txt                 # GS1 Digital Link: grammar + check digits (GS1's engine)
 ```
 
 (`semanticids` has its own section below.)

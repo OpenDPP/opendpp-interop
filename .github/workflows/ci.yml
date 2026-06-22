@@ -33,6 +33,7 @@ jobs:
           node validate/validate.mjs shacl    samples/battery-passport.jsonld
           node validate/validate.mjs sdjwt    samples/battery-vc.sdjwt
           node validate/validate.mjs sdjwt    samples/battery-vc-presented.sdjwt
+          node validate/validate.mjs gs1      samples/gs1-digital-link.txt
       - name: SD-JWT-VC negative control (a forged disclosure MUST be rejected)
         run: |
           set -e
@@ -44,6 +45,11 @@ jobs:
           set -e
           node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('samples/battery-passport.jsonld','utf8'));j.status='BOGUS_STATUS';fs.writeFileSync('/tmp/bad.jsonld',JSON.stringify(j))"
           if node validate/validate.mjs shacl /tmp/bad.jsonld; then echo "ERROR: tampered passport unexpectedly conformed" && exit 1; else echo "ok: SHACL rejected the tampered passport"; fi
+      - name: GS1 negative control (a bad GTIN check digit MUST be rejected)
+        run: |
+          set -e
+          echo 'https://id.gs1.org/01/09501101532006' > /tmp/bad-gs1.txt
+          if node validate/validate.mjs gs1 /tmp/bad-gs1.txt; then echo "ERROR: a bad GTIN check digit unexpectedly conformed" && exit 1; else echo "ok: GS1 engine rejected the bad check digit"; fi
       - name: Classify AAS semanticIds against the IDTA allowlist (identity)
         run: node validate/validate.mjs semanticids samples/battery-aas-environment.json --strict
       - name: Assert classifier behaviour (CarbonFootprint is a published IDTA id)
