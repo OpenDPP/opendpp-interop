@@ -35,6 +35,18 @@ Legend: ✅ Conform · 🟡 Partial · 🗺 Roadmap.
 | BBS+ zero-knowledge selective disclosure | 🗺 Roadmap | deferred — SD-JWT-VC reuses the ES256 trust stack; BBS+ needs a separate BLS12-381 key type. |
 | `did:webvh` (web + verifiable history) | 🗺 Roadmap | deferred — `did:web` + key rotation suffices now. |
 
+## GS1 Digital Link
+
+The identity / addressing layer for both doors. Every Digital Link OpenDPP **emits or accepts**
+(resolution, ingest, and the `POST /api/v1/gs1/decode` endpoint) is parsed by GS1's own
+conformance-tested **Barcode Syntax Engine** (the official `gs1encoder`) — never a hand-rolled regex.
+
+| Capability | Status | How to verify |
+| --- | --- | --- |
+| Conformant Digital Link emission (SKU `/01/{gtin}` · `/8003/{grai}` · unit `/01/{gtin}/21/{serial}`) | ✅ | `node validate/validate.mjs gs1 samples/gs1-digital-link.txt` — GS1's engine accepts the bare-key SKU/GRAI links and the unit link (real physical serial in AI-21). A bad GTIN check digit, an over-long AI-21 serial (> 20 chars), or AI-21 under a GRAI is **rejected** (the kit's CI runs that negative control). Live: the `GET /01/{gtin14}` and `GET /8003/{grai}` resolvers. |
+| Scan-data / element-string decode | ✅ | `POST /api/v1/gs1/decode` decodes AIM-prefixed scan data, bracketed element strings, and Digital Links into structured AIs + the Human-Readable Interpretation + a resolvable link, via GS1's engine. |
+| Human-Readable Interpretation (HRI) labels | ✅ | `GET /api/v1/passports/{id}/qr?hri=1&format=svg` renders the print-grade GS1 label — the QR plus the engine's HRI text beneath it. |
+
 ## CIRPASS-2 reference ecosystem (non-normative)
 
 The EU ESPR Art. 13 registry is a **decentralised pointer index**: it holds a thin pointer per

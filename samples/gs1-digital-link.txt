@@ -1,0 +1,18 @@
+# GS1 Digital Link conformance samples — the canonical forms OpenDPP emits.
+# Validate offline against GS1's own engine:
+#   node validate/validate.mjs gs1 samples/gs1-digital-link.txt
+# Each line below is a GS1 Digital Link URI or a bracketed AI element string; `#` lines are comments.
+
+# SKU / model passport — the BARE GTIN primary key (AI-01). OpenDPP does NOT append AI-21 here:
+# AI-21 is the per-unit serial, and the GTIN check digit is verified by GS1's engine.
+https://id.gs1.org/01/09501101532007
+
+# Serialised battery unit — GTIN (AI-01) + the real physical serial in AI-21 (<= 20 chars).
+https://id.gs1.org/01/09501101532007/21/VM-LFP100-26-1
+
+# The same unit as a bracketed AI element string.
+(01)09501101532007(21)VM-LFP100-26-1
+
+# Returnable-asset passport (GRAI, AI-8003) — the bare key. AI-21 is NOT a valid key-qualifier for a
+# GRAI, so OpenDPP keeps the GRAI's own serial component and never emits /8003/{grai}/21/{serial}.
+https://id.gs1.org/8003/09501101539501RACK01

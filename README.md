@@ -1,7 +1,7 @@
 # OpenDPP Interop Boundary Kit
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Conformance](https://img.shields.io/badge/conformance-AAS%20v3.0%20%2B%20UNTP%20DPP%20v0.7.0-brightgreen.svg)](./CONFORMANCE.md)
+[![Conformance](https://img.shields.io/badge/conformance-AAS%20v3.0%20%2B%20UNTP%20DPP%20v0.7.0%20%2B%20GS1%20Digital%20Link-brightgreen.svg)](./CONFORMANCE.md)
 
 Everything an integrator needs to **consume, conform to, and validate** OpenDPP's two
 interoperability projections — *without access to the product source*: the official schemas,
@@ -24,6 +24,11 @@ The product backend is a separate, private repository — you don't need it to i
 | **AAS / IDTA** | `application/aas+json` + AASX (OPC/ZIP) | `GET /passport/{id}` (or `/01/{gtin14}`) with `Accept: application/aas+json` | IDTA-01001-3-1 **AAS v3.0** |
 | **UNTP + VC** | enveloping **`vc+jwt`** (W3C VC-JOSE-COSE, ES256) — or embedded **`vc+ld+json`** (W3C Data Integrity, `ecdsa-jcs-2019`) | `GET /passport/{id}` (SKU/type) **or** `GET /unit/{id}` (per-unit, item granularity) with `Accept: application/vc+jwt` (or `application/vc+ld+json`); issuer key at `GET /tenants/{tenantId}/did.json`; revocation at `GET /tenants/{tenantId}/status/revocation` | **UNTP DigitalProductPassport v0.7.0**, `did:web`, W3C Bitstring Status List |
 
+Both doors are addressed by **GS1 Digital Links** — a passport resolves at `/01/{gtin}` (SKU/model) or
+`/8003/{grai}`, a serialised unit at `/01/{gtin}/21/{serial}`, and `POST /api/v1/gs1/decode` turns raw
+scan-data / AI element strings into those links. Every link OpenDPP emits is validated against GS1's own
+Barcode Syntax Engine — check it yourself with the `gs1` validator door (below).
+
 The public machine-readable contract for the whole API surface is
 [`openapi.json`](./openapi.json) (also live at <https://opendpp-node.eu/openapi.json>). Conformance
 status of each capability: **[CONFORMANCE.md](./CONFORMANCE.md)**.
@@ -34,7 +39,7 @@ Check an AAS Environment or a UNTP credential **you** produce against the offici
 
 ```bash
 cd validate
-npm install                       # ajv + ajv-formats only — no OpenDPP code
+npm install                       # the validator's pinned deps — no OpenDPP code
 
 node validate.mjs aas         ../samples/battery-aas-environment.json
 node validate.mjs untp        ../samples/battery-vc-credential.json
@@ -42,6 +47,7 @@ node validate.mjs semanticids ../samples/battery-aas-environment.json        # I
 node validate.mjs registry    ../samples/battery-registry-pointer-model.json # CIRPASS-2 EU-registry (NON-NORMATIVE)
 node validate.mjs shacl       ../samples/battery-passport.jsonld             # OpenDPP SHACL shapes (NON-NORMATIVE)
 node validate.mjs sdjwt       ../samples/battery-vc.sdjwt                    # SD-JWT-VC: disclosures + ES256 signature
+node validate.mjs gs1         ../samples/gs1-digital-link.txt               # GS1 Digital Link: grammar + check digits (GS1's engine)
 ```
 
 Exit `0` = conformant · `1` = schema errors (printed) · `2` = usage error. See
@@ -61,8 +67,9 @@ opendpp-interop/
 ├── shapes/                 OpenDPP-authored SHACL shapes (NON-NORMATIVE) for the DPP / battery vertical
 │   └── opendpp-dpp-shapes.ttl
 ├── samples/                validated reference artifacts (a battery via both doors + a textile UNTP credential + the EU-registry pointer + the JSON-LD passport)
-│   └── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
-└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl · sdjwt)
+│   ├── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
+│   └── gs1-digital-link.txt      GS1 Digital Link URIs / AI element strings (validated by the `gs1` door)
+└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl · sdjwt · gs1)
 ```
 
 ## Official schemas (vendored)

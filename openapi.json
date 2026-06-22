@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "OpenDPP Integration API",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "summary": "Create, validate, seal and publish EU Digital Product Passports; serialize battery units; manage facilities, access grants and webhooks; resolve and verify passports publicly.",
     "description": "OpenDPP is a B2B platform for EU Digital Product Passports (DPPs), aligned with the ESPR (Regulation (EU) 2024/1781) data requirements and the EU Battery Regulation (Regulation (EU) 2023/1542). This specification documents the **public integration surface**: everything an external system needs to create, validate, seal, publish, resolve and verify passports.\n\n## Authentication\nAuthenticate with a tenant **API key** sent as a Bearer token: `Authorization: Bearer op_dpp_token_…`. Keys are created in the Client Console (Developers → API keys), are shown **once** at creation, carry a role plus optional narrowed permissions and optional expiry, and can be revoked at any time. API-key clients are exempt from CSRF requirements. Public endpoints (tagged **Public Resolution**, plus the public validators and the audit verifier) need no credentials.\n\n## Tenancy\nTenant identity is **token-bound** — it is derived from your API key, never from the request host. The same paths work on the apex host and on tenant workspace hosts (`https://<workspace>.opendpp-node.eu`); when a workspace host is used, it must match the key's tenant (requests across workspaces are rejected with `403`).\n\n## Errors\nAuthenticated endpoints return `{ success: false, error, message }` (some omit `success`). ESPR metadata validation failures return the richer shape documented as **ValidationFailed** with per-field `errors[]`/`warnings[]` (localizable via `?lang=` or `Accept-Language`; 28 languages). Bulk endpoints report row-level problems as `errors: string[]`. Malformed JSON and query-string violations return Fastify's default `{ statusCode, code, error, message }` body.\n\n## Rate limits\nGlobal limit: **100 requests/min per IP** (higher for verified crawlers), with `x-ratelimit-*` response headers. Public passport resolution is additionally limited to **30 requests/min per IP** (no headers). The public validator is limited to **10 requests/min per IP**. Stay under these limits with client-side queueing; on `429`, back off and retry after the indicated window.\n\n## Sealing & verification\nPassport seals are **eIDAS advanced electronic seals** (ECDSA P-256 over a Merkle root of the passport content, optional RFC 3161 timestamp). Anyone can verify a seal — no account required. `POST /api/v1/audit/verify` recomputes every Merkle leaf from the submitted values, so it requires the unredacted document (caller-supplied redacted-leaf hashes are deliberately not trusted). Redacted documents remain verifiable **offline**: masked fields keep their true leaf hashes in `proof.redactedLeaves`, letting any verifier rebuild the sealed root without the privileged values.\n\n## Public access tiers\nPublic resolution endpoints serve **tiered** views of the same URL: the public tier for anonymous callers; a restricted tier for holders of legitimate-interest (`dpp_li_…`) or authority (`dpp_auth_…`) capability tokens (presented as a Bearer token or `?grant=` query parameter); and the owner tier for the issuing tenant's own credentials.\n\n## Webhooks\nSubscribe to passport lifecycle events (`passport.ingested`, `passport.sealed`, `passport.recalled`, or `*`). Deliveries are HMAC-SHA256-signed; see the **webhooks** section of this document for the exact signature scheme, retry schedule, and payloads.\n\nThis document is also served machine-readably at [`/openapi.json`](https://opendpp-node.eu/openapi.json) and [`/openapi.yaml`](https://opendpp-node.eu/openapi.yaml).\n\n## Open interoperability kit\nThe interoperability boundary — the official AAS + UNTP/W3C-VC schemas, live-reproducible samples, an offline conformance validator, and the field mappings — is **open source** at [github.com/OpenDPP/opendpp-interop](https://github.com/OpenDPP/opendpp-interop) (Apache-2.0). It lets any integrator validate and verify OpenDPP's standards-conformant output without access to the product source.",
     "contact": {
@@ -189,7 +189,7 @@
           "Battery Units"
         ],
         "summary": "Serialise individual battery units under a passport (bulk, up to 200)",
-        "description": "Creates one or many **individual physical battery units** (Battery Reg. (EU) 2023/1542 Art. 77(2)) under a SKU/type-level passport. Send either a single unit object or `{\"units\": [...]}` with **at most 200 items** (if `units` is present and an array it is used; otherwise the whole body is treated as one unit).\n\n**Permission:** `battery:write`. Bearer API key (`op_dpp_token_…`) or session JWT; cookie-session clients must send `X-CSRF-Token`. Operator-scoped credentials may only serialise under passports of their own Economic Operator (403). Write operations pass subscription gating (402) and optional tenant MFA enforcement (403).\n\n**Per-item validation (collected as plain-string errors, not a rejection of the whole batch):** `serialNumber` is trimmed then must match `^[A-Za-z0-9._-]{1,64}$` (GS1 AI-21 recommends ≤ 20 chars); `status` must be a valid unit status; `manufacturedAt` must be Date-parseable; duplicate `(passport, serialNumber)` pairs are skipped with *\"A unit with this serial already exists for this passport\"*. Each created unit gets a per-unit GS1 Digital Link URI `/{01|8003}/{productId}/21/{serialNumber}` carrying the **real physical serial** in AI-21.\n\n**Predecessor linkage (Art. 77(7) repurpose/remanufacture):** `predecessorUnitId` must reference an existing unit **in your tenant** (any passport). A recycled predecessor (`ceasedAt` set) is refused — its passport has ceased to exist (Art. 77(8)). (The check keys on `ceasedAt`, which only the events-route `RECYCLED` transition stamps — a unit merely *created* with status `RECYCLED` has no `ceasedAt` and is still accepted as a predecessor.) In one transaction the new unit is created, an append-only `STATUS_CHANGE` event (`{status, successorUnitId, successorSerial}` payload) is written to the predecessor, and the predecessor's status is set to `predecessorStatus` (default `REPURPOSED`; only `REPURPOSED|REMANUFACTURED|REUSED` allowed).\n\n**Partial success:** the response is **201 when at least one unit was created**; skipped items are listed in `errors`. If *every* item failed you get **400 `Serialisation Failed`** with the same string array. A `batteryunit.created` audit event and a tenant notification are emitted on success.\n\n**Rate limits:** global limiter only — 100 req/min per IP (`x-ratelimit-*` headers).",
+        "description": "Creates one or many **individual physical battery units** (Battery Reg. (EU) 2023/1542 Art. 77(2)) under a SKU/type-level passport. Send either a single unit object or `{\"units\": [...]}` with **at most 200 items** (if `units` is present and an array it is used; otherwise the whole body is treated as one unit).\n\n**Permission:** `battery:write`. Bearer API key (`op_dpp_token_…`) or session JWT; cookie-session clients must send `X-CSRF-Token`. Operator-scoped credentials may only serialise under passports of their own Economic Operator (403). Write operations pass subscription gating (402) and optional tenant MFA enforcement (403).\n\n**Per-item validation (collected as plain-string errors, not a rejection of the whole batch):** `serialNumber` is trimmed then must match `^[A-Za-z0-9._-]{1,20}$` (GS1 AI-21 recommends ≤ 20 chars); `status` must be a valid unit status; `manufacturedAt` must be Date-parseable; duplicate `(passport, serialNumber)` pairs are skipped with *\"A unit with this serial already exists for this passport\"*. Each created unit gets a per-unit GS1 Digital Link URI `/{01|8003}/{productId}/21/{serialNumber}` carrying the **real physical serial** in AI-21.\n\n**Predecessor linkage (Art. 77(7) repurpose/remanufacture):** `predecessorUnitId` must reference an existing unit **in your tenant** (any passport). A recycled predecessor (`ceasedAt` set) is refused — its passport has ceased to exist (Art. 77(8)). (The check keys on `ceasedAt`, which only the events-route `RECYCLED` transition stamps — a unit merely *created* with status `RECYCLED` has no `ceasedAt` and is still accepted as a predecessor.) In one transaction the new unit is created, an append-only `STATUS_CHANGE` event (`{status, successorUnitId, successorSerial}` payload) is written to the predecessor, and the predecessor's status is set to `predecessorStatus` (default `REPURPOSED`; only `REPURPOSED|REMANUFACTURED|REUSED` allowed).\n\n**Partial success:** the response is **201 when at least one unit was created**; skipped items are listed in `errors`. If *every* item failed you get **400 `Serialisation Failed`** with the same string array. A `batteryunit.created` audit event and a tenant notification are emitted on success.\n\n**Rate limits:** global limiter only — 100 req/min per IP (`x-ratelimit-*` headers).",
         "security": [
           {
             "ApiKeyAuth": []
@@ -295,7 +295,7 @@
                       "success": false,
                       "error": "Serialisation Failed",
                       "errors": [
-                        "Invalid serialNumber \"bad serial!\": must be 1-64 URL-safe characters ([A-Za-z0-9._-])",
+                        "Invalid serialNumber \"bad serial!\": must be 1-20 URL-safe characters ([A-Za-z0-9._-]) — GS1 AI-21's maximum length is 20",
                         "[BATT-2026-000451] A unit with this serial already exists for this passport"
                       ]
                     }
@@ -499,10 +499,10 @@
                       }
                     ],
                     "@type": "DigitalProductPassport",
-                    "@id": "https://opendpp-node.eu/01/09501101530003/21/4c8e1d2a-6b3f-4a9e-8d57-0f1e2a3b4c5d",
+                    "@id": "https://opendpp-node.eu/01/09501101530003",
                     "id": "4c8e1d2a-6b3f-4a9e-8d57-0f1e2a3b4c5d",
                     "productId": "09501101530003",
-                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/4c8e1d2a-6b3f-4a9e-8d57-0f1e2a3b4c5d",
+                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                     "digitalSeal": null,
                     "signingPublicKey": null,
                     "status": "ACTIVE",
@@ -2620,7 +2620,7 @@
           "Passports"
         ],
         "summary": "Create (ingest) a Digital Product Passport",
-        "description": "Creates a SKU/type-level Digital Product Passport.\n\n**Permission:** `passport:create` (Bearer `op_dpp_token_…` API key or session JWT; cookie sessions must also send the `X-CSRF-Token` double-submit header). Write operations are subject to subscription gating (**402**) and, where the workspace enforces it, MFA (**403**).\n\n**Rate limit:** global 100 requests/min per IP (`x-ratelimit-*` headers). **Body limit: 1 MiB (1,048,576 bytes)** → **413** beyond that.\n\n**Validation.** Unless `draft: true`, `metadata` is validated against the ESPR category rules for `metadata.category` plus cross-field rules (e.g. `materialComposition` percentages must sum to 100 ±0.1, `originCountry` must be a real ISO 3166-1 alpha-2 code), and the product's EPCIS traceability lineage is audited. For five categories (textiles, batteries, electronics, chemicals, construction) the authoritative per-category JSON Schema is served live at `GET /api/v1/schemas/{category}`; the other four (cosmetics, toys, iron-steel, aluminium) are validated by built-in server-side rules and `GET /api/v1/schemas/{category}` returns **404** for them. Failure returns the **400 Validation Failed** body with per-field `errors[]` (plus `warnings[]` when any exist — the key is omitted entirely when there are none). A passing payload may still produce non-blocking `warnings[]`, echoed in the 201. `friendlyMessage` texts are localized via `?lang=` or `Accept-Language` (default `en`); category-validity errors (`metadata.category` missing or unknown) carry no `friendlyMessage`.\n\n**Drafts.** `draft: true` skips ALL validation, stores the passport with `status: \"DRAFT\"` (not publicly resolvable), returns `message: \"Draft passport saved\"` with `warnings: []`, and does **not** emit a webhook.\n\n**Identifier handling.** `productId` may be a GTIN-14 (14 digits, GS1 mod-10 check digit), a GRAI (14-digit numeric asset id + up to 16 alphanumeric serial chars), or a free-form SKU. A valid GTIN-14 is auto-copied into `metadata.gtin` (a GRAI into `metadata.grai`) before storage. The server mints a UUID passport id and a GS1 Digital Link URI `https://opendpp-node.eu/{01|8003}/{productId}/21/{passportId}`.\n\n**Operator binding.** With `operatorId` omitted, the passport is attributed to the first economic operator bound to your workspace; if no operator is bound at all the request fails **400** (the API never fabricates an operator identity — register one via `POST /api/v1/operators`). An `operatorId` not bound to your workspace → **403**. Operator-scoped API keys force their own operator and **403** on mismatch. The `(productId, operatorId)` pair is unique → **409** on duplicates. An optional `facilityId` must reference a Facility in your workspace (**400** otherwise).\n\n**Webhook:** non-draft creation transactionally enqueues a `passport.ingested` event whose payload is the public redacted JSON-LD passport document (same masking as the 201 `passport` field). Drafts emit nothing.\n\n**Response caveats:** the 201 `passport` field is the **public, redacted** JSON-LD representation — even for the creator. The owner-only metadata key `facilityDetails` is replaced with the literal placeholder `\"[REDACTED - Privileged Access Required]\"` (it appears as the placeholder even when you did not supply it), and for `category: \"batteries\"` the restricted legitimate-interest keys `detailedPerformance`, `lifecycleAndInUse` and `circularityAndDisassembly` (Battery Reg. Annex XIII parts 2-4) are masked the same way when present. `enrichment` is stored outside the validated metadata and Merkle seal and never appears in the JSON-LD document. Only `success`, `message`, `passport`, and `warnings` are emitted at the top level of the 201 body.\n\n**Other 400 bodies:** non-validation failures (whitespace-only `productId`, no bound operator, unknown `facilityId`) reuse status 400 with the plain `{\"success\": false, \"error\": \"Bad Request\", \"message\": …}` triple and **no** `errors`/`warnings` arrays. Requests rejected before the handler runs — request-body schema violations (e.g. missing `productId`) and malformed JSON — come back as just `{\"error\": \"Bad Request\", \"message\": …}`.",
+        "description": "Creates a SKU/type-level Digital Product Passport.\n\n**Permission:** `passport:create` (Bearer `op_dpp_token_…` API key or session JWT; cookie sessions must also send the `X-CSRF-Token` double-submit header). Write operations are subject to subscription gating (**402**) and, where the workspace enforces it, MFA (**403**).\n\n**Rate limit:** global 100 requests/min per IP (`x-ratelimit-*` headers). **Body limit: 1 MiB (1,048,576 bytes)** → **413** beyond that.\n\n**Validation.** Unless `draft: true`, `metadata` is validated against the ESPR category rules for `metadata.category` plus cross-field rules (e.g. `materialComposition` percentages must sum to 100 ±0.1, `originCountry` must be a real ISO 3166-1 alpha-2 code), and the product's EPCIS traceability lineage is audited. For five categories (textiles, batteries, electronics, chemicals, construction) the authoritative per-category JSON Schema is served live at `GET /api/v1/schemas/{category}`; the other four (cosmetics, toys, iron-steel, aluminium) are validated by built-in server-side rules and `GET /api/v1/schemas/{category}` returns **404** for them. Failure returns the **400 Validation Failed** body with per-field `errors[]` (plus `warnings[]` when any exist — the key is omitted entirely when there are none). A passing payload may still produce non-blocking `warnings[]`, echoed in the 201. `friendlyMessage` texts are localized via `?lang=` or `Accept-Language` (default `en`); category-validity errors (`metadata.category` missing or unknown) carry no `friendlyMessage`.\n\n**Drafts.** `draft: true` skips ALL validation, stores the passport with `status: \"DRAFT\"` (not publicly resolvable), returns `message: \"Draft passport saved\"` with `warnings: []`, and does **not** emit a webhook.\n\n**Identifier handling.** `productId` may be a GTIN-14 (14 digits, GS1 mod-10 check digit), a GRAI (14-digit numeric asset id + up to 16 alphanumeric serial chars), or a free-form SKU. A valid GTIN-14 is auto-copied into `metadata.gtin` (a GRAI into `metadata.grai`) before storage. The server mints a UUID passport id and a GS1 Digital Link URI `https://opendpp-node.eu/{01|8003}/{productId}`.\n\n**Operator binding.** With `operatorId` omitted, the passport is attributed to the first economic operator bound to your workspace; if no operator is bound at all the request fails **400** (the API never fabricates an operator identity — register one via `POST /api/v1/operators`). An `operatorId` not bound to your workspace → **403**. Operator-scoped API keys force their own operator and **403** on mismatch. The `(productId, operatorId)` pair is unique → **409** on duplicates. An optional `facilityId` must reference a Facility in your workspace (**400** otherwise).\n\n**Webhook:** non-draft creation transactionally enqueues a `passport.ingested` event whose payload is the public redacted JSON-LD passport document (same masking as the 201 `passport` field). Drafts emit nothing.\n\n**Response caveats:** the 201 `passport` field is the **public, redacted** JSON-LD representation — even for the creator. The owner-only metadata key `facilityDetails` is replaced with the literal placeholder `\"[REDACTED - Privileged Access Required]\"` (it appears as the placeholder even when you did not supply it), and for `category: \"batteries\"` the restricted legitimate-interest keys `detailedPerformance`, `lifecycleAndInUse` and `circularityAndDisassembly` (Battery Reg. Annex XIII parts 2-4) are masked the same way when present. `enrichment` is stored outside the validated metadata and Merkle seal and never appears in the JSON-LD document. Only `success`, `message`, `passport`, and `warnings` are emitted at the top level of the 201 body.\n\n**Other 400 bodies:** non-validation failures (whitespace-only `productId`, no bound operator, unknown `facilityId`) reuse status 400 with the plain `{\"success\": false, \"error\": \"Bad Request\", \"message\": …}` triple and **no** `errors`/`warnings` arrays. Requests rejected before the handler runs — request-body schema violations (e.g. missing `productId`) and malformed JSON — come back as just `{\"error\": \"Bad Request\", \"message\": …}`.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -2730,10 +2730,10 @@
                       }
                     ],
                     "@type": "DigitalProductPassport",
-                    "@id": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-1c7d-4a0e-9d3b-5f6a7c8e9012",
+                    "@id": "https://opendpp-node.eu/01/09501101530003",
                     "id": "9b2fa884-1c7d-4a0e-9d3b-5f6a7c8e9012",
                     "productId": "09501101530003",
-                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-1c7d-4a0e-9d3b-5f6a7c8e9012",
+                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                     "digitalSeal": null,
                     "signingPublicKey": null,
                     "status": "ACTIVE",
@@ -3022,10 +3022,10 @@
                         {}
                       ],
                       "@type": "DigitalProductPassport",
-                      "@id": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                      "@id": "https://opendpp-node.eu/01/09501101530003",
                       "id": "9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
                       "productId": "09501101530003",
-                      "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                      "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                       "digitalSeal": null,
                       "signingPublicKey": null,
                       "status": "ACTIVE",
@@ -3649,7 +3649,7 @@
                   "results": [
                     {
                       "productId": "09501101530003",
-                      "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-1c7d-4a0e-9d3b-5f6a7c8e9012"
+                      "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003"
                     }
                   ],
                   "errors": [
@@ -4083,10 +4083,10 @@
                     }
                   ],
                   "@type": "DigitalProductPassport",
-                  "@id": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                  "@id": "https://opendpp-node.eu/01/09501101530003",
                   "id": "9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
                   "productId": "09501101530003",
-                  "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                  "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                   "digitalSeal": null,
                   "signingPublicKey": null,
                   "status": "ACTIVE",
@@ -4613,10 +4613,10 @@
                       }
                     ],
                     "@type": "DigitalProductPassport",
-                    "@id": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                    "@id": "https://opendpp-node.eu/01/09501101530003",
                     "id": "9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
                     "productId": "09501101530003",
-                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                     "digitalSeal": null,
                     "signingPublicKey": null,
                     "status": "ACTIVE",
@@ -4964,10 +4964,10 @@
                       }
                     ],
                     "@type": "DigitalProductPassport",
-                    "@id": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                    "@id": "https://opendpp-node.eu/01/09501101530003",
                     "id": "9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
                     "productId": "09501101530003",
-                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                     "digitalSeal": "MEUCIQDOJ9uZ9b1H0u4G7m2X8nF3kqL5wTzVbY1c2d3e4f5g6AIgKxN8mPqRsTuVwXyZ0a1b2c3d4e5f6g7h8i9j0kAbCdE=",
                     "signingPublicKey": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1u2v3w4x5y6z7A8B9C0D1E2F3G4H\n5I6J7K8L9M0N1O2P3Q4R5S6T7U8V9W0X1Y2Z3a4b5c6d7e8f9g0h1i2j3k4l5m6n\n-----END PUBLIC KEY-----\n",
                     "status": "ACTIVE",
@@ -5131,10 +5131,10 @@
                       }
                     ],
                     "@type": "DigitalProductPassport",
-                    "@id": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                    "@id": "https://opendpp-node.eu/01/09501101530003",
                     "id": "9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
                     "productId": "09501101530003",
-                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                     "digitalSeal": null,
                     "signingPublicKey": null,
                     "status": "DECOMMISSIONED",
@@ -5339,10 +5339,10 @@
                     }
                   ],
                   "@type": "DigitalProductPassport",
-                  "@id": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
+                  "@id": "https://opendpp-node.eu/01/09501101530003",
                   "id": "9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
                   "productId": "09501101530003",
-                  "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
+                  "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                   "digitalSeal": "MEUCIQDl0n7K0wG7B1k9p2v4S0cQ9X4j8M5n6P7q8R9s0T1uAIgK2L3m4N5o6P7q8R9s0T1u2V3w4X5y6Z7a8B9c0D1e2F4=",
                   "signingPublicKey": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7sB3kFq2nXp9wLm4Rv8tYc1dZh6j\nKe0aGu5iSx3oNl2bPw9rT7vCmD4fHg8qWy1zEjU6kA0sIxLpO5tMnBvR3Q==\n-----END PUBLIC KEY-----\n",
                   "status": "ACTIVE",
@@ -5600,10 +5600,10 @@
                     }
                   ],
                   "@type": "DigitalProductPassport",
-                  "@id": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
+                  "@id": "https://opendpp-node.eu/01/09501101530003",
                   "id": "9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
                   "productId": "09501101530003",
-                  "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
+                  "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                   "digitalSeal": null,
                   "signingPublicKey": null,
                   "status": "ACTIVE",
@@ -5815,7 +5815,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "GS1 AI-21 serial. For serialised battery units this is the unit's physical serial (units are created matching `^[A-Za-z0-9._-]{1,64}$`); the legacy fallback also matches a passport UUID or the passport's `metadata.serialNumber` / `metadata[\"21\"]` value. Percent-encode reserved characters; the segment is URL-decoded before matching."
+            "description": "GS1 AI-21 serial. For serialised battery units this is the unit's physical serial (units are created matching `^[A-Za-z0-9._-]{1,20}$`); the legacy fallback also matches a passport UUID or the passport's `metadata.serialNumber` / `metadata[\"21\"]` value. Percent-encode reserved characters; the segment is URL-decoded before matching."
           },
           {
             "name": "grant",
@@ -6240,10 +6240,10 @@
                       }
                     ],
                     "@type": "DigitalProductPassport",
-                    "@id": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
+                    "@id": "https://opendpp-node.eu/01/09501101530003",
                     "id": "9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
                     "productId": "09501101530003",
-                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003/21/9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
+                    "digitalLinkUri": "https://opendpp-node.eu/01/09501101530003",
                     "digitalSeal": null,
                     "signingPublicKey": null,
                     "status": "ACTIVE",
@@ -6822,6 +6822,182 @@
         }
       }
     },
+    "/api/v1/gs1/decode": {
+      "post": {
+        "operationId": "decodeGs1",
+        "tags": [
+          "Public Resolution"
+        ],
+        "summary": "Decode GS1 scan data / element string / Digital Link into structured AIs + HRI",
+        "description": "Decodes raw scanner output — AIM-symbology-prefixed **scan data** (e.g. `]Q1https://id.gs1.org/01/09501101532007/21/VM-1`, `]C1010950…`), a bracketed GS1 **element string** (`(01)09501101532007(21)VM-1`), or a **Digital Link** URI — into its structured Application Identifiers, the Human-Readable Interpretation (HRI), and a Digital Link that resolves on this node. Parsing is performed by GS1's authoritative Barcode Syntax Engine (vendored WASM), so check digits and the AI grammar are validated, not approximated.\n\n**Public + stateless** — no permission and no tenant data is touched; it complements the public resolver. Supply **exactly one** of `scanData`, `elementString`, `digitalLink`; zero or more than one returns 400. After decoding, `GET` the returned `digitalLinkUri` (the canonical path rehosted on this node) to resolve the passport/unit.\n\n**Errors:** missing/multiple/over-long input, or a value GS1's grammar rejects, returns **400** (`Provide exactly one of: scanData, elementString, digitalLink` or `Not a valid GS1 <kind>: <engine message>`); **503** if the engine is unavailable.\n\n**Rate limit:** global limiter only — 100 req/min/IP (standard `x-ratelimit-*` headers).",
+        "security": [
+          {}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Provide exactly one of the three input forms.",
+                "properties": {
+                  "scanData": {
+                    "type": "string",
+                    "maxLength": 4096,
+                    "description": "Raw scanner output including its AIM symbology identifier prefix (e.g. `]Q1…` QR, `]d2…` DataMatrix, `]C1…` GS1-128)."
+                  },
+                  "elementString": {
+                    "type": "string",
+                    "maxLength": 4096,
+                    "description": "Bracketed GS1 AI element string, e.g. `(01)09501101532007(21)VM-1`."
+                  },
+                  "digitalLink": {
+                    "type": "string",
+                    "maxLength": 4096,
+                    "description": "A GS1 Digital Link URI (http/https)."
+                  }
+                },
+                "additionalProperties": false
+              },
+              "examples": {
+                "scanData": {
+                  "summary": "Scanner output (QR, AIM prefix ]Q1)",
+                  "value": {
+                    "scanData": "]Q1https://id.gs1.org/01/09501101532007/21/VM-LFP100-26-1"
+                  }
+                },
+                "elementString": {
+                  "summary": "Bracketed element string",
+                  "value": {
+                    "elementString": "(01)09501101532007(21)VM-LFP100-26-1"
+                  }
+                },
+                "digitalLink": {
+                  "summary": "Digital Link URI",
+                  "value": {
+                    "digitalLink": "https://id.gs1.org/01/09501101532007"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decoded GS1 data. `canonicalUpi` is the host-independent identity (`https://id.gs1.org/…`); `digitalLinkUri` is that same path rehosted on this node's resolver host (GET it to resolve). `elementString`/`canonicalUpi`/`digitalLinkUri` are null and `ai` is empty when the input is syntactically valid GS1 but carries no AI data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "input",
+                    "elementString",
+                    "hri",
+                    "canonicalUpi",
+                    "digitalLinkUri",
+                    "ai"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "input": {
+                      "type": "string",
+                      "description": "Which input form was decoded: `scanData`, `elementString` or `digitalLink`."
+                    },
+                    "elementString": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Bracketed AI element string, e.g. `(01)09501101532007(21)VM-1`."
+                    },
+                    "hri": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Human-Readable Interpretation lines, e.g. `[\"(01) 09501101532007\", \"(21) VM-1\"]`."
+                    },
+                    "canonicalUpi": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Host-independent canonical Digital Link (`https://id.gs1.org/…`)."
+                    },
+                    "digitalLinkUri": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "The canonical path rehosted on this node's resolver host — GET it to resolve."
+                    },
+                    "ai": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "Application Identifier → value map, e.g. `{\"01\": \"09501101532007\", \"21\": \"VM-1\"}`."
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "example": {
+                  "success": true,
+                  "input": "scanData",
+                  "elementString": "(01)09501101532007(21)VM-LFP100-26-1",
+                  "hri": [
+                    "(01) 09501101532007",
+                    "(21) VM-LFP100-26-1"
+                  ],
+                  "canonicalUpi": "https://id.gs1.org/01/09501101532007/21/VM-LFP100-26-1",
+                  "digitalLinkUri": "https://opendpp-node.eu/01/09501101532007/21/VM-LFP100-26-1",
+                  "ai": {
+                    "21": "VM-LFP100-26-1",
+                    "01": "09501101532007"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing/multiple inputs, over-long input, or a value GS1's grammar rejects. Messages: `Provide exactly one of: scanData, elementString, digitalLink`, `Input exceeds 4096 characters`, `Not a valid GS1 <kind>: <engine message>`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Bad Request",
+                  "message": "Not a valid GS1 digitalLink: AI (01) value is too short"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "description": "The GS1 Syntax Engine (WASM) could not be loaded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Service Unavailable",
+                  "message": "GS1 Syntax Engine is unavailable"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/passports/{id}/qr": {
       "get": {
         "operationId": "getPassportQrCode",
@@ -6829,7 +7005,7 @@
           "QR Codes"
         ],
         "summary": "Export a print-grade GS1 Digital Link QR code for a passport",
-        "description": "Renders the passport's GS1 Digital Link URI (its `digitalLinkUri`, e.g. `https://opendpp-node.eu/01/09501101530003/21/{passportUuid}`) as a print-grade QR code and returns it as a binary file download. The printed carrier resolves through the public GS1 gateway.\n\n**Permission:** `passport:read` (read-only — subscription status is **not** checked on `:read` permissions, so this endpoint never returns 402). Works with a Bearer API key, a Bearer JWT, or the `opendpp_session` cookie — plain same-origin `<a href>` downloads are supported for browser sessions.\n\n**Identifier resolution:** `{id}` is matched first against the passport UUID, then against the caller-supplied `productId` (GTIN-14/GRAI/SKU), always scoped to your tenant. Credentials scoped to an Economic Operator receive **403** (`Your access is restricted to Economic Operator: <operatorId>`) when the passport belongs to a different operator.\n\n**QR rendering:** 4-module quiet zone (GS1 guidance); error-correction level per `ecl` (default `Q`, the GS1 recommendation for product labels); `size` is **clamped** to 128–2048 px — out-of-range values are clamped to the nearest bound, not rejected, and fractional values are truncated. The response carries `Content-Disposition: attachment; filename=\"qr-<productId>.png\"` (or `.svg`); the filename base is the passport's `productId` with characters outside `[A-Za-z0-9._-]` replaced by `_`, truncated to 80 characters.\n\n**Errors:** an invalid query option returns **400** with one of these exact messages: `format must be png or svg`, `size must be a number`, `ecl must be M, Q or H`. An unknown passport returns **404** with message `Passport <id> not found under your Tenant workspace`.\n\n**Rate limit:** global limiter only — 100 requests/min/IP (standard `x-ratelimit-*` headers).",
+        "description": "Renders the passport's GS1 Digital Link URI (its `digitalLinkUri`, e.g. `https://opendpp-node.eu/01/09501101530003`) as a print-grade QR code and returns it as a binary file download. The printed carrier resolves through the public GS1 gateway.\n\n**Permission:** `passport:read` (read-only — subscription status is **not** checked on `:read` permissions, so this endpoint never returns 402). Works with a Bearer API key, a Bearer JWT, or the `opendpp_session` cookie — plain same-origin `<a href>` downloads are supported for browser sessions.\n\n**Identifier resolution:** `{id}` is matched first against the passport UUID, then against the caller-supplied `productId` (GTIN-14/GRAI/SKU), always scoped to your tenant. Credentials scoped to an Economic Operator receive **403** (`Your access is restricted to Economic Operator: <operatorId>`) when the passport belongs to a different operator.\n\n**QR rendering:** 4-module quiet zone (GS1 guidance); error-correction level per `ecl` (default `Q`, the GS1 recommendation for product labels); `size` is **clamped** to 128–2048 px — out-of-range values are clamped to the nearest bound, not rejected, and fractional values are truncated. The response carries `Content-Disposition: attachment; filename=\"qr-<productId>.png\"` (or `.svg`); the filename base is the passport's `productId` with characters outside `[A-Za-z0-9._-]` replaced by `_`, truncated to 80 characters.\n\n**Errors:** an invalid query option returns **400** with one of these exact messages: `format must be png or svg`, `size must be a number`, `ecl must be M, Q or H`. An unknown passport returns **404** with message `Passport <id> not found under your Tenant workspace`.\n\n**Rate limit:** global limiter only — 100 requests/min/IP (standard `x-ratelimit-*` headers).",
         "security": [
           {
             "ApiKeyAuth": []
@@ -6895,6 +7071,16 @@
               ],
               "default": "Q"
             }
+          },
+          {
+            "name": "hri",
+            "in": "query",
+            "required": false,
+            "description": "When `1`/`true`, renders the GS1 Human-Readable Interpretation (the bracketed AI string, e.g. `(01) 09501101530003 (21) BAT-2026-000123`) as vector text beneath the QR symbol — the print-grade GS1 label form (machine-readable QR + the human-readable AI string). Requires `format=svg`; combining it with `format=png` returns 400 (`hri (Human-Readable Interpretation) labels require format=svg`).",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -6919,7 +7105,7 @@
             }
           },
           "400": {
-            "description": "Invalid query option. Exact messages: `format must be png or svg`, `size must be a number`, `ecl must be M, Q or H`.",
+            "description": "Invalid query option. Exact messages: `format must be png or svg`, `size must be a number`, `ecl must be M, Q or H`, `hri (Human-Readable Interpretation) labels require format=svg`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7015,6 +7201,16 @@
               ],
               "default": "Q"
             }
+          },
+          {
+            "name": "hri",
+            "in": "query",
+            "required": false,
+            "description": "When `1`/`true`, renders the GS1 Human-Readable Interpretation (the bracketed AI string, e.g. `(01) 09501101530003 (21) BAT-2026-000123`) as vector text beneath the QR symbol — the print-grade GS1 label form (machine-readable QR + the human-readable AI string). Requires `format=svg`; combining it with `format=png` returns 400 (`hri (Human-Readable Interpretation) labels require format=svg`).",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -7039,7 +7235,7 @@
             }
           },
           "400": {
-            "description": "Invalid query option. Exact messages: `format must be png or svg`, `size must be a number`, `ecl must be M, Q or H`.",
+            "description": "Invalid query option. Exact messages: `format must be png or svg`, `size must be a number`, `ecl must be M, Q or H`, `hri (Human-Readable Interpretation) labels require format=svg`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9356,8 +9552,8 @@
           },
           "serialNumber": {
             "type": "string",
-            "pattern": "^[A-Za-z0-9._-]{1,64}$",
-            "description": "The battery's real physical serial number (GS1 AI-21 value). 1–64 URL-safe characters; GS1 recommends ≤ 20."
+            "pattern": "^[A-Za-z0-9._-]{1,20}$",
+            "description": "The battery's real physical serial number (GS1 AI-21 value). 1–20 URL-safe characters; GS1 recommends ≤ 20."
           },
           "digitalLinkUri": {
             "type": "string",
@@ -9509,8 +9705,8 @@
         "properties": {
           "serialNumber": {
             "type": "string",
-            "pattern": "^[A-Za-z0-9._-]{1,64}$",
-            "description": "Required. The battery's real physical serial (GS1 AI-21). Trimmed, then must match `^[A-Za-z0-9._-]{1,64}$`. Must be unique within the passport (duplicates are skipped with an item error)."
+            "pattern": "^[A-Za-z0-9._-]{1,20}$",
+            "description": "Required. The battery's real physical serial (GS1 AI-21). Trimmed, then must match `^[A-Za-z0-9._-]{1,20}$` (GS1 AI-21's 20-character maximum) — a longer serial is rejected at ingest with a per-item error. Must be unique within the passport (duplicates are skipped with an item error)."
           },
           "manufacturedAt": {
             "type": [
@@ -9769,7 +9965,7 @@
           },
           "serialNumber": {
             "type": "string",
-            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
           },
           "digitalLinkUri": {
             "type": "string",
@@ -11177,7 +11373,7 @@
                 "digitalLinkUri": {
                   "type": "string",
                   "format": "uri",
-                  "description": "Generated GS1 Digital Link URI `https://opendpp-node.eu/{01|8003}/{productId}/21/{passportId}`."
+                  "description": "Generated GS1 Digital Link URI `https://opendpp-node.eu/{01|8003}/{productId}`."
                 }
               }
             }
@@ -11596,7 +11792,7 @@
           "digitalLinkUri": {
             "type": "string",
             "format": "uri",
-            "description": "SKU/type-level GS1 Digital Link URI: `{BASE_URL}/{01|8003}/{productId}/21/{passportId}` (AI-21 carries the passport UUID at SKU level; individual units carry their physical serial instead)."
+            "description": "SKU/type-level GS1 Digital Link URI: `{BASE_URL}/{01|8003}/{productId}` (AI-21 carries the passport UUID at SKU level; individual units carry their physical serial instead)."
           },
           "digitalSeal": {
             "type": [
@@ -11744,7 +11940,7 @@
           "digitalLinkUri": {
             "type": "string",
             "format": "uri",
-            "description": "SKU/type-level GS1 Digital Link URI: `{BASE_URL}/{01|8003}/{productId}/21/{passportId}` (AI-21 carries the passport UUID at SKU level; individual units carry their physical serial instead)."
+            "description": "SKU/type-level GS1 Digital Link URI: `{BASE_URL}/{01|8003}/{productId}` (AI-21 carries the passport UUID at SKU level; individual units carry their physical serial instead)."
           },
           "digitalSeal": {
             "type": [
@@ -12080,7 +12276,7 @@
           },
           "serialNumber": {
             "type": "string",
-            "pattern": "^[A-Za-z0-9._-]{1,64}$",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$",
             "description": "The physical battery serial (the real GS1 AI-21 value; unique within its SKU/type passport)."
           },
           "digitalLinkUri": {

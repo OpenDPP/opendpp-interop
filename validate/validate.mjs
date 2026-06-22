@@ -36,6 +36,7 @@ import addFormats from "ajv-formats";
 import { classifyAasFile, VERDICTS } from "./semantic-ids.mjs";
 import { validateShaclFile } from "./shacl.mjs";
 import { validateSdJwtFile } from "./sdjwt.mjs";
+import { validateGs1File } from "./gs1.mjs";
 
 const SCHEMAS = {
   // AAS v3.0: official IDTA-01001-3-1 JSON Schema (draft-2019-09).
@@ -49,7 +50,7 @@ const SCHEMAS = {
 export const INTEROP_KINDS = Object.keys(SCHEMAS);
 // Schema-validated kinds + the identity-only semanticId classifier + the SHACL shapes door + the
 // SD-JWT-VC selective-disclosure door (the last two are not ajv JSON-Schema kinds).
-export const ALL_KINDS = [...INTEROP_KINDS, "semanticids", "shacl", "sdjwt"];
+export const ALL_KINDS = [...INTEROP_KINDS, "semanticids", "shacl", "sdjwt", "gs1"];
 
 /** Validate `data` of the given `kind` ("aas" | "untp"). Returns { valid, label, errors }. */
 export function validateInterop(kind, data) {
@@ -104,6 +105,18 @@ if (isMain) {
     let ok;
     try {
       ok = await validateSdJwtFile(resolve(file));
+    } catch (e) {
+      console.error(`could not validate ${file}: ${e?.message ?? e}`);
+      process.exit(2);
+    }
+    process.exit(ok ? 0 : 1);
+  }
+
+  // --- GS1 Digital Link door (a Digital Link URI / AI element string, not JSON) ------------------
+  if (kind === "gs1") {
+    let ok;
+    try {
+      ok = await validateGs1File(resolve(file));
     } catch (e) {
       console.error(`could not validate ${file}: ${e?.message ?? e}`);
       process.exit(2);
