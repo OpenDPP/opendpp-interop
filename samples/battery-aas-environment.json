@@ -1,29 +1,29 @@
 {
   "assetAdministrationShells": [
     {
-      "id": "urn:opendpp:aas:demo-batteries-lfp-cell-200",
-      "idShort": "AAS_09501101532007",
+      "id": "urn:opendpp:aas:demo-battery-passport",
+      "idShort": "AAS_BATT_MODEL_X",
       "modelType": "AssetAdministrationShell",
       "assetInformation": {
         "assetKind": "Instance",
-        "globalAssetId": "urn:opendpp:asset:operator-demo-opendpp:09501101532007",
+        "globalAssetId": "urn:opendpp:asset:op-eu-default:BATT-MODEL-X",
         "specificAssetIds": [
           {
             "name": "productId",
-            "value": "09501101532007",
+            "value": "BATT-MODEL-X",
             "externalSubjectId": {
               "type": "ExternalReference",
               "keys": [
                 {
                   "type": "GlobalReference",
-                  "value": "urn:gs1:gln:0950110153038"
+                  "value": "urn:gs1:gln:4012345678901"
                 }
               ]
             }
           },
           {
             "name": "manufacturingFacilityGln",
-            "value": "0950110153038"
+            "value": "4012345678901"
           }
         ]
       },
@@ -33,7 +33,7 @@
           "keys": [
             {
               "type": "Submodel",
-              "value": "urn:opendpp:submodel:general:demo-batteries-lfp-cell-200"
+              "value": "urn:opendpp:submodel:general:demo-battery-passport"
             }
           ]
         },
@@ -51,7 +51,7 @@
           "keys": [
             {
               "type": "Submodel",
-              "value": "urn:opendpp:submodel:category:characteristics:demo-batteries-lfp-cell-200"
+              "value": "urn:opendpp:submodel:nameplate:demo-battery-passport"
             }
           ]
         },
@@ -60,7 +60,7 @@
           "keys": [
             {
               "type": "Submodel",
-              "value": "urn:opendpp:submodel:category:carbon-footprint:demo-batteries-lfp-cell-200"
+              "value": "urn:opendpp:submodel:category:characteristics:demo-battery-passport"
             }
           ]
         },
@@ -69,7 +69,16 @@
           "keys": [
             {
               "type": "Submodel",
-              "value": "urn:opendpp:submodel:security-seal:demo-batteries-lfp-cell-200"
+              "value": "urn:opendpp:submodel:category:technical-data:demo-battery-passport"
+            }
+          ]
+        },
+        {
+          "type": "ModelReference",
+          "keys": [
+            {
+              "type": "Submodel",
+              "value": "urn:opendpp:submodel:category:carbon-footprint:demo-battery-passport"
             }
           ]
         }
@@ -78,7 +87,7 @@
   ],
   "submodels": [
     {
-      "id": "urn:opendpp:submodel:general:demo-batteries-lfp-cell-200",
+      "id": "urn:opendpp:submodel:general:demo-battery-passport",
       "idShort": "GeneralProductInformation",
       "modelType": "Submodel",
       "semanticId": {
@@ -95,25 +104,25 @@
           "idShort": "passportId",
           "modelType": "Property",
           "valueType": "xs:string",
-          "value": "demo-batteries-lfp-cell-200"
+          "value": "demo-battery-passport"
         },
         {
           "idShort": "createdAt",
           "modelType": "Property",
           "valueType": "xs:dateTime",
-          "value": "2026-06-12T10:43:00.544Z"
+          "value": "2026-02-18T00:00:00.000Z"
         },
         {
           "idShort": "manufacturingFacilityGln",
           "modelType": "Property",
           "valueType": "xs:string",
-          "value": "0950110153038"
+          "value": "4012345678901"
         },
         {
           "idShort": "manufacturingFacilityName",
           "modelType": "Property",
           "valueType": "xs:string",
-          "value": "Saxony Battery Works (SAMPLE)"
+          "value": "Cell Plant EU"
         },
         {
           "idShort": "manufacturingFacilityCountry",
@@ -135,10 +144,69 @@
           "value": "batteries"
         },
         {
+          "idShort": "manufacturer",
+          "qualifiers": [
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppCollectionKind",
+              "valueType": "xs:string",
+              "value": "object"
+            }
+          ],
+          "modelType": "SubmodelElementCollection",
+          "value": [
+            {
+              "idShort": "name",
+              "modelType": "Property",
+              "valueType": "xs:string",
+              "value": "ACME Cells"
+            },
+            {
+              "idShort": "productDesignation",
+              "modelType": "Property",
+              "valueType": "xs:string",
+              "value": "Model X NMC"
+            },
+            {
+              "idShort": "productFamily",
+              "modelType": "Property",
+              "valueType": "xs:string",
+              "value": "Model X"
+            }
+          ]
+        },
+        {
+          "idShort": "serialNumber",
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "SN-000123"
+        },
+        {
+          "idShort": "ratedCapacity",
+          "modelType": "Property",
+          "valueType": "xs:double",
+          "value": "75000"
+        },
+        {
+          "idShort": "batteryCategory",
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "ev"
+        },
+        {
           "idShort": "chemistry",
           "modelType": "Property",
           "valueType": "xs:string",
-          "value": "LFP"
+          "value": "NMC (Lithium Nickel Manganese Cobalt Oxide)",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "urn:opendpp:concept:chemistry"
+              }
+            ]
+          }
         },
         {
           "idShort": "durability",
@@ -155,76 +223,54 @@
             {
               "idShort": "cycleLife",
               "modelType": "Property",
-              "valueType": "xs:string",
-              "value": "6000",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BAF155#001"
-                  }
-                ]
-              }
+              "valueType": "xs:double",
+              "value": "2000"
             },
             {
               "idShort": "calendarLifeYears",
               "modelType": "Property",
               "valueType": "xs:double",
-              "value": "15",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BAF156#001"
-                  }
-                ]
-              }
+              "value": "10"
             }
           ]
         },
         {
-          "idShort": "productName",
-          "modelType": "Property",
-          "valueType": "xs:string",
-          "value": "LFP Industrial Cell 100Ah (SAMPLE)"
-        },
-        {
-          "idShort": "originCountry",
-          "modelType": "Property",
-          "valueType": "xs:string",
-          "value": "DE",
-          "semanticId": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "0173-1#02-BAF123#001"
-              }
-            ]
-          }
-        },
-        {
-          "idShort": "stateOfCharge",
-          "modelType": "Property",
-          "valueType": "xs:double",
-          "value": "55",
-          "semanticId": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "0173-1#02-BAF151#001"
-              }
-            ]
-          }
-        },
-        {
-          "idShort": "batteryCategory",
-          "modelType": "Property",
-          "valueType": "xs:string",
-          "value": "industrial"
+          "idShort": "recycledContentShare",
+          "qualifiers": [
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppCollectionKind",
+              "valueType": "xs:string",
+              "value": "object"
+            }
+          ],
+          "modelType": "SubmodelElementCollection",
+          "value": [
+            {
+              "idShort": "cobalt",
+              "modelType": "Property",
+              "valueType": "xs:double",
+              "value": "12"
+            },
+            {
+              "idShort": "lithium",
+              "modelType": "Property",
+              "valueType": "xs:double",
+              "value": "6"
+            },
+            {
+              "idShort": "lead",
+              "modelType": "Property",
+              "valueType": "xs:double",
+              "value": "0"
+            },
+            {
+              "idShort": "nickel",
+              "modelType": "Property",
+              "valueType": "xs:double",
+              "value": "8"
+            }
+          ]
         },
         {
           "idShort": "carbonFootprint",
@@ -239,108 +285,40 @@
           "modelType": "SubmodelElementCollection",
           "value": [
             {
+              "idShort": "co2eKg",
+              "modelType": "Property",
+              "valueType": "xs:double",
+              "value": "4200.5"
+            },
+            {
               "idShort": "unit",
               "modelType": "Property",
               "valueType": "xs:string",
               "value": "kg CO2e"
             },
             {
-              "idShort": "co2eKg",
+              "idShort": "calculationMethod",
               "modelType": "Property",
-              "valueType": "xs:double",
-              "value": "742",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BBD001#001"
-                  }
-                ]
-              }
+              "valueType": "xs:string",
+              "value": "ISO 14067"
             },
             {
               "idShort": "scope1",
               "modelType": "Property",
               "valueType": "xs:double",
-              "value": "88",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BBD002#001"
-                  }
-                ]
-              }
+              "value": "1000"
             },
             {
               "idShort": "scope2",
               "modelType": "Property",
               "valueType": "xs:double",
-              "value": "214",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BBD003#001"
-                  }
-                ]
-              }
+              "value": "1500"
             },
             {
               "idShort": "scope3",
               "modelType": "Property",
               "valueType": "xs:double",
-              "value": "440",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BBD004#001"
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "idShort": "hazardousSubstances",
-          "qualifiers": [
-            {
-              "kind": "ConceptQualifier",
-              "type": "OpenDppCollectionKind",
-              "valueType": "xs:string",
-              "value": "array"
-            }
-          ],
-          "modelType": "SubmodelElementCollection",
-          "value": [
-            {
-              "idShort": "item_0",
-              "modelType": "SubmodelElementCollection",
-              "value": [
-                {
-                  "idShort": "unit",
-                  "modelType": "Property",
-                  "valueType": "xs:string",
-                  "value": "%"
-                },
-                {
-                  "idShort": "concentration",
-                  "modelType": "Property",
-                  "valueType": "xs:double",
-                  "value": "9"
-                },
-                {
-                  "idShort": "substanceName",
-                  "modelType": "Property",
-                  "valueType": "xs:string",
-                  "value": "Lithium hexafluorophosphate (LiPF6)"
-                }
-              ]
+              "value": "1700.5"
             }
           ]
         },
@@ -364,13 +342,13 @@
                   "idShort": "material",
                   "modelType": "Property",
                   "valueType": "xs:string",
-                  "value": "Lithium Iron Phosphate (LFP) Cathode"
+                  "value": "Lithium"
                 },
                 {
-                  "idShort": "percentage",
+                  "idShort": "percent",
                   "modelType": "Property",
                   "valueType": "xs:double",
-                  "value": "32"
+                  "value": "7"
                 }
               ]
             },
@@ -382,13 +360,13 @@
                   "idShort": "material",
                   "modelType": "Property",
                   "valueType": "xs:string",
-                  "value": "Graphite Anode"
+                  "value": "Nickel"
                 },
                 {
-                  "idShort": "percentage",
+                  "idShort": "percent",
                   "modelType": "Property",
                   "valueType": "xs:double",
-                  "value": "24"
+                  "value": "33"
                 }
               ]
             },
@@ -400,294 +378,76 @@
                   "idShort": "material",
                   "modelType": "Property",
                   "valueType": "xs:string",
-                  "value": "Aluminium Casing"
+                  "value": "Cobalt"
                 },
                 {
-                  "idShort": "percentage",
-                  "modelType": "Property",
-                  "valueType": "xs:double",
-                  "value": "18"
-                }
-              ]
-            },
-            {
-              "idShort": "item_3",
-              "modelType": "SubmodelElementCollection",
-              "value": [
-                {
-                  "idShort": "material",
-                  "modelType": "Property",
-                  "valueType": "xs:string",
-                  "value": "Copper Current Collector"
-                },
-                {
-                  "idShort": "percentage",
+                  "idShort": "percent",
                   "modelType": "Property",
                   "valueType": "xs:double",
                   "value": "12"
                 }
               ]
-            },
-            {
-              "idShort": "item_4",
-              "modelType": "SubmodelElementCollection",
-              "value": [
-                {
-                  "idShort": "material",
-                  "modelType": "Property",
-                  "valueType": "xs:string",
-                  "value": "Electrolyte"
-                },
-                {
-                  "idShort": "percentage",
-                  "modelType": "Property",
-                  "valueType": "xs:double",
-                  "value": "9"
-                }
-              ]
-            },
-            {
-              "idShort": "item_5",
-              "modelType": "SubmodelElementCollection",
-              "value": [
-                {
-                  "idShort": "material",
-                  "modelType": "Property",
-                  "valueType": "xs:string",
-                  "value": "Separator and Binder"
-                },
-                {
-                  "idShort": "percentage",
-                  "modelType": "Property",
-                  "valueType": "xs:double",
-                  "value": "5"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "idShort": "recycledContentShare",
-          "qualifiers": [
-            {
-              "kind": "ConceptQualifier",
-              "type": "OpenDppCollectionKind",
-              "valueType": "xs:string",
-              "value": "object"
-            }
-          ],
-          "modelType": "SubmodelElementCollection",
-          "value": [
-            {
-              "idShort": "lead",
-              "modelType": "Property",
-              "valueType": "xs:double",
-              "value": "0",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BAF778#003"
-                  }
-                ]
-              }
-            },
-            {
-              "idShort": "cobalt",
-              "modelType": "Property",
-              "valueType": "xs:double",
-              "value": "0",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BAF775#003"
-                  }
-                ]
-              }
-            },
-            {
-              "idShort": "nickel",
-              "modelType": "Property",
-              "valueType": "xs:double",
-              "value": "0",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BAF777#003"
-                  }
-                ]
-              }
-            },
-            {
-              "idShort": "lithium",
-              "modelType": "Property",
-              "valueType": "xs:double",
-              "value": "6",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BAF776#003"
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "idShort": "regulatoryCompliance",
-          "qualifiers": [
-            {
-              "kind": "ConceptQualifier",
-              "type": "OpenDppCollectionKind",
-              "valueType": "xs:string",
-              "value": "object"
-            }
-          ],
-          "modelType": "SubmodelElementCollection",
-          "value": [
-            {
-              "idShort": "ceMarking",
-              "modelType": "Property",
-              "valueType": "xs:boolean",
-              "value": "true",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BAF700#001"
-                  }
-                ]
-              }
-            },
-            {
-              "idShort": "certificates",
-              "qualifiers": [
-                {
-                  "kind": "ConceptQualifier",
-                  "type": "OpenDppCollectionKind",
-                  "valueType": "xs:string",
-                  "value": "array"
-                }
-              ],
-              "modelType": "SubmodelElementCollection",
-              "value": [
-                {
-                  "idShort": "item_0",
-                  "modelType": "SubmodelElementCollection",
-                  "value": [
-                    {
-                      "idShort": "name",
-                      "modelType": "Property",
-                      "valueType": "xs:string",
-                      "value": "UN 38.3 Transport Test Summary"
-                    },
-                    {
-                      "idShort": "issuer",
-                      "modelType": "Property",
-                      "valueType": "xs:string",
-                      "value": "TUV Saxony (SAMPLE)"
-                    },
-                    {
-                      "idShort": "validUntil",
-                      "modelType": "Property",
-                      "valueType": "xs:string",
-                      "value": "2031-01-31"
-                    },
-                    {
-                      "idShort": "referenceNumber",
-                      "modelType": "Property",
-                      "valueType": "xs:string",
-                      "value": "SAMPLE-UN383-2026-DE-2001"
-                    }
-                  ]
-                },
-                {
-                  "idShort": "item_1",
-                  "modelType": "SubmodelElementCollection",
-                  "value": [
-                    {
-                      "idShort": "name",
-                      "modelType": "Property",
-                      "valueType": "xs:string",
-                      "value": "CE Marking — Battery Regulation (EU) 2023/1542"
-                    },
-                    {
-                      "idShort": "issuer",
-                      "modelType": "Property",
-                      "valueType": "xs:string",
-                      "value": "Notified Body 0000 (SAMPLE)"
-                    },
-                    {
-                      "idShort": "validUntil",
-                      "modelType": "Property",
-                      "valueType": "xs:string",
-                      "value": "2031-01-31"
-                    },
-                    {
-                      "idShort": "referenceNumber",
-                      "modelType": "Property",
-                      "valueType": "xs:string",
-                      "value": "SAMPLE-CE-BATT-2026-2001"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "idShort": "declarationOfConformityUrl",
-              "modelType": "Property",
-              "valueType": "xs:string",
-              "value": "https://compliance.example.opendpp-node.eu/docs/conformity-lfp-cell-200.pdf",
-              "semanticId": {
-                "type": "ExternalReference",
-                "keys": [
-                  {
-                    "type": "GlobalReference",
-                    "value": "0173-1#02-BAF701#001"
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "idShort": "electrochemicalCapacity",
-          "qualifiers": [
-            {
-              "kind": "ConceptQualifier",
-              "type": "OpenDppCollectionKind",
-              "valueType": "xs:string",
-              "value": "object"
-            }
-          ],
-          "modelType": "SubmodelElementCollection",
-          "value": [
-            {
-              "idShort": "unit",
-              "modelType": "Property",
-              "valueType": "xs:string",
-              "value": "Ah"
-            },
-            {
-              "idShort": "value",
-              "modelType": "Property",
-              "valueType": "xs:double",
-              "value": "100"
             }
           ]
         }
       ]
     },
     {
-      "id": "urn:opendpp:submodel:category:characteristics:demo-batteries-lfp-cell-200",
+      "id": "urn:opendpp:submodel:nameplate:demo-battery-passport",
+      "idShort": "Nameplate",
+      "modelType": "Submodel",
+      "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+          {
+            "type": "GlobalReference",
+            "value": "urn:opendpp:submodel-spec:nameplate:1.0.0"
+          }
+        ]
+      },
+      "submodelElements": [
+        {
+          "idShort": "ManufacturerName",
+          "modelType": "MultiLanguageProperty",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "0173-1#02-AAO677"
+              }
+            ]
+          },
+          "value": [
+            {
+              "language": "en",
+              "text": "ACME Cells"
+            }
+          ]
+        },
+        {
+          "idShort": "ManufacturerProductDesignation",
+          "modelType": "MultiLanguageProperty",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "0173-1#02-AAW338"
+              }
+            ]
+          },
+          "value": [
+            {
+              "language": "en",
+              "text": "Model X NMC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:opendpp:submodel:category:characteristics:demo-battery-passport",
       "idShort": "BatteryCharacteristics",
       "modelType": "Submodel",
       "semanticId": {
@@ -704,45 +464,13 @@
           "idShort": "batteryCategory",
           "modelType": "Property",
           "valueType": "xs:string",
-          "value": "industrial"
+          "value": "ev"
         },
         {
           "idShort": "chemistry",
           "modelType": "Property",
           "valueType": "xs:string",
-          "value": "LFP"
-        },
-        {
-          "idShort": "electrochemicalCapacity",
-          "qualifiers": [
-            {
-              "kind": "ConceptQualifier",
-              "type": "OpenDppCollectionKind",
-              "valueType": "xs:string",
-              "value": "object"
-            }
-          ],
-          "modelType": "SubmodelElementCollection",
-          "value": [
-            {
-              "idShort": "unit",
-              "modelType": "Property",
-              "valueType": "xs:string",
-              "value": "Ah"
-            },
-            {
-              "idShort": "value",
-              "modelType": "Property",
-              "valueType": "xs:double",
-              "value": "100"
-            }
-          ]
-        },
-        {
-          "idShort": "stateOfCharge",
-          "modelType": "Property",
-          "valueType": "xs:double",
-          "value": "55"
+          "value": "NMC (Lithium Nickel Manganese Cobalt Oxide)"
         },
         {
           "idShort": "durability",
@@ -760,13 +488,13 @@
               "idShort": "cycleLife",
               "modelType": "Property",
               "valueType": "xs:double",
-              "value": "6000"
+              "value": "2000"
             },
             {
               "idShort": "calendarLifeYears",
               "modelType": "Property",
               "valueType": "xs:double",
-              "value": "15"
+              "value": "10"
             }
           ]
         },
@@ -783,13 +511,19 @@
           "modelType": "SubmodelElementCollection",
           "value": [
             {
-              "idShort": "lead",
+              "idShort": "cobalt",
               "modelType": "Property",
               "valueType": "xs:double",
-              "value": "0"
+              "value": "12"
             },
             {
-              "idShort": "cobalt",
+              "idShort": "lithium",
+              "modelType": "Property",
+              "valueType": "xs:double",
+              "value": "6"
+            },
+            {
+              "idShort": "lead",
               "modelType": "Property",
               "valueType": "xs:double",
               "value": "0"
@@ -798,20 +532,72 @@
               "idShort": "nickel",
               "modelType": "Property",
               "valueType": "xs:double",
-              "value": "0"
-            },
-            {
-              "idShort": "lithium",
-              "modelType": "Property",
-              "valueType": "xs:double",
-              "value": "6"
+              "value": "8"
             }
           ]
         }
       ]
     },
     {
-      "id": "urn:opendpp:submodel:category:carbon-footprint:demo-batteries-lfp-cell-200",
+      "id": "urn:opendpp:submodel:category:technical-data:demo-battery-passport",
+      "idShort": "TechnicalData",
+      "modelType": "Submodel",
+      "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+          {
+            "type": "GlobalReference",
+            "value": "https://admin-shell.io/ZVEI/TechnicalData/Submodel/1/2"
+          }
+        ]
+      },
+      "submodelElements": [
+        {
+          "idShort": "ProductClassifications",
+          "modelType": "SubmodelElementCollection",
+          "value": [
+            {
+              "idShort": "ProductClassificationItem00",
+              "modelType": "SubmodelElementCollection",
+              "value": [
+                {
+                  "idShort": "ProductClassId",
+                  "modelType": "Property",
+                  "valueType": "xs:string",
+                  "value": "batteries",
+                  "semanticId": {
+                    "type": "ExternalReference",
+                    "keys": [
+                      {
+                        "type": "GlobalReference",
+                        "value": "https://admin-shell.io/ZVEI/TechnicalData/ProductClassId/1/1"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "idShort": "ClassificationSystem",
+                  "modelType": "Property",
+                  "valueType": "xs:string",
+                  "value": "ESPR product category",
+                  "semanticId": {
+                    "type": "ExternalReference",
+                    "keys": [
+                      {
+                        "type": "GlobalReference",
+                        "value": "https://admin-shell.io/ZVEI/TechnicalData/ClassificationSystem/1/1"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "urn:opendpp:submodel:category:carbon-footprint:demo-battery-passport",
       "idShort": "CarbonFootprint",
       "modelType": "Submodel",
       "semanticId": {
@@ -825,3078 +611,113 @@
       },
       "submodelElements": [
         {
-          "idShort": "PCFCO2eq",
-          "modelType": "Property",
-          "valueType": "xs:double",
-          "value": "742",
-          "semanticId": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "urn:opendpp:concept:carbonFootprint.co2eKg"
-              }
-            ]
-          }
-        },
-        {
-          "idShort": "PCFCO2eqUnit",
-          "modelType": "Property",
-          "valueType": "xs:string",
-          "value": "kg CO2e"
-        },
-        {
-          "idShort": "PCFScope1",
-          "modelType": "Property",
-          "valueType": "xs:double",
-          "value": "88",
-          "semanticId": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "urn:opendpp:concept:carbonFootprint.scope1"
-              }
-            ]
-          }
-        },
-        {
-          "idShort": "PCFScope2",
-          "modelType": "Property",
-          "valueType": "xs:double",
-          "value": "214",
-          "semanticId": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "urn:opendpp:concept:carbonFootprint.scope2"
-              }
-            ]
-          }
-        },
-        {
-          "idShort": "PCFScope3",
-          "modelType": "Property",
-          "valueType": "xs:double",
-          "value": "440",
-          "semanticId": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "urn:opendpp:concept:carbonFootprint.scope3"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "urn:opendpp:submodel:security-seal:demo-batteries-lfp-cell-200",
-      "idShort": "eidasVerificationSeal",
-      "modelType": "Submodel",
-      "semanticId": {
-        "type": "ExternalReference",
-        "keys": [
-          {
-            "type": "GlobalReference",
-            "value": "urn:opendpp:submodel-spec:eidas-seal:1.0.0"
-          }
-        ]
-      },
-      "submodelElements": [
-        {
-          "idShort": "digitalSealHash",
-          "modelType": "Property",
-          "valueType": "xs:string",
-          "value": "f9a1528abf228c96c87ef1ae048d93df8f9b9a3fd7c28556915ae8e966bbd03e"
-        },
-        {
-          "idShort": "cryptographicSignature",
-          "modelType": "Property",
-          "valueType": "xs:string",
-          "value": "MEUCIAYfNpSPJGhw4UcyOmikWyb0vbkpG+ld+PrUODTNzesKAiEAsxzkw8rdcnTHI5C92OH/CMDghbgy37PigJjp7kS6k80="
-        },
-        {
-          "idShort": "pemPublicKey",
-          "modelType": "Property",
-          "valueType": "xs:string",
-          "value": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEB13XCxCs/Bj9iUg+Y4juXsHdBTyX\nILYkIa8kZdPS6+O77niNJnZg+Sfroz2hy4K7mYNaU6+0MJzqP4sswAyfGw==\n-----END PUBLIC KEY-----\n"
-        },
-        {
-          "idShort": "x509CertificateChain",
-          "modelType": "Property",
-          "valueType": "xs:string",
-          "value": "-----BEGIN CERTIFICATE-----\nMIIB+TCCAZ+gAwIBAgIMARGH6YV7vSVp1TbHMAoGCCqGSM49BAMCMD0xGDAWBgNV\nBAMTD09wZW5EUFAgU2VhbCBDQTEUMBIGA1UEChMLT3BlbkRQUCBVQUIxCzAJBgNV\nBAYTAkxUMB4XDTI2MDYxMjEwMzc1OVoXDTI5MDYxMjEwMzc1OVowgaExSDBGBgNV\nBAMMP09wZW5EUFAgRGVtbyBNYW51ZmFjdHVyaW5nIOKAlCBTQU1QTEUgREFUQSAo\nTk9UIEEgUkVBTCBDT01QQU5ZKTFIMEYGA1UECgw/T3BlbkRQUCBEZW1vIE1hbnVm\nYWN0dXJpbmcg4oCUIFNBTVBMRSBEQVRBIChOT1QgQSBSRUFMIENPTVBBTlkpMQsw\nCQYDVQQGEwJQVDBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABAdd1wsQrPwY/YlI\nPmOI7l7B3QU8lyC2JCGvJGXT0uvju+54jSZ2YPkn66M9ocuCu5mDWlOvtDCc6j+L\nLMAMnxujIDAeMAwGA1UdEwEB/wQCMAAwDgYDVR0PAQH/BAQDAgeAMAoGCCqGSM49\nBAMCA0gAMEUCIQDCFmDrGPTPfEZOxQVyC25+YqxMBudc9SqlFns2kb/9NAIgT7Bo\nf8wP+AsI5xUhVBxVq7Z/GCcRiSXEaG4UrHvMDYQ=\n-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----\nMIIBujCCAV+gAwIBAgIMASRiKgObYWEXbWWEMAoGCCqGSM49BAMCMD0xGDAWBgNV\nBAMTD09wZW5EUFAgU2VhbCBDQTEUMBIGA1UEChMLT3BlbkRQUCBVQUIxCzAJBgNV\nBAYTAkxUMB4XDTI2MDYxMjEwMzc1OVoXDTM2MDYxMjEwMzc1OVowPTEYMBYGA1UE\nAxMPT3BlbkRQUCBTZWFsIENBMRQwEgYDVQQKEwtPcGVuRFBQIFVBQjELMAkGA1UE\nBhMCTFQwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATTl/4igRbUPY0iMD61HI6c\nzJP2HzDQ+kM/1qgTUFkRnRBaV1bkkJnb5RO54CtIHvxzuramcxLdfallO9GCBAIb\no0UwQzASBgNVHRMBAf8ECDAGAQH/AgEAMA4GA1UdDwEB/wQEAwIBBjAdBgNVHQ4E\nFgQUdoIuAN5hb/zQts3YzE0wrgcli8UwCgYIKoZIzj0EAwIDSQAwRgIhAOBcrG7k\n8znXhNyeCbAMlSseWKv4P1wE62g6TH6D0WbpAiEA6s6ykwCMtrE7AsXxcoRyxMCL\nBowjEwottWNDCcRnOx8=\n-----END CERTIFICATE-----"
+          "idShort": "ProductCarbonFootprints",
+          "modelType": "SubmodelElementCollection",
+          "value": [
+            {
+              "idShort": "ProductCarbonFootprint00",
+              "modelType": "SubmodelElementCollection",
+              "value": [
+                {
+                  "idShort": "PcfCO2eq",
+                  "modelType": "Property",
+                  "valueType": "xs:double",
+                  "value": "4200.5",
+                  "semanticId": {
+                    "type": "ExternalReference",
+                    "keys": [
+                      {
+                        "type": "GlobalReference",
+                        "value": "0173-1#02-ABG855"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "idShort": "ReferenceImpactUnitForCalculation",
+                  "modelType": "Property",
+                  "valueType": "xs:string",
+                  "value": "kg CO2e",
+                  "semanticId": {
+                    "type": "ExternalReference",
+                    "keys": [
+                      {
+                        "type": "GlobalReference",
+                        "value": "0173-1#02-ABG856"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "idShort": "PcfScope1",
+                  "modelType": "Property",
+                  "valueType": "xs:double",
+                  "value": "1000",
+                  "semanticId": {
+                    "type": "ExternalReference",
+                    "keys": [
+                      {
+                        "type": "GlobalReference",
+                        "value": "urn:opendpp:concept:carbonFootprint.scope1"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "idShort": "PcfScope2",
+                  "modelType": "Property",
+                  "valueType": "xs:double",
+                  "value": "1500",
+                  "semanticId": {
+                    "type": "ExternalReference",
+                    "keys": [
+                      {
+                        "type": "GlobalReference",
+                        "value": "urn:opendpp:concept:carbonFootprint.scope2"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "idShort": "PcfScope3",
+                  "modelType": "Property",
+                  "valueType": "xs:double",
+                  "value": "1700.5",
+                  "semanticId": {
+                    "type": "ExternalReference",
+                    "keys": [
+                      {
+                        "type": "GlobalReference",
+                        "value": "urn:opendpp:concept:carbonFootprint.scope3"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "idShort": "PcfCalculationMethod",
+                  "modelType": "Property",
+                  "valueType": "xs:string",
+                  "value": "ISO 14067",
+                  "semanticId": {
+                    "type": "ExternalReference",
+                    "keys": [
+                      {
+                        "type": "GlobalReference",
+                        "value": "0173-1#02-ABG854#001"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }
   ],
   "conceptDescriptions": [
     {
-      "id": "0173-1#02-AAO677#002",
-      "idShort": "ManufacturerName",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ManufacturerName",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Legally valid designation of the natural or judicial person responsible for the design, production, packaging and labeling of the product.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-AAW338#001",
-      "idShort": "ManufacturerProductDesignation",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ManufacturerProductDesignation",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Short description of the product (short text).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-AAU731#001",
-      "idShort": "ManufacturerProductFamily",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ManufacturerProductFamily",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "2nd level of a 3-level product group hierarchy.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-AAO057#002",
-      "idShort": "ManufacturerProductType",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ManufacturerProductType",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Characteristic to differentiate between different products of a product family or special variants.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-AAM556#002",
-      "idShort": "SerialNumber",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "SerialNumber",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Unique combination of numbers and letters used to identify the device once it has been manufactured.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-AAQ832#001",
-      "idShort": "BatchNumber",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "BatchNumber",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Combination of numbers and letters used to identify a batch of products.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF123#001",
-      "idShort": "CountryOfOrigin",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CountryOfOrigin",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Country where the product was manufactured (2-letter ISO 3166-1 alpha-2 code).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-AAP906#001",
-      "idShort": "YearOfConstruction",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "YearOfConstruction",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Year as completion date of object.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-AAN270#002",
-      "idShort": "HardwareVersion",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "HardwareVersion",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Version of the hardware supplied with the device.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-AAM985#002",
-      "idShort": "SoftwareVersion",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "SoftwareVersion",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Version of the software used by the firmware or control code of a device.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BBD001#001",
-      "idShort": "PCFCO2eq",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "PCFCO2eq",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Sum of all greenhouse gas emissions of a product according to ISO 14067 in kg CO2 equivalent per declared unit.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kg CO2e"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BBD002#001",
-      "idShort": "PCFScope1",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "PCFScope1",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Direct GHG emissions from sources owned or controlled by the reporting organisation (Scope 1).",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kg CO2e"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BBD003#001",
-      "idShort": "PCFScope2",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "PCFScope2",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Indirect GHG emissions from the generation of purchased energy (Scope 2).",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kg CO2e"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BBD004#001",
-      "idShort": "PCFScope3",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "PCFScope3",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "All other indirect GHG emissions in the value chain not included in Scope 2 (Scope 3).",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kg CO2e"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-ABG854#001",
-      "idShort": "PCFCalculationMethod",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "PCFCalculationMethod",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Standard or methodology used to calculate the product carbon footprint (e.g. ISO 14040, ISO 14067, GHG Protocol).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-ABG855#001",
-      "idShort": "PCFReferenceUnit",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "PCFReferenceUnit",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Declared unit for which the PCF was calculated (e.g. per kg, per piece, per kWh).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF080#001",
-      "idShort": "GlobalWarmingPotential",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "GlobalWarmingPotential",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Total Global Warming Potential (GWP) expressed in kg CO2 equivalent per functional unit.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kg CO2e"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF081#001",
-      "idShort": "LCAStandard",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "LCAStandard",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Life Cycle Assessment standard applied (e.g. EN 15804, ISO 14040/14044).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF082#001",
-      "idShort": "EPDUrl",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "EPDUrl",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "URL link to the published Environmental Product Declaration (EPD) document.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF150#001",
-      "idShort": "NominalCapacity",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "NominalCapacity",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Total amount of electrical charge a battery can store, measured in Ampere-hours.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "Ah"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF151#001",
-      "idShort": "StateOfCharge",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "StateOfCharge",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Available capacity of a battery expressed as a percentage of its rated capacity.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF155#001",
-      "idShort": "CycleLifeExpected",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CycleLifeExpected",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Expected number of complete charge/discharge cycles a battery can deliver before falling below 80% rated capacity.",
-                "language": "en"
-              }
-            ],
-            "dataType": "INTEGER_MEASURE",
-            "unit": "cycles"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF156#001",
-      "idShort": "CalendarLifeYears",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CalendarLifeYears",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Expected calendar service life of the battery in years under standard operating conditions.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "years"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF160#001",
-      "idShort": "CathodeMaterial",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CathodeMaterial",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Active material used in the battery cathode (e.g. LFP, NMC, NCA, LCO).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF161#001",
-      "idShort": "AnodeMaterial",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "AnodeMaterial",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Active material used in the battery anode (e.g. graphite, silicon, lithium metal).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF162#001",
-      "idShort": "ElectrolyteMaterial",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ElectrolyteMaterial",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Material or type of electrolyte used in the battery cell.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF163#001",
-      "idShort": "NominalVoltage",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "NominalVoltage",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Nominal voltage of the battery pack under standard operating conditions.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "V"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF164#001",
-      "idShort": "MaxChargingVoltage",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "MaxChargingVoltage",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Maximum permissible charging voltage that the battery cell or pack can safely withstand.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "V"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF165#001",
-      "idShort": "RatedEnergy",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "RatedEnergy",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Total energy deliverable by the battery under specified conditions, expressed in kilowatt-hours.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kWh"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF166#001",
-      "idShort": "EnergyDensityGravimetric",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "EnergyDensityGravimetric",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Gravimetric energy density of the battery expressed in watt-hours per kilogram.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "Wh/kg"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF167#001",
-      "idShort": "EnergyDensityVolumetric",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "EnergyDensityVolumetric",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Volumetric energy density of the battery expressed in watt-hours per litre.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "Wh/L"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF775#003",
-      "idShort": "CobaltRecycledRatio",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CobaltRecycledRatio",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Percentage of secondary (recycled) cobalt content in active battery material.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF776#003",
-      "idShort": "LithiumRecycledRatio",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "LithiumRecycledRatio",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Percentage of secondary (recycled) lithium content in active battery material.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF777#003",
-      "idShort": "NickelRecycledRatio",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "NickelRecycledRatio",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Percentage of secondary (recycled) nickel content in active battery material.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF778#003",
-      "idShort": "LeadRecycledRatio",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "LeadRecycledRatio",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Percentage of secondary (recycled) lead content in active battery material.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF170#001",
-      "idShort": "BatteryWeight",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "BatteryWeight",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Total weight of the battery pack including housing and connectors.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kg"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF171#001",
-      "idShort": "ExtinguishingAgent",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ExtinguishingAgent",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Recommended extinguishing agent to be used in case of fire involving this battery.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF310#001",
-      "idShort": "RepairabilityIndex",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "RepairabilityIndex",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Index score (0–10) per applicable EU methodology indicating ease of disassembly and repair.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_COUNT"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF311#001",
-      "idShort": "DurabilityScore",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "DurabilityScore",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Index score (0–10) indicating operational durability and expected product lifespan.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_COUNT"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF312#001",
-      "idShort": "RecyclabilityPercentage",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "RecyclabilityPercentage",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Percentage of the product (by mass) that can be recovered and recycled at end of life.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF313#001",
-      "idShort": "ExpectedServiceLifeYears",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ExpectedServiceLifeYears",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Expected service life of the product under normal conditions of use, expressed in years.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "years"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF314#001",
-      "idShort": "DesignForDisassembly",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "DesignForDisassembly",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Indicates whether the product has been designed to enable easy disassembly for repair, reuse or recycling.",
-                "language": "en"
-              }
-            ],
-            "dataType": "BOOLEAN"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF315#001",
-      "idShort": "DeconstructionManualUrl",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "DeconstructionManualUrl",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "URL to a published deconstruction or disassembly manual for this product.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF316#001",
-      "idShort": "RecycledPlasticContent",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "RecycledPlasticContent",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Percentage of recycled plastic content in the product by total plastic weight.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF410#001",
-      "idShort": "PackagingRecycledContentPercentage",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "PackagingRecycledContentPercentage",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Percentage of packaging material sourced from post-consumer recycled material.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF411#001",
-      "idShort": "PackagingMaterialType",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "PackagingMaterialType",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Type of material used for product packaging (e.g. cardboard, glass, PET, PP).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAE391#003",
-      "idShort": "MaterialName",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "MaterialName",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Designation of the raw material or substance used in the product composition.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAE392#001",
-      "idShort": "MaterialContentPercentage",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "MaterialContentPercentage",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Mass percentage of a specific material in the overall product composition.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF500#001",
-      "idShort": "SVHCPresence",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "SVHCPresence",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Indicates whether the product contains Substances of Very High Concern (SVHC) listed under REACH above 0.1% w/w.",
-                "language": "en"
-              }
-            ],
-            "dataType": "BOOLEAN"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF501#001",
-      "idShort": "SVHCConcentration",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "SVHCConcentration",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Concentration of identified Substance of Very High Concern (SVHC) in the article (% w/w).",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "% w/w"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF510#001",
-      "idShort": "HazardClassification",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "HazardClassification",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "GHS/CLP hazard classification categories applicable to this product or substance.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF511#001",
-      "idShort": "SafetyDatasheetUrl",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "SafetyDatasheetUrl",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "URL to the Safety Data Sheet (SDS) document compliant with REACH Regulation Annex II.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF512#001",
-      "idShort": "AllergenContent",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "AllergenContent",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "List of declared allergens present in the product as required by applicable regulation.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF513#001",
-      "idShort": "IngredientList",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "IngredientList",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Full list of ingredients or components present in the product (INCI or CAS nomenclature).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF600#001",
-      "idShort": "FiberType",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "FiberType",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Type of textile fiber used in the product (e.g. Organic Cotton, Recycled Polyester, Wool).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF601#001",
-      "idShort": "FiberPercentage",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "FiberPercentage",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Proportion of a specific fiber type in the product's total fiber composition by weight.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF602#001",
-      "idShort": "CareInstructions",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CareInstructions",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Instructions for safe use, washing, ironing and drying of the textile product.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF603#001",
-      "idShort": "ProductSize",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ProductSize",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Product size designation following applicable standard (ISO, EU, US, or custom).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF043#001",
-      "idShort": "ThermalConductivity",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ThermalConductivity",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Thermal conductivity of the material — rate at which heat is transferred through a unit thickness.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "W/mK"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF044#001",
-      "idShort": "CompressiveStrength",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CompressiveStrength",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Ultimate compressive strength of the material when subjected to a uniaxial compressive load.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "N/mm2"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF045#001",
-      "idShort": "TensileStrength",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "TensileStrength",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Maximum stress a material can withstand when being stretched or pulled before breaking.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "N/mm2"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF046#001",
-      "idShort": "FireClassification",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "FireClassification",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Fire behaviour classification of the construction product according to EN 13501-1.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF047#001",
-      "idShort": "Density",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "Density",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Mass per unit volume of the material or product in kilograms per cubic metre.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kg/m3"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF048#001",
-      "idShort": "DimensionLength",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "DimensionLength",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "External length of the product or component as manufactured.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "mm"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF049#001",
-      "idShort": "DimensionWidth",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "DimensionWidth",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "External width of the product or component as manufactured.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "mm"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0112/2///61360_4#AAF050#001",
-      "idShort": "DimensionThickness",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "DimensionThickness",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "External thickness of the product or component as manufactured.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "mm"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF200#001",
-      "idShort": "StandbyPowerConsumption",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "StandbyPowerConsumption",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Electrical power consumed by the product in standby (off-mode) operation.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "W"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF201#001",
-      "idShort": "BatteryOperatingHours",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "BatteryOperatingHours",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Expected operating hours on internal battery under typical load conditions.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "h"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF202#001",
-      "idShort": "EnergyEfficiencyClass",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "EnergyEfficiencyClass",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "EU energy efficiency class label (A+++ to G) of the product.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF203#001",
-      "idShort": "AnnualEnergyConsumption",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "AnnualEnergyConsumption",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Estimated annual energy consumption under standard representative usage conditions.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kWh/year"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF204#001",
-      "idShort": "WEEEDisposalInstructions",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "WEEEDisposalInstructions",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Instructions for proper disposal or take-back of electronic waste under the WEEE Directive.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF700#001",
-      "idShort": "CEMarking",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CEMarking",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Indicates whether the product bears CE marking as required by applicable EU directives.",
-                "language": "en"
-              }
-            ],
-            "dataType": "BOOLEAN"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF701#001",
-      "idShort": "DeclarationOfConformityUrl",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "DeclarationOfConformityUrl",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "URL or reference to the EU Declaration of Conformity (DoC) document.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF702#001",
-      "idShort": "DeclarationOfPerformanceNumber",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "DeclarationOfPerformanceNumber",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Reference number of the EU Declaration of Performance (DoP) for construction products.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF703#001",
-      "idShort": "CertificateName",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CertificateName",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Name or designation of the third-party compliance certificate or standard verification.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF704#001",
-      "idShort": "CertificateIssuer",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CertificateIssuer",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Name of the notified body, certification authority or conformity assessment body issuing the certificate.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF705#001",
-      "idShort": "CertificateReferenceNumber",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CertificateReferenceNumber",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Unique reference number assigned to the certificate by the issuing body.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF706#001",
-      "idShort": "CertificateValidUntil",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "CertificateValidUntil",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Expiry date of the compliance certificate (ISO 8601 date format).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF800#001",
-      "idShort": "FacilityName",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "FacilityName",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Legal or operational name of the manufacturing or processing facility.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF801#001",
-      "idShort": "FacilityLocation",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "FacilityLocation",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Physical address or geographic location of the facility (city, country).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF802#001",
-      "idShort": "FacilityActivity",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "FacilityActivity",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Primary manufacturing or processing activity performed at the facility.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF803#001",
-      "idShort": "FacilityEORI",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "FacilityEORI",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Economic Operators Registration and Identification (EORI) number of the facility operator.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF804#001",
-      "idShort": "TraceabilityDocumentHash",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "TraceabilityDocumentHash",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "SHA-256 cryptographic hash of the traceability document for integrity verification.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF805#001",
-      "idShort": "TraceabilityDocumentUrl",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "TraceabilityDocumentUrl",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Publicly accessible URL to the referenced traceability or sourcing document.",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF900#001",
-      "idShort": "ScrapMetalContentRatio",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "ScrapMetalContentRatio",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Percentage by weight of post-consumer scrap metal used in the product production.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF901#001",
-      "idShort": "TensileStrengthClass",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "TensileStrengthClass",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Structural steel tensile strength class designation (e.g. S235JR, S355JR per EN 10025).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF902#001",
+      "id": "urn:opendpp:concept:carbonEmissionIntensityPerTon",
       "idShort": "CarbonEmissionIntensityPerTon",
       "modelType": "ConceptDescription",
       "embeddedDataSpecifications": [
@@ -3914,14 +735,14 @@
             "modelType": "DataSpecificationIec61360",
             "preferredName": [
               {
-                "text": "CarbonEmissionIntensityPerTon",
-                "language": "en"
+                "language": "en",
+                "text": "CarbonEmissionIntensityPerTon"
               }
             ],
             "definition": [
               {
-                "text": "Carbon dioxide equivalent emissions intensity per tonne of steel or metal produced.",
-                "language": "en"
+                "language": "en",
+                "text": "Embodied CO2e emissions per tonne of product."
               }
             ],
             "dataType": "REAL_MEASURE",
@@ -3931,8 +752,8 @@
       ]
     },
     {
-      "id": "0173-1#02-BAF903#001",
-      "idShort": "MetallurgicalClassification",
+      "id": "urn:opendpp:concept:repairabilityIndex",
+      "idShort": "RepairabilityIndex",
       "modelType": "ConceptDescription",
       "embeddedDataSpecifications": [
         {
@@ -3949,121 +770,119 @@
             "modelType": "DataSpecificationIec61360",
             "preferredName": [
               {
-                "text": "MetallurgicalClassification",
-                "language": "en"
+                "language": "en",
+                "text": "RepairabilityIndex"
               }
             ],
             "definition": [
               {
-                "text": "Standard metallurgical classification of the metal product (e.g. Carbon Structural Steel).",
-                "language": "en"
+                "language": "en",
+                "text": "Dimensionless repairability index (no unit)."
+              }
+            ],
+            "dataType": "REAL_COUNT"
+          }
+        }
+      ]
+    },
+    {
+      "id": "urn:opendpp:concept:cycleLife",
+      "idShort": "CycleLife",
+      "modelType": "ConceptDescription",
+      "embeddedDataSpecifications": [
+        {
+          "dataSpecification": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
+              }
+            ]
+          },
+          "dataSpecificationContent": {
+            "modelType": "DataSpecificationIec61360",
+            "preferredName": [
+              {
+                "language": "en",
+                "text": "CycleLife"
+              }
+            ],
+            "definition": [
+              {
+                "language": "en",
+                "text": "Rated number of charge/discharge cycles (a count, no unit)."
+              }
+            ],
+            "dataType": "INTEGER_COUNT"
+          }
+        }
+      ]
+    },
+    {
+      "id": "urn:opendpp:concept:isRecyclable",
+      "idShort": "IsRecyclable",
+      "modelType": "ConceptDescription",
+      "embeddedDataSpecifications": [
+        {
+          "dataSpecification": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
+              }
+            ]
+          },
+          "dataSpecificationContent": {
+            "modelType": "DataSpecificationIec61360",
+            "preferredName": [
+              {
+                "language": "en",
+                "text": "IsRecyclable"
+              }
+            ],
+            "definition": [
+              {
+                "language": "en",
+                "text": "Whether the product is recyclable."
+              }
+            ],
+            "dataType": "BOOLEAN"
+          }
+        }
+      ]
+    },
+    {
+      "id": "urn:opendpp:concept:chemistry",
+      "idShort": "Chemistry",
+      "modelType": "ConceptDescription",
+      "embeddedDataSpecifications": [
+        {
+          "dataSpecification": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
+              }
+            ]
+          },
+          "dataSpecificationContent": {
+            "modelType": "DataSpecificationIec61360",
+            "preferredName": [
+              {
+                "language": "en",
+                "text": "Chemistry"
+              }
+            ],
+            "definition": [
+              {
+                "language": "en",
+                "text": "Battery cell chemistry."
               }
             ],
             "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF904#001",
-      "idShort": "PostConsumerScrapContent",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "PostConsumerScrapContent",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Percentage of post-consumer recycled scrap used in aluminium or metal production.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "%"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF905#001",
-      "idShort": "SmelterElectricitySource",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "SmelterElectricitySource",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Primary electricity source used in the smelting process (e.g. hydro, wind, grid).",
-                "language": "en"
-              }
-            ],
-            "dataType": "STRING"
-          }
-        }
-      ]
-    },
-    {
-      "id": "0173-1#02-BAF906#001",
-      "idShort": "EnergyIntensityPerKg",
-      "modelType": "ConceptDescription",
-      "embeddedDataSpecifications": [
-        {
-          "dataSpecification": {
-            "type": "ExternalReference",
-            "keys": [
-              {
-                "type": "GlobalReference",
-                "value": "https://admin-shell.io/DataSpecificationTemplates/DataSpecificationIec61360/3"
-              }
-            ]
-          },
-          "dataSpecificationContent": {
-            "modelType": "DataSpecificationIec61360",
-            "preferredName": [
-              {
-                "text": "EnergyIntensityPerKg",
-                "language": "en"
-              }
-            ],
-            "definition": [
-              {
-                "text": "Energy consumed per kilogram of metal produced during the smelting or rolling process.",
-                "language": "en"
-              }
-            ],
-            "dataType": "REAL_MEASURE",
-            "unit": "kWh/kg"
           }
         }
       ]

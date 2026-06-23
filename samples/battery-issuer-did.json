@@ -3,17 +3,16 @@
     "https://www.w3.org/ns/did/v1",
     "https://w3id.org/security/suites/jws-2020/v1"
   ],
-  "id": "did:web:opendpp-node.eu:tenants:tenant-demo-opendpp",
-  "name": "OpenDPP Demo Manufacturing — SAMPLE DATA (NOT A REAL COMPANY)",
+  "id": "did:web:opendpp-node.eu:tenants:demo",
   "verificationMethod": [
     {
-      "id": "did:web:opendpp-node.eu:tenants:tenant-demo-opendpp#key-0",
+      "id": "did:web:opendpp-node.eu:tenants:demo#key-0",
       "type": "JsonWebKey2020",
-      "controller": "did:web:opendpp-node.eu:tenants:tenant-demo-opendpp",
+      "controller": "did:web:opendpp-node.eu:tenants:demo",
       "publicKeyJwk": {
         "kty": "EC",
-        "x": "B13XCxCs_Bj9iUg-Y4juXsHdBTyXILYkIa8kZdPS6-M",
-        "y": "u-54jSZ2YPkn66M9ocuCu5mDWlOvtDCc6j-LLMAMnxs",
+        "x": "5FEjgb9Ks0TvqdnHdPsWNl-lBJukOXiw0L4WzdMtrNY",
+        "y": "YeJbhwbwTowpX6ipviQxNo1_uvaLDqiJyDogkV163Sk",
         "crv": "P-256",
         "alg": "ES256",
         "use": "sig"
@@ -21,9 +20,9 @@
     }
   ],
   "assertionMethod": [
-    "did:web:opendpp-node.eu:tenants:tenant-demo-opendpp#key-0"
+    "did:web:opendpp-node.eu:tenants:demo#key-0"
   ],
   "authentication": [
-    "did:web:opendpp-node.eu:tenants:tenant-demo-opendpp#key-0"
+    "did:web:opendpp-node.eu:tenants:demo#key-0"
   ]
 }
