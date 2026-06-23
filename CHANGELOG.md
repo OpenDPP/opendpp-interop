@@ -5,7 +5,7 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
-## [1.5.0] — API contract 1.5.0 (ingest-response parity: VC-readiness + non-GS1 advisory on bulk & AAS)
+## [1.5.0] — API contract 1.5.0 (ingest-response parity) + per-category AAS sample coverage
 
 Carries OpenDPP public API contract **1.5.0** (`openapi.json`). The change is **ingest-response metadata
 only**, so every validator door (`aas` / `untp` / `registry` / `semanticids` / `shacl` / `sdjwt` / `gs1`)
@@ -17,6 +17,12 @@ is unchanged — the conformance projections this kit validates are unaffected.
   201 also gains a **`warnings[]`** non-GS1 advisory (parity with create / validate-only). All additive
   response fields. The create / validate-only **400** descriptions now also document that a 14-digit
   `productId` failing the GS1 mod-10 check digit is rejected. No request-shape change and no validator change.
+- **Samples — per-category AAS coverage** (mirrors OpenDPP backend #114/#115) — the kit now ships one
+  AASX package **per ESPR category** (9: aluminium, batteries, chemicals, construction, cosmetics,
+  electronics, iron-steel, textiles, toys) instead of battery-only. Each is AAS v3.0 JSON-Schema valid
+  (the kit CI extracts `aasx/data/environment.json` from every `.aasx` and validates it) **and** IDTA
+  `aas-test-engines` metamodel-valid (the stricter gold standard, run in OpenDPP's backend CI). Content
+  only — no contract or validator-door change.
 
 ## [1.4.0] — API contract 1.4.0 (passport create reports VC-readiness)
 

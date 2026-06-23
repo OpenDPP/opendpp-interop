@@ -24,6 +24,14 @@ jobs:
         run: |
           set -e
           node validate/validate.mjs aas      samples/battery-aas-environment.json
+          # Every per-category AAS sample (#114/#115): extract the AAS Environment from each .aasx
+          # (OPC/ZIP, at aasx/data/environment.json) and validate it against the official IDTA-01001-3-1
+          # AAS v3.0 JSON Schema. The same 9 .aasx are also validated against the stricter IDTA
+          # `aas-test-engines` metamodel gold standard in OpenDPP's backend CI.
+          for aasx in samples/*.aasx; do
+            unzip -p "$aasx" aasx/data/environment.json > /tmp/aas-env.json
+            echo "aas: $aasx"; node validate/validate.mjs aas /tmp/aas-env.json
+          done
           node validate/validate.mjs untp     samples/battery-vc-credential.json
           node validate/validate.mjs untp     samples/battery-unit-vc-credential.json
           node validate/validate.mjs untp     samples/textile-vc-credential.json

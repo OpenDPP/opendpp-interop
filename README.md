@@ -123,6 +123,11 @@ so you can **reproduce and verify every one** against the live API (each `sample
 the `curl`). Synthetic demo data — see [`NOTICE`](./NOTICE):
 
 - `battery-aas-environment.json`, `battery.aasx` — the battery as an AAS v3.0 Environment / AASX package.
+- `{aluminium,chemicals,construction,cosmetics,electronics,iron-steel,textiles,toys}.aasx` — one AASX
+  package **per ESPR category** (#114/#115), each carrying that category's standardized submodel views.
+  Every one is AAS v3.0 JSON-Schema valid (the kit CI extracts `aasx/data/environment.json` from each and
+  validates it) **and** IDTA `aas-test-engines` metamodel-valid (the stricter gold standard, run in
+  OpenDPP's backend CI).
 - `battery-vc-credential.json` — the UNTP DPP credential (unsigned form, SKU/type, `idGranularity:"model"`).
 - `battery-vc.jwt` — the enveloping **`vc+jwt`** (paste into a JOSE debugger).
 - `battery-vc-di.jsonld` — the **embedded W3C Data Integrity** form (`ecdsa-jcs-2019`).
