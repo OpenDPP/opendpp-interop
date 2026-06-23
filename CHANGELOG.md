@@ -5,6 +5,17 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.4.0] — API contract 1.4.0 (passport create reports VC-readiness)
+
+Carries OpenDPP public API contract **1.4.0** (`openapi.json`). The change is **owner-facing metadata
+only**, so every validator door (`aas` / `untp` / `registry` / `semanticids` / `shacl` / `sdjwt` / `gs1`)
+is unchanged — the conformance projections this kit validates are unaffected.
+
+- **API contract 1.4.0** — the `POST /api/v1/passports` 201 response gains two fields: **`vcReady`**
+  (boolean) and **`vcReadyReason`** (string | null), reporting whether the passport can emit a UNTP
+  Verifiable Credential (true only when a manufacturing facility with a country of production is linked;
+  a GLN is optional). A soft signal — the passport still publishes/resolves as AAS / JSON-LD / HTML.
+
 ## [1.3.0] — API contract 1.3.0 (bulk import: dry-run + upsert)
 
 Carries OpenDPP public API contract **1.3.0** (`openapi.json`). The change is **ingest-side only**, so
