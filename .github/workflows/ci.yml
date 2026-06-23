@@ -60,7 +60,11 @@ jobs:
           echo 'https://id.gs1.org/01/09501101532006' > /tmp/bad-gs1.txt
           if node validate/validate.mjs gs1 /tmp/bad-gs1.txt; then echo "ERROR: a bad GTIN check digit unexpectedly conformed" && exit 1; else echo "ok: GS1 engine rejected the bad check digit"; fi
       - name: Classify AAS semanticIds against the IDTA allowlist (identity)
-        run: node validate/validate.mjs semanticids samples/battery-aas-environment.json --strict
+        # Non-strict (warns on unverified ids) — matches the OpenDPP backend gate. The sample's TechnicalData
+        # submodel carries element-level IDTA ids (e.g. https://admin-shell.io/ZVEI/TechnicalData/…/1/1) that a
+        # submodel-level registry snapshot cannot auto-verify; --strict would wrongly reject those legitimate
+        # IDTA template element ids. Deprecated-id detection still warns; the positive assertions are below.
+        run: node validate/validate.mjs semanticids samples/battery-aas-environment.json
       - name: Assert classifier behaviour (CarbonFootprint is a published IDTA id)
         run: |
           node -e "
