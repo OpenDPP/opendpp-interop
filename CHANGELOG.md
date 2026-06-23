@@ -5,6 +5,18 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.3.0] — API contract 1.3.0 (bulk import: dry-run + upsert)
+
+Carries OpenDPP public API contract **1.3.0** (`openapi.json`). The change is **ingest-side only**, so
+every validator door (`aas` / `untp` / `registry` / `semanticids` / `shacl` / `sdjwt` / `gs1`) is
+unchanged — the conformance projections this kit validates are unaffected.
+
+- **API contract 1.3.0** — `POST /api/v1/passports/bulk` gains two optional, backward-compatible request
+  flags: **`dryRun`** (validate every row and report OK-vs-error **without writing** — HTTP 200, a
+  pre-import preview) and **`upsert`** (a row whose `(productId, operator)` already exists **updates** the
+  existing passport instead of erroring as a duplicate; a sealed passport is never overwritten). The
+  response shape is unchanged.
+
 ## [1.2.0] — GS1 Digital Link conformance + API contract 1.2.0
 
 Carries OpenDPP public API contract **1.2.0** (`openapi.json`). New:
