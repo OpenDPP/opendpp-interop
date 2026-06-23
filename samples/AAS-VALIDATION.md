@@ -1,12 +1,15 @@
-# AAS v3.0 — sample Asset Administration Shell
+# AAS v3.0/3.1 — sample Asset Administration Shell
 
 Real, live outputs of the OpenDPP demo service, for the same fictional battery as the VC samples
 (type passport `…/01/09501101532007`).
 
-- `battery-aas-environment.json` — the AAS v3.0 Environment (IDTA-01001-3-1), live from prod.
+- `battery-aas-environment.json` — the AAS v3.0/3.1 Environment (IDTA-01001-3-1), live from prod.
 - `battery.aasx` — that same Environment packaged as an **AASX** (OPC/ZIP) per AAS Part 5; open in
   AASX Package Explorer or load via BaSyx. Layout: `[Content_Types].xml`, `_rels/.rels`,
   `aasx/aasx-origin`, `aasx/data/environment.json`.
+- `{aluminium,chemicals,construction,cosmetics,electronics,iron-steel,textiles,toys}.aasx` — one AASX
+  **per ESPR category** (#114/#115), each carrying that category's standardized submodel views on top of
+  the authoritative ComplianceMetadata. Same OPC layout; the AAS Environment is at `aasx/data/environment.json`.
 
 ## Reproduce
 
@@ -19,11 +22,21 @@ curl -sL -H 'Accept: application/aas+json' https://opendpp-node.eu/01/0950110153
 
 ```bash
 cd ../validate && npm install
-node validate.mjs aas ../samples/battery-aas-environment.json   # ✓ IDTA-01001-3-1 AAS v3.0
+node validate.mjs aas ../samples/battery-aas-environment.json   # ✓ official IDTA AAS metamodel 3.1 JSON Schema (aas-specs v3.1.2), IDTA-01001-3-1
+
+# Validate every per-category .aasx — extract its AAS Environment first, then validate:
+for f in ../samples/*.aasx; do
+  unzip -p "$f" aasx/data/environment.json > /tmp/aas-env.json
+  node validate.mjs aas /tmp/aas-env.json
+done
 ```
 
-The schema (`../schemas/aas-v3.schema.json`) is the official IDTA-01001-3-1 JSON Schema (draft-2019-09).
-The upstream [`aas-test-engines`](https://github.com/admin-shell-io/aas-test-engines) Python suite is
-the gold standard; this JSON-Schema validation is the CI-friendly structural equivalent.
+The schema (`../schemas/aas-v3.schema.json`) is the official IDTA AAS **metamodel 3.1** JSON Schema
+(`aas-specs` v3.1.2, IDTA-01001-3-1; draft-2019-09).
+All **9 per-category** `.aasx` also pass the upstream
+[`aas-test-engines`](https://github.com/admin-shell-io/aas-test-engines) Python suite — the IDTA
+`aas-test-engines` **3.0** metamodel gold standard (latest 1.0.3 — no 3.1 test cases yet), stricter
+than this JSON-Schema check — in OpenDPP's backend CI. The samples use the 3.0/3.1 common subset, so
+they pass both.
 
 > Concepts OpenDPP coins are `urn:opendpp:concept:*` / `urn:opendpp:submodel:*` — never presented as eCl@ss.

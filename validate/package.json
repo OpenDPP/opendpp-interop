@@ -1,6 +1,6 @@
 {
   "name": "@opendpp/interop-validate",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "type": "module",
   "description": "Validate AAS / UNTP DPP / CIRPASS-2-pointer output against the official schemas OpenDPP's CI uses, plus OpenDPP's own non-normative SHACL shapes — offline, no product source required.",

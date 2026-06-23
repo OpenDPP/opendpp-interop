@@ -1,7 +1,7 @@
 # OpenDPP Interop Boundary Kit
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Conformance](https://img.shields.io/badge/conformance-AAS%20v3.0%20%2B%20UNTP%20DPP%20v0.7.0%20%2B%20GS1%20Digital%20Link-brightgreen.svg)](./CONFORMANCE.md)
+[![Conformance](https://img.shields.io/badge/conformance-AAS%20v3.0%2F3.1%20%2B%20UNTP%20DPP%20v0.7.0%20%2B%20GS1%20Digital%20Link-brightgreen.svg)](./CONFORMANCE.md)
 
 Everything an integrator needs to **consume, conform to, and validate** OpenDPP's two
 interoperability projections — *without access to the product source*: the official schemas,
@@ -21,7 +21,7 @@ The product backend is a separate, private repository — you don't need it to i
 
 | Door | Format | How to consume | Conforms to |
 | --- | --- | --- | --- |
-| **AAS / IDTA** | `application/aas+json` + AASX (OPC/ZIP) | `GET /passport/{id}` (or `/01/{gtin14}`) with `Accept: application/aas+json` | IDTA-01001-3-1 **AAS v3.0** |
+| **AAS / IDTA** | `application/aas+json` + AASX (OPC/ZIP) | `GET /passport/{id}` (or `/01/{gtin14}`) with `Accept: application/aas+json` | IDTA-01001-3-1 **AAS v3.0/3.1** |
 | **UNTP + VC** | enveloping **`vc+jwt`** (W3C VC-JOSE-COSE, ES256) — or embedded **`vc+ld+json`** (W3C Data Integrity, `ecdsa-jcs-2019`) | `GET /passport/{id}` (SKU/type) **or** `GET /unit/{id}` (per-unit, item granularity) with `Accept: application/vc+jwt` (or `application/vc+ld+json`); issuer key at `GET /tenants/{tenantId}/did.json`; revocation at `GET /tenants/{tenantId}/status/revocation` | **UNTP DigitalProductPassport v0.7.0**, `did:web`, W3C Bitstring Status List |
 
 Both doors are addressed by **GS1 Digital Links** — a passport resolves at `/01/{gtin}` (SKU/model) or
@@ -77,7 +77,7 @@ opendpp-interop/
 The exact schemas OpenDPP's own CI validates against, copied verbatim (upstream is authoritative —
 see [`schemas/README.md`](./schemas/README.md) and [`NOTICE`](./NOTICE)):
 
-- **AAS v3.0** — [`schemas/aas-v3.schema.json`](./schemas/aas-v3.schema.json) (official
+- **the official IDTA AAS metamodel 3.1 JSON Schema (`aas-specs` v3.1.2)** — [`schemas/aas-v3.schema.json`](./schemas/aas-v3.schema.json) (official
   IDTA-01001-3-1, JSON Schema draft-2019-09).
 - **UNTP DPP v0.7.0** — [`schemas/untp-dpp-v0.7.0.schema.json`](./schemas/untp-dpp-v0.7.0.schema.json)
   (draft-2020-12).
@@ -122,7 +122,14 @@ passport `…/01/09501101532007`, unit `VM-LFP100-2026-000001`; textile passport
 so you can **reproduce and verify every one** against the live API (each `samples/*-VALIDATION.md` has
 the `curl`). Synthetic demo data — see [`NOTICE`](./NOTICE):
 
-- `battery-aas-environment.json`, `battery.aasx` — the battery as an AAS v3.0 Environment / AASX package.
+- `battery-aas-environment.json`, `battery.aasx` — the battery as an AAS v3.0/3.1 Environment / AASX package.
+- `{aluminium,chemicals,construction,cosmetics,electronics,iron-steel,textiles,toys}.aasx` — one AASX
+  package **per ESPR category** (#114/#115), each carrying that category's standardized submodel views.
+  Every one validates against both the official AAS **3.1** JSON Schema (`aas-specs` v3.1.2) and the
+  `aas-test-engines` **3.0** gold standard (the 3.0/3.1 common subset): the kit CI extracts
+  `aasx/data/environment.json` from each and JSON-Schema-validates it, **and** the IDTA
+  `aas-test-engines` **3.0** metamodel gold standard (latest 1.0.3 — no 3.1 test cases yet) runs in
+  OpenDPP's backend CI.
 - `battery-vc-credential.json` — the UNTP DPP credential (unsigned form, SKU/type, `idGranularity:"model"`).
 - `battery-vc.jwt` — the enveloping **`vc+jwt`** (paste into a JOSE debugger).
 - `battery-vc-di.jsonld` — the **embedded W3C Data Integrity** form (`ecdsa-jcs-2019`).

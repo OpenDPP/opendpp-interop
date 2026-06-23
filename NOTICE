@@ -8,7 +8,7 @@ Third-party content (vendored verbatim; NOT covered by the Apache-2.0 license
 above — each retains its own upstream license and terms):
 
 1. schemas/aas-v3.schema.json
-   Asset Administration Shell (AAS) v3.0 JSON Schema — IDTA-01001-3-1.
+   Official IDTA AAS metamodel 3.1 JSON Schema (aas-specs v3.1.2) — IDTA-01001-3-1.
    © IDTA (Industrial Digital Twin Association) and contributors.
    Canonical source: https://github.com/admin-shell-io/aas-specs
    Vendored verbatim for offline validation. Upstream is authoritative.

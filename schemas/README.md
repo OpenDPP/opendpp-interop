@@ -7,7 +7,7 @@ validates against. They are **not** OpenDPP works — each retains its upstream 
 
 | File | Standard | Draft | Upstream / canonical source |
 | --- | --- | --- | --- |
-| `aas-v3.schema.json` | Asset Administration Shell (AAS) v3.0 — IDTA-01001-3-1 | JSON Schema draft-2019-09 | IDTA / [admin-shell-io/aas-specs](https://github.com/admin-shell-io/aas-specs) (`$id: https://admin-shell.io/aas/3/1`) |
+| `aas-v3.schema.json` | Official IDTA AAS metamodel 3.1 JSON Schema (`aas-specs` v3.1.2) — IDTA-01001-3-1 | JSON Schema draft-2019-09 | IDTA / [admin-shell-io/aas-specs](https://github.com/admin-shell-io/aas-specs) (`$id: https://admin-shell.io/aas/3/1`) |
 | `untp-dpp-v0.7.0.schema.json` | UN Transparency Protocol — Digital Product Passport v0.7.0 | JSON Schema draft-2020-12 | UN/CEFACT / [uncefact/spec-untp](https://github.com/uncefact/spec-untp) |
 | `cirpass2-eu-registry-pointer.schema.json` | CIRPASS-2 mock-eu-registry pointer (ESPR Art. 13 index record) — **NON-NORMATIVE** | JSON Schema draft-2020-12 | CIRPASS-2 / [CIRPASS-2/mock-eu-registry](https://github.com/CIRPASS-2/mock-eu-registry) (`default-schema.json`, pinned commit `b383c4d`) |
 

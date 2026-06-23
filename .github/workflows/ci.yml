@@ -24,6 +24,15 @@ jobs:
         run: |
           set -e
           node validate/validate.mjs aas      samples/battery-aas-environment.json
+          # Every per-category AAS sample (#114/#115): extract the AAS Environment from each .aasx
+          # (OPC/ZIP, at aasx/data/environment.json) and validate it against the official IDTA AAS
+          # metamodel 3.1 JSON Schema (aas-specs v3.1.2), official IDTA-01001-3-1. The same 9 .aasx are
+          # also validated against the stricter IDTA `aas-test-engines` 3.0 metamodel gold standard in
+          # OpenDPP's backend CI.
+          for aasx in samples/*.aasx; do
+            unzip -p "$aasx" aasx/data/environment.json > /tmp/aas-env.json
+            echo "aas: $aasx"; node validate/validate.mjs aas /tmp/aas-env.json
+          done
           node validate/validate.mjs untp     samples/battery-vc-credential.json
           node validate/validate.mjs untp     samples/battery-unit-vc-credential.json
           node validate/validate.mjs untp     samples/textile-vc-credential.json
@@ -51,7 +60,11 @@ jobs:
           echo 'https://id.gs1.org/01/09501101532006' > /tmp/bad-gs1.txt
           if node validate/validate.mjs gs1 /tmp/bad-gs1.txt; then echo "ERROR: a bad GTIN check digit unexpectedly conformed" && exit 1; else echo "ok: GS1 engine rejected the bad check digit"; fi
       - name: Classify AAS semanticIds against the IDTA allowlist (identity)
-        run: node validate/validate.mjs semanticids samples/battery-aas-environment.json --strict
+        # Non-strict (warns on unverified ids) — matches the OpenDPP backend gate. The sample's TechnicalData
+        # submodel carries element-level IDTA ids (e.g. https://admin-shell.io/ZVEI/TechnicalData/…/1/1) that a
+        # submodel-level registry snapshot cannot auto-verify; --strict would wrongly reject those legitimate
+        # IDTA template element ids. Deprecated-id detection still warns; the positive assertions are below.
+        run: node validate/validate.mjs semanticids samples/battery-aas-environment.json
       - name: Assert classifier behaviour (CarbonFootprint is a published IDTA id)
         run: |
           node -e "

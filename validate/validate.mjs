@@ -39,8 +39,8 @@ import { validateSdJwtFile } from "./sdjwt.mjs";
 import { validateGs1File } from "./gs1.mjs";
 
 const SCHEMAS = {
-  // AAS v3.0: official IDTA-01001-3-1 JSON Schema (draft-2019-09).
-  aas: { file: "aas-v3.schema.json", Ajv: Ajv2019, label: "AAS v3.0 Environment (IDTA-01001-3-1)" },
+  // the official IDTA AAS metamodel 3.1 JSON Schema (aas-specs v3.1.2): official IDTA-01001-3-1 (draft-2019-09).
+  aas: { file: "aas-v3.schema.json", Ajv: Ajv2019, label: "AAS v3.0/3.1 Environment (official IDTA AAS metamodel 3.1 JSON Schema, aas-specs v3.1.2, IDTA-01001-3-1)" },
   // UNTP DigitalProductPassport v0.7.0 (draft-2020-12).
   untp: { file: "untp-dpp-v0.7.0.schema.json", Ajv: Ajv2020, label: "UNTP DigitalProductPassport v0.7.0" },
   // CIRPASS-2 mock-eu-registry pointer (ESPR Art. 13 index record), draft-2020-12. NON-NORMATIVE reference.

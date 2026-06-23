@@ -5,6 +5,26 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.5.0] — API contract 1.5.0 (ingest-response parity) + per-category AAS sample coverage
+
+Carries OpenDPP public API contract **1.5.0** (`openapi.json`). The change is **ingest-response metadata
+only**, so every validator door (`aas` / `untp` / `registry` / `semanticids` / `shacl` / `sdjwt` / `gs1`)
+is unchanged — the conformance projections this kit validates are unaffected.
+
+- **API contract 1.5.0** — VC-readiness reporting reaches the remaining ingest paths, for parity with
+  `POST /api/v1/passports` (1.4.0): each `POST /api/v1/passports/bulk` `results[]` row and the
+  `POST /api/v1/passports/aas/ingest` 201 now carry **`vcReady`** / **`vcReadyReason`**, and the AAS-ingest
+  201 also gains a **`warnings[]`** non-GS1 advisory (parity with create / validate-only). All additive
+  response fields. The create / validate-only **400** descriptions now also document that a 14-digit
+  `productId` failing the GS1 mod-10 check digit is rejected. No request-shape change and no validator change.
+- **Samples — per-category AAS coverage** (mirrors OpenDPP backend #114/#115) — the kit now ships one
+  AASX package **per ESPR category** (9: aluminium, batteries, chemicals, construction, cosmetics,
+  electronics, iron-steel, textiles, toys) instead of battery-only. They use the metamodel 3.0/3.1 common
+  subset, so each validates against **both** the official AAS **3.1** JSON Schema (`aas-specs` v3.1.2)
+  **and** the IDTA `aas-test-engines` **3.0** metamodel gold standard (latest 1.0.3 — no 3.1 test cases
+  yet): the kit CI extracts `aasx/data/environment.json` from every `.aasx` and JSON-Schema-validates it,
+  and the gold-standard run is in OpenDPP's backend CI. Content only — no contract or validator-door change.
+
 ## [1.4.0] — API contract 1.4.0 (passport create reports VC-readiness)
 
 Carries OpenDPP public API contract **1.4.0** (`openapi.json`). The change is **owner-facing metadata
