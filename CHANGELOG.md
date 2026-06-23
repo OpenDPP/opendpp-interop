@@ -19,10 +19,11 @@ is unchanged — the conformance projections this kit validates are unaffected.
   `productId` failing the GS1 mod-10 check digit is rejected. No request-shape change and no validator change.
 - **Samples — per-category AAS coverage** (mirrors OpenDPP backend #114/#115) — the kit now ships one
   AASX package **per ESPR category** (9: aluminium, batteries, chemicals, construction, cosmetics,
-  electronics, iron-steel, textiles, toys) instead of battery-only. Each is AAS v3.0 JSON-Schema valid
-  (the kit CI extracts `aasx/data/environment.json` from every `.aasx` and validates it) **and** IDTA
-  `aas-test-engines` metamodel-valid (the stricter gold standard, run in OpenDPP's backend CI). Content
-  only — no contract or validator-door change.
+  electronics, iron-steel, textiles, toys) instead of battery-only. They use the metamodel 3.0/3.1 common
+  subset, so each validates against **both** the official AAS **3.1** JSON Schema (`aas-specs` v3.1.2)
+  **and** the IDTA `aas-test-engines` **3.0** metamodel gold standard (latest 1.0.3 — no 3.1 test cases
+  yet): the kit CI extracts `aasx/data/environment.json` from every `.aasx` and JSON-Schema-validates it,
+  and the gold-standard run is in OpenDPP's backend CI. Content only — no contract or validator-door change.
 
 ## [1.4.0] — API contract 1.4.0 (passport create reports VC-readiness)
 
