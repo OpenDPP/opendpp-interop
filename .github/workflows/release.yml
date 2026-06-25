@@ -8,12 +8,12 @@ name: Release on version bump
 
 on:
   push:
-    # main: auto-release every future version bump the moment it lands.
-    # claude/**: bootstrap — lets the automation branch that introduces this workflow create the
-    #            already-merged-but-untagged v1.5.0 release. Harmless to keep (guarded + idempotent).
+    # Auto-release every future version bump the moment it lands on main. (The original `claude/**`
+    # bootstrap trigger — which existed only to create the already-merged-but-untagged v1.5.0 release —
+    # has been removed now that it is spent: v1.0.0..v1.5.0 are all published, the job already checks out
+    # `ref: main` regardless of the pushed branch, and workflow_dispatch covers any manual run.)
     branches:
       - main
-      - "claude/**"
   workflow_dispatch:
 
 permissions:
@@ -27,6 +27,7 @@ jobs:
   release:
     name: Tag + publish the carried contract version
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check out main (the tag is always anchored to main's tip)
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0

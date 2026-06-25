@@ -7,6 +7,14 @@ name: Drift check
 on:
   schedule:
     - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  # Event-driven backstop: the source repo (opendpp-node) can `repository_dispatch` this with event type
+  # `spec-updated` right after a contract change, so drift is checked when the spec actually moves — not
+  # only weekly. It ALSO keeps the 60-day clock alive: GitHub auto-DISABLES a schedule-only workflow after
+  # 60 days of repository inactivity, and this kit is refreshed infrequently, so a long-stable stretch would
+  # otherwise silently stop the weekly check. If that ever happens, re-enable from the Actions tab;
+  # workflow_dispatch is the manual fallback. (The opendpp-node sender is a follow-up; this is the receiver.)
+  repository_dispatch:
+    types: [spec-updated]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +25,7 @@ jobs:
   openapi-drift:
     name: openapi.json vs live
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Fetch live spec + compare canonically
