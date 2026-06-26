@@ -5,6 +5,26 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.6.0] — API contract 1.6.0 (quota enforcement + GS1 & resolution round-out)
+
+Carries OpenDPP public API contract **1.6.0** (`openapi.json`). Additive (MINOR) — no breaking change.
+The additions are **API-surface only** (two new endpoints, a discriminated billing-`402`, and a new
+per-unit media type), so every validator door (`aas` / `untp` / `registry` / `semanticids` / `shacl` /
+`sdjwt` / `gs1`) is unchanged — the conformance projections this kit validates are unaffected.
+
+- **Passport-quota `402`** — `POST /api/v1/passports` (+ `/bulk`, `/aas/ingest`), the `PUT /api/v1/passports/{id}`
+  draft→publish transition, and `POST /api/v1/operators/{id}/restore` now document a discriminated `402`
+  (`code: "passport_quota_exceeded"` + `quota` + `upgradeUrl`) on the shared `PaymentRequired` response (OpenDPP #280).
+- **`POST /api/v1/gs1/decode/batch`** — batch GS1 scan-data / element-string / Digital-Link decode (≤200
+  items, per-item partial-success); the single-scan `/gs1/decode` is unchanged (OpenDPP #262).
+- **`POST /api/v1/passports/{passportId}/units/validate`** — a non-mutating GS1 / AI-21 unit-identifier
+  conformance pre-flight returning per-item verdicts (OpenDPP #263).
+- **`GET /unit/{id}` `application/dc+sd-jwt`** — the per-unit SD-JWT-VC representation, reaching parity with
+  `GET /passport/{id}` (OpenDPP #251 RE-Q). The kit ships a new **`samples/battery-unit-vc.sdjwt`** (item
+  granularity), validated by the `sdjwt` door. The VC demo set re-signs against a fresh issuer key (the demo
+  key is ephemeral) so the new per-unit sample shares the issuer `did:web`; the credential JSON payloads are
+  unchanged.
+
 ## [1.5.0] — API contract 1.5.0 (ingest-response parity) + per-category AAS sample coverage
 
 Carries OpenDPP public API contract **1.5.0** (`openapi.json`). The change is **ingest-response metadata

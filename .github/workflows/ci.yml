@@ -45,6 +45,7 @@ jobs:
           node validate/validate.mjs shacl    samples/battery-passport.jsonld
           node validate/validate.mjs sdjwt    samples/battery-vc.sdjwt
           node validate/validate.mjs sdjwt    samples/battery-vc-presented.sdjwt
+          node validate/validate.mjs sdjwt    samples/battery-unit-vc.sdjwt
           node validate/validate.mjs gs1      samples/gs1-digital-link.txt
       - name: SD-JWT-VC negative control (a forged disclosure MUST be rejected)
         run: |
