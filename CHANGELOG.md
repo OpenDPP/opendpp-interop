@@ -20,8 +20,10 @@ per-unit media type), so every validator door (`aas` / `untp` / `registry` / `se
 - **`POST /api/v1/passports/{passportId}/units/validate`** — a non-mutating GS1 / AI-21 unit-identifier
   conformance pre-flight returning per-item verdicts (OpenDPP #263).
 - **`GET /unit/{id}` `application/dc+sd-jwt`** — the per-unit SD-JWT-VC representation, reaching parity with
-  `GET /passport/{id}` (OpenDPP #251 RE-Q). *(The kit does not yet ship a per-unit SD-JWT sample; the existing
-  `samples/battery-vc.sdjwt` demonstrates the passport-level SD-JWT-VC.)*
+  `GET /passport/{id}` (OpenDPP #251 RE-Q). The kit ships a new **`samples/battery-unit-vc.sdjwt`** (item
+  granularity), validated by the `sdjwt` door. The VC demo set re-signs against a fresh issuer key (the demo
+  key is ephemeral) so the new per-unit sample shares the issuer `did:web`; the credential JSON payloads are
+  unchanged.
 
 ## [1.5.0] — API contract 1.5.0 (ingest-response parity) + per-category AAS sample coverage
 
