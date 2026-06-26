@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "OpenDPP Integration API",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "summary": "Create, validate, seal and publish EU Digital Product Passports; serialize battery units; manage facilities, access grants and webhooks; resolve and verify passports publicly.",
     "description": "OpenDPP is a B2B platform for EU Digital Product Passports (DPPs), aligned with the ESPR (Regulation (EU) 2024/1781) data requirements and the EU Battery Regulation (Regulation (EU) 2023/1542). This specification documents the **public integration surface**: everything an external system needs to create, validate, seal, publish, resolve and verify passports.\n\n## Authentication\nAuthenticate with a tenant **API key** sent as a Bearer token: `Authorization: Bearer op_dpp_token_…`. Keys are created in the Client Console (Developers → API keys), are shown **once** at creation, carry a role plus optional narrowed permissions and optional expiry, and can be revoked at any time. API-key clients are exempt from CSRF requirements. Public endpoints (tagged **Public Resolution**, plus the public validators and the audit verifier) need no credentials.\n\n## Tenancy\nTenant identity is **token-bound** — it is derived from your API key, never from the request host. The same paths work on the apex host and on tenant workspace hosts (`https://<workspace>.opendpp-node.eu`); when a workspace host is used, it must match the key's tenant (requests across workspaces are rejected with `403`).\n\n## Errors\nAuthenticated endpoints return `{ success: false, error, message }` (some omit `success`). ESPR metadata validation failures return the richer shape documented as **ValidationFailed** with per-field `errors[]`/`warnings[]` (localizable via `?lang=` or `Accept-Language`; 28 languages). Bulk endpoints report row-level problems as `errors: string[]`. Malformed JSON and query-string violations return Fastify's default `{ statusCode, code, error, message }` body.\n\n## Rate limits\nGlobal limit: **100 requests/min per IP** (higher for verified crawlers), with `x-ratelimit-*` response headers. Public passport resolution is additionally limited to **30 requests/min per IP** (no headers). The public validator is limited to **10 requests/min per IP**. Stay under these limits with client-side queueing; on `429`, back off and retry after the indicated window.\n\n## Sealing & verification\nPassport seals are **eIDAS advanced electronic seals** (ECDSA P-256 over a Merkle root of the passport content, optional RFC 3161 timestamp). Anyone can verify a seal — no account required. `POST /api/v1/audit/verify` recomputes every Merkle leaf from the submitted values, so it requires the unredacted document (caller-supplied redacted-leaf hashes are deliberately not trusted). Redacted documents remain verifiable **offline**: masked fields keep their true leaf hashes in `proof.redactedLeaves`, letting any verifier rebuild the sealed root without the privileged values.\n\n## Public access tiers\nPublic resolution endpoints serve **tiered** views of the same URL: the public tier for anonymous callers; a restricted tier for holders of legitimate-interest (`dpp_li_…`) or authority (`dpp_auth_…`) capability tokens (presented as a Bearer token or `?grant=` query parameter); and the owner tier for the issuing tenant's own credentials.\n\n## Webhooks\nSubscribe to passport lifecycle events (`passport.ingested`, `passport.sealed`, `passport.recalled`, or `*`). Deliveries are HMAC-SHA256-signed; see the **webhooks** section of this document for the exact signature scheme, retry schedule, and payloads.\n\nThis document is also served machine-readably at [`/openapi.json`](https://opendpp-node.eu/openapi.json) and [`/openapi.yaml`](https://opendpp-node.eu/openapi.yaml).\n\n## Open interoperability kit\nThe interoperability boundary — the official AAS + UNTP/W3C-VC schemas, live-reproducible samples, an offline conformance validator, and the field mappings — is **open source** at [github.com/OpenDPP/opendpp-interop](https://github.com/OpenDPP/opendpp-interop) (Apache-2.0). It lets any integrator validate and verify OpenDPP's standards-conformant output without access to the product source.",
     "contact": {
@@ -166,6 +166,157 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/v1/passports/{passportId}/units/validate": {
+      "parameters": [
+        {
+          "name": "passportId",
+          "in": "path",
+          "required": true,
+          "description": "The SKU/type-level passport, addressed by its UUID or caller-supplied `productId` (GTIN-14 / GRAI / SKU), scoped to your tenant.",
+          "schema": {
+            "type": "string"
+          },
+          "example": "09501101530003"
+        }
+      ],
+      "post": {
+        "operationId": "validateBatteryUnits",
+        "tags": [
+          "Battery Units"
+        ],
+        "summary": "Pre-flight: validate battery-unit identifiers without persisting (#263)",
+        "description": "NON-MUTATING pre-flight for bulk unit import. Runs the SAME engine-backed AI-21 / GS1 Digital Link conformance + field checks as `POST /api/v1/passports/{passportId}/units` and returns a per-item verdict — **persisting nothing**. Send a single unit or `{\"units\": [...]}` (≤200). Lets a bulk importer ask \"would these serials be GS1-conformant?\" before committing a batch.\n\n**Permission:** `battery:write` (gated as the write permission, like other validate-only checks; subscription gating → 402). **Validation:** `serialNumber` charset/length (`^[A-Za-z0-9._-]{1,20}$`); for a GTIN-keyed passport the unit Digital Link must parse cleanly through GS1's authoritative engine; `status` must be a valid unit status; `manufacturedAt` must be Date-parseable. Predecessor linkage is NOT checked here (a persistence-time concern). The verdict order matches the input order.\n\n**Rate limits:** global limiter only — 100 req/min per IP.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SerializeBatteryUnitsRequest"
+              },
+              "example": {
+                "units": [
+                  {
+                    "serialNumber": "BATT-2026-000451"
+                  },
+                  {
+                    "serialNumber": "bad serial!"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Per-item conformance verdicts in input order (nothing persisted).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "count",
+                    "validCount",
+                    "results"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of units checked."
+                    },
+                    "validCount": {
+                      "type": "integer",
+                      "description": "How many are GS1-conformant."
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "serialNumber",
+                          "ok"
+                        ],
+                        "properties": {
+                          "serialNumber": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "ok": {
+                            "type": "boolean"
+                          },
+                          "error": {
+                            "type": "string",
+                            "description": "Present only when ok=false."
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "example": {
+                  "success": true,
+                  "message": "1 of 2 unit(s) GS1-conformant",
+                  "count": 2,
+                  "validCount": 1,
+                  "results": [
+                    {
+                      "serialNumber": "BATT-2026-000451",
+                      "ok": true
+                    },
+                    {
+                      "serialNumber": "bad serial!",
+                      "ok": false,
+                      "error": "Invalid serialNumber \"bad serial!\": must be 1-20 URL-safe characters ([A-Za-z0-9._-]) — GS1 AI-21's maximum length is 20"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body envelope (not a JSON object, empty `units`, or more than 200 items).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Passport not found under your tenant workspace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -2301,18 +2452,7 @@
             "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "The operator does not exist or is not bound to your workspace. Note: minimal envelope without an `error` key.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperatorMinimalError"
-                },
-                "example": {
-                  "success": false,
-                  "message": "Operator not found in your workspace."
-                }
-              }
-            }
+            "$ref": "#/components/responses/OperatorNotFound"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -2407,18 +2547,7 @@
             "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "The operator does not exist or is not bound to your workspace. Note: minimal envelope without an `error` key.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperatorMinimalError"
-                },
-                "example": {
-                  "success": false,
-                  "message": "Operator not found in your workspace."
-                }
-              }
-            }
+            "$ref": "#/components/responses/OperatorNotFound"
           },
           "409": {
             "description": "The operator could neither be hard-deleted nor archived (both attempts failed). Note: minimal envelope without an `error` key.",
@@ -2509,18 +2638,7 @@
             "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "The operator does not exist or is not bound to your workspace. Note: minimal envelope without an `error` key.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperatorMinimalError"
-                },
-                "example": {
-                  "success": false,
-                  "message": "Operator not found in your workspace."
-                }
-              }
-            }
+            "$ref": "#/components/responses/OperatorNotFound"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -6307,6 +6425,12 @@
                   "type": "object",
                   "description": "The per-UNIT credential (item granularity) with an EMBEDDED W3C Data Integrity proof (`proof.cryptosuite` `ecdsa-jcs-2019`, RFC 8785 JCS, multibase base58btc `proofValue`) instead of the enveloping JWS — `did:web`-signed, with the same `idGranularity:\"item\"` / GS1 AI-21 `itemNumber` / type-passport link / per-unit Bitstring Status List bit, and the same `406` (no facility/country) and `410` (recycled) conditions as the `vc+jwt` form (#117)."
                 }
+              },
+              "application/dc+sd-jwt": {
+                "schema": {
+                  "type": "string",
+                  "description": "The per-UNIT credential (item granularity) as an **SD-JWT-VC** for cryptographic selective disclosure (`<JWS>~<disclosure>~…`, `typ: dc+sd-jwt`; legacy `vc+sd-jwt` accepted) — a holder may present a subset of the disclosable `credentialSubject` claims while the issuer signature stays intact. Same `idGranularity:\"item\"` / GS1 AI-21 `itemNumber` / type-passport link / per-unit Bitstring Status List bit, and the same `406` (no facility/country) and `410` (recycled) conditions as the `vc+jwt` form (#251 RE-Q — parity with `GET /passport/{id}`)."
+                }
               }
             }
           },
@@ -6973,6 +7097,251 @@
                   "success": false,
                   "error": "Bad Request",
                   "message": "Not a valid GS1 digitalLink: AI (01) value is too short"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "description": "The GS1 Syntax Engine (WASM) could not be loaded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Service Unavailable",
+                  "message": "GS1 Syntax Engine is unavailable"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gs1/decode/batch": {
+      "post": {
+        "operationId": "decodeGs1Batch",
+        "tags": [
+          "Public Resolution"
+        ],
+        "summary": "Batch-decode many GS1 scans / element strings / Digital Links in one request",
+        "description": "Batch form of `POST /api/v1/gs1/decode` for line-side / warehouse stations capturing many scans per second. Send `{ \"items\": [ … ] }` (≤200), each item exactly one of `scanData`/`elementString`/`digitalLink`, and receive a `results` array aligned to input order — each entry either a decoded scan (`ok: true`, the same fields as the single-scan 200 minus `success`) or an error (`ok: false` + `error`). **Partial-success:** one bad item never fails the batch — the request returns **200** and per-item failures are reported in place. Parsing uses GS1's authoritative Barcode Syntax Engine (vendored WASM). **Public + stateless** (no permission, no tenant data).\n\n**Errors:** a missing/empty/non-array `items`, or more than 200 items, returns **400**; a body over the 256 KiB route cap returns **413**; **503** if the engine is unavailable.\n\n**Rate limit:** global limiter only — 100 req/min/IP (standard `x-ratelimit-*` headers).",
+        "security": [
+          {}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "items"
+                ],
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 200,
+                    "description": "Up to 200 scans, each an object with exactly one of scanData/elementString/digitalLink.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "scanData": {
+                          "type": "string",
+                          "maxLength": 4096
+                        },
+                        "elementString": {
+                          "type": "string",
+                          "maxLength": 4096
+                        },
+                        "digitalLink": {
+                          "type": "string",
+                          "maxLength": 4096
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "example": {
+                "items": [
+                  {
+                    "scanData": "]Q1https://id.gs1.org/01/09501101532007/21/VM-LFP100-26-1"
+                  },
+                  {
+                    "elementString": "(01)09501101532007"
+                  },
+                  {
+                    "digitalLink": "not-a-valid-link"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Per-item decode results aligned to input order (partial-success — one bad item never fails the batch).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "count",
+                    "results"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of items decoded (== items.length)."
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "One entry per input item, in order.",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "required": [
+                              "ok",
+                              "input",
+                              "elementString",
+                              "hri",
+                              "canonicalUpi",
+                              "digitalLinkUri",
+                              "ai"
+                            ],
+                            "properties": {
+                              "ok": {
+                                "type": "boolean",
+                                "enum": [
+                                  true
+                                ]
+                              },
+                              "input": {
+                                "type": "string"
+                              },
+                              "elementString": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "hri": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "canonicalUpi": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "digitalLinkUri": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "ai": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "required": [
+                              "ok",
+                              "error"
+                            ],
+                            "properties": {
+                              "ok": {
+                                "type": "boolean",
+                                "enum": [
+                                  false
+                                ]
+                              },
+                              "error": {
+                                "type": "string"
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "example": {
+                  "success": true,
+                  "count": 3,
+                  "results": [
+                    {
+                      "ok": true,
+                      "input": "scanData",
+                      "elementString": "(01)09501101532007(21)VM-LFP100-26-1",
+                      "hri": [
+                        "(01) 09501101532007",
+                        "(21) VM-LFP100-26-1"
+                      ],
+                      "canonicalUpi": "https://id.gs1.org/01/09501101532007/21/VM-LFP100-26-1",
+                      "digitalLinkUri": "https://opendpp-node.eu/01/09501101532007/21/VM-LFP100-26-1",
+                      "ai": {
+                        "21": "VM-LFP100-26-1",
+                        "01": "09501101532007"
+                      }
+                    },
+                    {
+                      "ok": true,
+                      "input": "elementString",
+                      "elementString": "(01)09501101532007",
+                      "hri": [
+                        "(01) 09501101532007"
+                      ],
+                      "canonicalUpi": "https://id.gs1.org/01/09501101532007",
+                      "digitalLinkUri": "https://opendpp-node.eu/01/09501101532007",
+                      "ai": {
+                        "01": "09501101532007"
+                      }
+                    },
+                    {
+                      "ok": false,
+                      "error": "Not a valid GS1 digitalLink: the URI is not a valid GS1 Digital Link"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing/empty/non-array `items`, or more than 200 items. Messages: `Provide an 'items' array of scans to decode`, `'items' must be a non-empty array`, `'items' exceeds the 200-item batch limit`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Bad Request",
+                  "message": "'items' exceeds the 200-item batch limit"
                 }
               }
             }
@@ -8618,42 +8987,16 @@
             }
           },
           {
-            "name": "X-OpenDPP-Delivery",
-            "in": "header",
-            "required": true,
-            "description": "Stable delivery id (mirrors the envelope `id`). CONSTANT across retries of the same event — deduplicate on it for exactly-once processing.",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/WebhookDeliveryHeader"
           },
           {
-            "name": "X-OpenDPP-Timestamp",
-            "in": "header",
-            "required": true,
-            "description": "Unix epoch seconds (decimal string) minted at this delivery attempt; bound into the signature. Reject if skewed more than ~5 minutes from your clock.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9]+$"
-            }
+            "$ref": "#/components/parameters/WebhookTimestampHeader"
           },
           {
-            "name": "X-OpenDPP-Signature",
-            "in": "header",
-            "required": true,
-            "description": "Bare lowercase-hex HMAC-SHA256 of `<X-OpenDPP-Timestamp>.<raw request body>`, keyed with the full `whsec_…` subscription secret.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
-            }
+            "$ref": "#/components/parameters/WebhookSignatureHeader"
           },
           {
-            "name": "User-Agent",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "const": "OpenDPP-Webhook-Outbox/1.0"
-            }
+            "$ref": "#/components/parameters/WebhookUserAgentHeader"
           }
         ],
         "requestBody": {
@@ -8761,42 +9104,16 @@
             }
           },
           {
-            "name": "X-OpenDPP-Delivery",
-            "in": "header",
-            "required": true,
-            "description": "Stable delivery id (mirrors the envelope `id`). CONSTANT across retries of the same event — deduplicate on it for exactly-once processing.",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/WebhookDeliveryHeader"
           },
           {
-            "name": "X-OpenDPP-Timestamp",
-            "in": "header",
-            "required": true,
-            "description": "Unix epoch seconds (decimal string) minted at this delivery attempt; bound into the signature. Reject if skewed more than ~5 minutes from your clock.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9]+$"
-            }
+            "$ref": "#/components/parameters/WebhookTimestampHeader"
           },
           {
-            "name": "X-OpenDPP-Signature",
-            "in": "header",
-            "required": true,
-            "description": "Bare lowercase-hex HMAC-SHA256 of `<X-OpenDPP-Timestamp>.<raw request body>`, keyed with the full `whsec_…` subscription secret.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
-            }
+            "$ref": "#/components/parameters/WebhookSignatureHeader"
           },
           {
-            "name": "User-Agent",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "const": "OpenDPP-Webhook-Outbox/1.0"
-            }
+            "$ref": "#/components/parameters/WebhookUserAgentHeader"
           }
         ],
         "requestBody": {
@@ -8919,42 +9236,16 @@
             }
           },
           {
-            "name": "X-OpenDPP-Delivery",
-            "in": "header",
-            "required": true,
-            "description": "Stable delivery id (mirrors the envelope `id`). CONSTANT across retries of the same event — deduplicate on it for exactly-once processing.",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/WebhookDeliveryHeader"
           },
           {
-            "name": "X-OpenDPP-Timestamp",
-            "in": "header",
-            "required": true,
-            "description": "Unix epoch seconds (decimal string) minted at this delivery attempt; bound into the signature. Reject if skewed more than ~5 minutes from your clock.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9]+$"
-            }
+            "$ref": "#/components/parameters/WebhookTimestampHeader"
           },
           {
-            "name": "X-OpenDPP-Signature",
-            "in": "header",
-            "required": true,
-            "description": "Bare lowercase-hex HMAC-SHA256 of `<X-OpenDPP-Timestamp>.<raw request body>`, keyed with the full `whsec_…` subscription secret.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
-            }
+            "$ref": "#/components/parameters/WebhookSignatureHeader"
           },
           {
-            "name": "User-Agent",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "const": "OpenDPP-Webhook-Outbox/1.0"
-            }
+            "$ref": "#/components/parameters/WebhookUserAgentHeader"
           }
         ],
         "requestBody": {
@@ -9062,42 +9353,16 @@
             }
           },
           {
-            "name": "X-OpenDPP-Delivery",
-            "in": "header",
-            "required": true,
-            "description": "Stable delivery id (mirrors the envelope `id`). CONSTANT across retries of the same event — deduplicate on it for exactly-once processing.",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/WebhookDeliveryHeader"
           },
           {
-            "name": "X-OpenDPP-Timestamp",
-            "in": "header",
-            "required": true,
-            "description": "Unix epoch seconds (decimal string) minted at this delivery attempt; bound into the signature. Reject if skewed more than ~5 minutes from your clock.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9]+$"
-            }
+            "$ref": "#/components/parameters/WebhookTimestampHeader"
           },
           {
-            "name": "X-OpenDPP-Signature",
-            "in": "header",
-            "required": true,
-            "description": "Bare lowercase-hex HMAC-SHA256 of `<X-OpenDPP-Timestamp>.<raw request body>`, keyed with the full `whsec_…` subscription secret.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
-            }
+            "$ref": "#/components/parameters/WebhookSignatureHeader"
           },
           {
-            "name": "User-Agent",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "const": "OpenDPP-Webhook-Outbox/1.0"
-            }
+            "$ref": "#/components/parameters/WebhookUserAgentHeader"
           }
         ],
         "requestBody": {
@@ -9205,42 +9470,16 @@
             }
           },
           {
-            "name": "X-OpenDPP-Delivery",
-            "in": "header",
-            "required": true,
-            "description": "Stable delivery id (mirrors the envelope `id`). CONSTANT across retries of the same event — deduplicate on it for exactly-once processing.",
-            "schema": {
-              "type": "string"
-            }
+            "$ref": "#/components/parameters/WebhookDeliveryHeader"
           },
           {
-            "name": "X-OpenDPP-Timestamp",
-            "in": "header",
-            "required": true,
-            "description": "Unix epoch seconds (decimal string) minted at this delivery attempt; bound into the signature. Reject if skewed more than ~5 minutes from your clock.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9]+$"
-            }
+            "$ref": "#/components/parameters/WebhookTimestampHeader"
           },
           {
-            "name": "X-OpenDPP-Signature",
-            "in": "header",
-            "required": true,
-            "description": "Bare lowercase-hex HMAC-SHA256 of `<X-OpenDPP-Timestamp>.<raw request body>`, keyed with the full `whsec_…` subscription secret.",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
-            }
+            "$ref": "#/components/parameters/WebhookSignatureHeader"
           },
           {
-            "name": "User-Agent",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "const": "OpenDPP-Webhook-Outbox/1.0"
-            }
+            "$ref": "#/components/parameters/WebhookUserAgentHeader"
           }
         ],
         "requestBody": {
@@ -9383,6 +9622,60 @@
           "friendlyMessage": {
             "type": "string",
             "description": "Localized, human-friendly explanation (language from `?lang=` or `Accept-Language`; 28 languages, default `en`)."
+          }
+        }
+      },
+      "PassportQuotaError": {
+        "type": "object",
+        "description": "402 body for a write blocked by billing. Always carries `error` + `message`; a block caused by the subscription tier's published-passport CAP additionally sets `code: \"passport_quota_exceeded\"` plus `quota` and `upgradeUrl`, so clients distinguish it from a lapsed-subscription 402 and can prompt an upgrade.",
+        "required": [
+          "error",
+          "message"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Always `false` when present."
+          },
+          "error": {
+            "type": "string",
+            "description": "Short error title.",
+            "examples": [
+              "Payment Required"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable explanation."
+          },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable discriminator. `passport_quota_exceeded` = the tier's passport cap is reached; omitted for a lapsed-subscription 402.",
+            "examples": [
+              "passport_quota_exceeded"
+            ]
+          },
+          "quota": {
+            "type": "object",
+            "description": "Present only on a `passport_quota_exceeded` block: current usage vs the tier cap.",
+            "properties": {
+              "tier": {
+                "type": "string",
+                "description": "The workspace subscription tier."
+              },
+              "activePassports": {
+                "type": "integer",
+                "description": "Active (non-draft, non-archived) passports, counted tenant-wide."
+              },
+              "passportLimit": {
+                "type": "integer",
+                "description": "The tier's passport cap."
+              }
+            }
+          },
+          "upgradeUrl": {
+            "type": "string",
+            "description": "Where the workspace owner can upgrade the plan."
           }
         }
       },
@@ -13948,16 +14241,36 @@
         }
       },
       "PaymentRequired": {
-        "description": "The workspace subscription is lapsed or its grace period has expired — write operations are blocked until billing is restored. Read operations are unaffected.",
+        "description": "The write is blocked by billing — EITHER the workspace subscription is lapsed / its grace period expired (read operations are unaffected), OR (on passport-creating writes) the workspace has reached its plan's published-passport cap. A cap block is discriminated by `code: \"passport_quota_exceeded\"` and carries `quota` + `upgradeUrl`; a lapsed-subscription block omits them.",
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Error"
+              "$ref": "#/components/schemas/PassportQuotaError"
             },
-            "example": {
-              "success": false,
-              "error": "Payment Required",
-              "message": "Your workspace subscription status is 'past_due'. Write access is suspended."
+            "examples": {
+              "subscriptionLapsed": {
+                "summary": "Subscription lapsed",
+                "value": {
+                  "success": false,
+                  "error": "Payment Required",
+                  "message": "Your workspace subscription status is 'past_due'. Write access is suspended."
+                }
+              },
+              "passportQuotaExceeded": {
+                "summary": "Tier passport cap reached",
+                "value": {
+                  "success": false,
+                  "error": "Payment Required",
+                  "code": "passport_quota_exceeded",
+                  "message": "You have reached your plan's passport limit (250 of 250). Upgrade your plan to add more product passports.",
+                  "quota": {
+                    "tier": "growth",
+                    "activePassports": 250,
+                    "passportLimit": 250
+                  },
+                  "upgradeUrl": "/app/billing"
+                }
+              }
             }
           }
         }
@@ -13988,6 +14301,20 @@
               "success": false,
               "error": "Not Found",
               "message": "Resource not found."
+            }
+          }
+        }
+      },
+      "OperatorNotFound": {
+        "description": "The operator does not exist or is not bound to your workspace. Note: minimal envelope without an `error` key.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/OperatorMinimalError"
+            },
+            "example": {
+              "success": false,
+              "message": "Operator not found in your workspace."
             }
           }
         }
@@ -14119,6 +14446,44 @@
           "minimum": 1,
           "maximum": 100,
           "default": 10
+        }
+      },
+      "WebhookDeliveryHeader": {
+        "name": "X-OpenDPP-Delivery",
+        "in": "header",
+        "required": true,
+        "description": "Stable delivery id (mirrors the envelope `id`). CONSTANT across retries of the same event — deduplicate on it for exactly-once processing.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "WebhookTimestampHeader": {
+        "name": "X-OpenDPP-Timestamp",
+        "in": "header",
+        "required": true,
+        "description": "Unix epoch seconds (decimal string) minted at this delivery attempt; bound into the signature. Reject if skewed more than ~5 minutes from your clock.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        }
+      },
+      "WebhookSignatureHeader": {
+        "name": "X-OpenDPP-Signature",
+        "in": "header",
+        "required": true,
+        "description": "Bare lowercase-hex HMAC-SHA256 of `<X-OpenDPP-Timestamp>.<raw request body>`, keyed with the full `whsec_…` subscription secret.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "WebhookUserAgentHeader": {
+        "name": "User-Agent",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "const": "OpenDPP-Webhook-Outbox/1.0"
         }
       }
     }
