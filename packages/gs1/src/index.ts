@@ -23,8 +23,7 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  *
- * "OpenDPP" is a trademark of Opendpp UAB (EU trademark application 019384181,
- * registration pending); the Apache-2.0 license grants no rights to the marks.
+ * "OpenDPP" is a trademark of Opendpp UAB; the Apache-2.0 license grants no rights to the marks.
  */
 
 /**

@@ -56,5 +56,4 @@ explicit `baseUrl` option so the package has no implicit environment coupling.
 ## License
 
 [Apache-2.0](./LICENSE) © Opendpp UAB. See [`NOTICE`](./NOTICE). "OpenDPP" is a
-trademark of Opendpp UAB (EUTM application 019384181, registration pending);
-this license grants no rights to the marks.
+trademark of Opendpp UAB; this license grants no rights to the marks.
