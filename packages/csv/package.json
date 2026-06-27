@@ -1,0 +1,59 @@
+{
+  "name": "@opendpp/csv",
+  "version": "0.1.0",
+  "description": "Pure, zero-dependency CSV → passport reference mapper for the OpenDPP Digital Product Passport API (ESM, Node >=26). Maps parsed CSV rows to the public passport-create shape; bring your own RFC-4180 parser.",
+  "keywords": [
+    "opendpp",
+    "dpp",
+    "digital-product-passport",
+    "espr",
+    "csv",
+    "bulk-import",
+    "passport",
+    "esm"
+  ],
+  "license": "Apache-2.0",
+  "author": "Giovanni Savastano <giovanni.savastano@opendpp-node.eu>",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=26"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenDPP/opendpp-interop.git",
+    "directory": "packages/csv"
+  },
+  "homepage": "https://github.com/OpenDPP/opendpp-interop#readme",
+  "bugs": {
+    "url": "https://github.com/OpenDPP/opendpp-interop/issues"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --import tsx 'test/*.test.ts'",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
