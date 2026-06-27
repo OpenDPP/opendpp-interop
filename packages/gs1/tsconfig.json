@@ -1,5 +1,5 @@
 {
-  "//": "Build config for @opendpp/gs1 — a pure, zero-runtime-dependency GS1 Digital Link / check-digit library published to npm (Apache-2.0, (c) Opendpp UAB). Compiles src/ -> dist/ as NodeNext ESM with .d.ts + declaration maps. Node >=26. NOTE: types must include 'node' (the link builders read process.env.BASE_URL); noUncheckedIndexedAccess stays OFF to match the verbatim source lift.",
+  "//": "Build config for @opendpp/gs1 — a pure, zero-runtime-dependency GS1 Digital Link / check-digit library published to npm (Apache-2.0, (c) Opendpp UAB). Compiles src/ -> dist/ as NodeNext ESM with .d.ts. Node >=26. Source/declaration maps are OFF: src/ is not published, so the maps would dangle (404) for consumers. NOTE: types must include 'node' (the link builders read process.env.BASE_URL); noUncheckedIndexedAccess stays OFF to match the verbatim source lift.",
   "compilerOptions": {
     "target": "ES2023",
     "lib": ["ES2023"],
@@ -8,8 +8,8 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "declarationMap": false,
+    "sourceMap": false,
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
