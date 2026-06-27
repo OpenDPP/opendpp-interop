@@ -5,6 +5,16 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [Unreleased]
+
+Kit-tooling only (no API-contract change → no version bump; folds into the next contract release).
+
+- **`semanticids` door — new `catena-x` verdict.** The classifier now recognizes a Catena-X / Eclipse
+  Tractus-X SAMM aspect-model id (`urn:samm:io.catenax.…`) as a deliberately-referenced identifier
+  (CC-BY-4.0, by URN string only — no definitions redistributed) instead of bucketing it as `unknown`.
+  Mirrors the OpenDPP backend classifier (lockstep). Scoped to `io.catenax` so other `urn:samm:` ids stay
+  `unknown`. Reflects OpenDPP #116 Tier B (recycled-content metals → the generic-DPP scalar `#recycled`).
+
 ## [1.6.0] — API contract 1.6.0 (quota enforcement + GS1 & resolution round-out)
 
 Carries OpenDPP public API contract **1.6.0** (`openapi.json`). Additive (MINOR) — no breaking change.

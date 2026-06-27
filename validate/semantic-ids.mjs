@@ -14,6 +14,9 @@
  *                            superseded — an honest red flag).
  *   - "vendor-coined"        an honest `urn:opendpp:*` id OpenDPP coins (never presented as IDTA/eCl@ss).
  *   - "eclass"               an eCl@ss IRDI (`0173-1#…`), e.g. a genuine property-level concept id.
+ *   - "catena-x"             a Catena-X / Eclipse Tractus-X SAMM aspect-model id (`urn:samm:io.catenax.…`)
+ *                            that OpenDPP deliberately REFERENCES (CC-BY-4.0) as an identifier string only —
+ *                            no model definitions are redistributed, so no attribution obligation attaches.
  *   - "unknown"              anything else, INCLUDING an `admin-shell.io` (IDTA-namespace) IRI that is
  *                            NOT in this allowlist — i.e. an IDTA-identity claim we cannot vouch for.
  *
@@ -30,7 +33,7 @@ const ALLOWLIST = JSON.parse(readFileSync(new URL("../idta-semantic-ids.json", i
 const PUBLISHED = new Set(ALLOWLIST.anchors.filter((a) => a.status === "published").map((a) => a.iri));
 const DEPRECATED = new Set(ALLOWLIST.anchors.filter((a) => a.status === "deprecated").map((a) => a.iri));
 
-export const VERDICTS = ["real-idta-published", "idta-deprecated", "vendor-coined", "eclass", "unknown"];
+export const VERDICTS = ["real-idta-published", "idta-deprecated", "vendor-coined", "eclass", "catena-x", "unknown"];
 
 /** Classify a single `semanticId` IRI against the allowlist (membership/identity, not URL shape). */
 export function classifySemanticId(iri) {
@@ -38,6 +41,9 @@ export function classifySemanticId(iri) {
   if (DEPRECATED.has(iri)) return "idta-deprecated";
   if (iri.startsWith("urn:opendpp:")) return "vendor-coined";
   if (/^0173-1#/.test(iri)) return "eclass";
+  // A Catena-X / Eclipse Tractus-X SAMM aspect-model id we deliberately REFERENCE (CC-BY-4.0, by URN
+  // string only). Scoped to io.catenax so a non-Catena-X urn:samm id stays "unknown".
+  if (/^urn:samm:io\.catenax\./.test(iri)) return "catena-x";
   return "unknown";
 }
 
