@@ -1,6 +1,6 @@
 {
   "name": "@opendpp/webhooks",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "OpenDPP webhook event types + a zero-dependency, constant-time HMAC-SHA256 signature verifier for inbound OpenDPP webhooks (ESM, Node >=26).",
   "keywords": [
     "opendpp",
