@@ -55,6 +55,7 @@ uses, each machine-checked `published`/`deprecated` against
 | `idta-deprecated` | a real IDTA IRI the registry has deprecated (superseded — an honest red flag) |
 | `vendor-coined` | an honest `urn:opendpp:*` id OpenDPP coins (never presented as IDTA/eCl@ss) |
 | `eclass` | an eCl@ss IRDI (`0173-1#…`), e.g. a genuine property-level concept id |
+| `catena-x` | a Catena-X / Eclipse Tractus-X SAMM aspect-model id (`urn:samm:io.catenax.…`) referenced as an identifier string (CC-BY-4.0; no definitions redistributed) |
 | `unknown` | anything else, **including** an `admin-shell.io` IRI not in the allowlist (an IDTA claim we can't vouch for) |
 
 This verifies **identity** (the id is the authentic IDTA template id), **not** structural conformance
