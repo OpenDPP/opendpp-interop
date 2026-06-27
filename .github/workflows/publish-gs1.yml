@@ -1,0 +1,63 @@
+name: Publish @opendpp/gs1
+
+# Publishes @opendpp/gs1 to npm (keyless — OIDC trusted publishing, no NODE_AUTH_TOKEN) when a
+# `gs1-<semver>` tag is pushed. Provenance attestations are automatic (public repo + public package).
+#
+# The package SOURCE under packages/gs1/ is MIRROR-MANAGED from OpenDPP/opendpp-node (packages/gs1) —
+# do not hand-edit it here. The very first publish must be bootstrapped with a token (npm trusted
+# publishers are configured per existing package); afterwards this keyless workflow takes over. Full
+# setup runbook: opendpp-node/docs/operations/integrations/Interop-Package-Publishing.md.
+
+on:
+  push:
+    tags:
+      - "gs1-*" # e.g. gs1-0.1.0 — must match packages/gs1/package.json version
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # OIDC — the npm trusted-publishing anchor
+
+concurrency:
+  group: publish-gs1
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: npm publish @opendpp/gs1
+    runs-on: ubuntu-latest
+    environment: release # must match the npm Trusted Publisher config
+    defaults:
+      run:
+        working-directory: packages/gs1
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "26"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Ensure npm supports trusted publishing (>= 11.5.1)
+        run: npm install -g npm@latest
+
+      - name: Verify the tag matches the package version
+        if: startsWith(github.ref, 'refs/tags/gs1-')
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#gs1-}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::tag $GITHUB_REF_NAME implies $TAG_VERSION but package.json is $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Install build/test deps (the package has zero runtime deps)
+        run: npm install --no-save
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke test
+        run: npm test
+
+      - name: Publish (keyless via OIDC; provenance automatic)
+        run: npm publish
