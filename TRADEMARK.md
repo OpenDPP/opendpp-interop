@@ -1,7 +1,6 @@
 # Trademark & Conformance Policy
 
-**"OpenDPP"** and the OpenDPP logo are trademarks of **Opendpp UAB** (EU trademark
-application **019384181**, NICE classes 9 and 42; registration pending). This policy
+**"OpenDPP"** and the OpenDPP logo are trademarks of **Opendpp UAB**. This policy
 explains how you may — and may not — use them. It is independent of the software
 license: nothing here narrows your Apache-2.0 rights to the **code**.
 
