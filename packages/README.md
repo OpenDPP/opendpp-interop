@@ -13,5 +13,9 @@ the OpenDPP backend (`OpenDPP/opendpp-node`, `packages/*`).
 | Package | Source of truth | Published by |
 |---|---|---|
 | [`gs1`](./gs1) — `@opendpp/gs1` | `opendpp-node/packages/gs1` | [`publish-gs1.yml`](../.github/workflows/publish-gs1.yml) on a `gs1-<semver>` tag |
+| [`csv`](./csv) — `@opendpp/csv` | `opendpp-node/packages/csv` | [`publish-csv.yml`](../.github/workflows/publish-csv.yml) on a `csv-<semver>` tag |
+| [`webhooks`](./webhooks) — `@opendpp/webhooks` | `opendpp-node/packages/webhooks` | [`publish-webhooks.yml`](../.github/workflows/publish-webhooks.yml) on a `webhooks-<semver>` tag |
 
-Release + one-time setup runbook: `opendpp-node/docs/operations/integrations/Interop-Package-Publishing.md`.
+Each `publish-<pkg>.yml` is keyless (OIDC trusted publishing) and fires on its own `<pkg>-<semver>` tag;
+the tag must match that package's `package.json` version. Release + one-time setup runbook:
+`opendpp-node/docs/operations/integrations/Interop-Package-Publishing.md`.
