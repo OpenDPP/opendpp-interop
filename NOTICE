@@ -1,5 +1,5 @@
 OpenDPP Interop Boundary Kit (opendpp-interop)
-Copyright 2026 OpenDPP UAB
+Copyright 2026 Opendpp UAB
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 
@@ -42,7 +42,7 @@ above):
 
   shapes/opendpp-dpp-shapes.ttl
   OpenDPP DPP / battery (ESPR) SHACL starter shapes.
-  © OpenDPP UAB. Apache-2.0 (this kit's own license).
+  © Opendpp UAB. Apache-2.0 (this kit's own license).
   NON-NORMATIVE. These shapes are authored by OpenDPP against OpenDPP's own
   public JSON-LD DPP vocabulary (https://opendpp-node.eu/ns/dpp# and
   https://opendpp-node.eu/contexts/dpp/v1#) and are offered as a starter
