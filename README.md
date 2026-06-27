@@ -278,7 +278,11 @@ npx @openapitools/openapi-generator-cli generate \
 | **Live service** | <https://opendpp-node.eu> — the running passports, resolvers, and `did:web` / status-list endpoints. |
 | **Product backend** | a **separate, private** repository. Not required to integrate. |
 
-## License
+## License & trademark
 
 [Apache-2.0](./LICENSE) for this kit's own content (validator, docs, samples). Vendored third-party
 schemas keep their upstream terms — see [`NOTICE`](./NOTICE). Issues and PRs welcome.
+
+"OpenDPP" is a trademark of Opendpp UAB (EUTM application 019384181, registration pending). The
+Apache-2.0 license covers the code, not the name: forks may rebuild but must rename, and
+"OpenDPP-conformant" is reserved for output validated against the hosted node — see [`TRADEMARK.md`](./TRADEMARK.md).
