@@ -7,8 +7,23 @@ IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
-Kit-tooling only (no API-contract change → no version bump; folds into the next contract release).
+_Nothing yet._
 
+## [1.7.0] — API contract 1.7.0 (programmatic API-write entitlement + bulk label export)
+
+Carries OpenDPP public API contract **1.7.0** (`openapi.json`). Additive (MINOR) — no breaking change.
+The contract additions are **API-surface only** (a new billing-`402` discriminator, a new bulk-export
+endpoint, and a non-blocking advisory), so every validator door (`aas` / `untp` / `registry` /
+`semanticids` / `shacl` / `sdjwt` / `gs1`) is unchanged — the conformance projections this kit validates
+are unaffected.
+
+- **Programmatic API-write `402`** — the net-new passport-write surfaces now document a discriminated
+  `402` (`code: "api_access_required"` + `upgradeUrl`) on the shared `PaymentRequired` response for an
+  API-key write on a tier without API access (OpenDPP #347, Option B).
+- **`POST /api/v1/passports/labels`** — bulk QR/label ZIP export (≤200 passports, partial-success
+  `manifest.json`, tenant-scoped); the export counterpart to the bulk import (OpenDPP #376).
+- **PII-shape advisory** — passport ingest may now add a non-blocking `warnings[]` entry when metadata
+  looks like personal data (privacy-by-design, ESPR FAQ Q16; OpenDPP #400).
 - **`semanticids` door — new `catena-x` verdict.** The classifier now recognizes a Catena-X / Eclipse
   Tractus-X SAMM aspect-model id (`urn:samm:io.catenax.…`) as a deliberately-referenced identifier
   (CC-BY-4.0, by URN string only — no definitions redistributed) instead of bucketing it as `unknown`.
