@@ -139,6 +139,14 @@
       "submodelElements": [
         {
           "idShort": "category",
+          "qualifiers": [
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "mandatory"
+            }
+          ],
           "modelType": "Property",
           "valueType": "xs:string",
           "value": "batteries"
@@ -151,6 +159,12 @@
               "type": "OpenDppCollectionKind",
               "valueType": "xs:string",
               "value": "object"
+            },
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "voluntary"
             }
           ],
           "modelType": "SubmodelElementCollection",
@@ -177,24 +191,56 @@
         },
         {
           "idShort": "serialNumber",
+          "qualifiers": [
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "voluntary"
+            }
+          ],
           "modelType": "Property",
           "valueType": "xs:string",
           "value": "SN-000123"
         },
         {
           "idShort": "ratedCapacity",
+          "qualifiers": [
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "voluntary"
+            }
+          ],
           "modelType": "Property",
           "valueType": "xs:double",
           "value": "75000"
         },
         {
           "idShort": "batteryCategory",
+          "qualifiers": [
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "mandatory"
+            }
+          ],
           "modelType": "Property",
           "valueType": "xs:string",
           "value": "ev"
         },
         {
           "idShort": "chemistry",
+          "qualifiers": [
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "mandatory"
+            }
+          ],
           "modelType": "Property",
           "valueType": "xs:string",
           "value": "NMC (Lithium Nickel Manganese Cobalt Oxide)",
@@ -216,6 +262,12 @@
               "type": "OpenDppCollectionKind",
               "valueType": "xs:string",
               "value": "object"
+            },
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "mandatory"
             }
           ],
           "modelType": "SubmodelElementCollection",
@@ -242,6 +294,12 @@
               "type": "OpenDppCollectionKind",
               "valueType": "xs:string",
               "value": "object"
+            },
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "mandatory"
             }
           ],
           "modelType": "SubmodelElementCollection",
@@ -280,6 +338,12 @@
               "type": "OpenDppCollectionKind",
               "valueType": "xs:string",
               "value": "object"
+            },
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "mandatory"
             }
           ],
           "modelType": "SubmodelElementCollection",
@@ -330,6 +394,12 @@
               "type": "OpenDppCollectionKind",
               "valueType": "xs:string",
               "value": "array"
+            },
+            {
+              "kind": "ConceptQualifier",
+              "type": "OpenDppDataPointKind",
+              "valueType": "xs:string",
+              "value": "mandatory"
             }
           ],
           "modelType": "SubmodelElementCollection",
