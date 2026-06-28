@@ -302,6 +302,8 @@ npx @openapitools/openapi-generator-cli generate \
 | --- | --- |
 | **This repo** (`OpenDPP/opendpp-interop`) | the **public** interop boundary — schemas, samples, validator, OpenAPI contract, mappings. Apache-2.0. |
 | **Live service** | <https://opendpp-node.eu> — the running passports, resolvers, and `did:web` / status-list endpoints. |
+| **Client SDKs** | [`OpenDPP/opendpp-sdk`](https://github.com/OpenDPP/opendpp-sdk) — `@opendpp/sdk` (TypeScript) + Python, generated from this OpenAPI contract. |
+| **Knowledge bundle** | [`OpenDPP/opendpp-knowledge`](https://github.com/OpenDPP/opendpp-knowledge) — the API as an OKF bundle for AI agents. |
 | **Product backend** | a **separate, private** repository. Not required to integrate. |
 
 ## License & trademark
