@@ -1,4 +1,42 @@
 {
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "OpenDPP Interop Boundary Kit",
+  "description": "Public interoperability boundary kit for OpenDPP, a B2B Digital Product Passport service for the EU ESPR / battery regulation. Ships the official AAS (IDTA v3.0/3.1) and UNTP DPP (v0.7.0, W3C Verifiable Credentials) projections, GS1 Digital Link addressing, validated samples, vendored conformance schemas, a runnable offline validator, the public OpenAPI contract, and the @opendpp/* client libraries — everything needed to consume, conform to, and validate OpenDPP output without access to the product source.",
+  "excludeFolders": [
+    ".github",
+    "**/node_modules",
+    "**/dist"
+  ],
+  "excludeFiles": [
+    "openapi.json",
+    "*.schema.json",
+    "idta-semantic-ids.json",
+    "*.aasx",
+    "*.jwt",
+    "*.sdjwt",
+    "*.jsonld",
+    "*.ttl",
+    "battery-*.json",
+    "textile-*.json",
+    "gs1-digital-link.txt",
+    "package-lock.json",
+    "LICENSE",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md"
+  ],
+  "rules": [
+    "This repository is OpenDPP's public interoperability contract — schemas, samples, an offline validator, the OpenAPI spec, and field mappings. The product backend is a separate, private repository and is NOT required to integrate; never assume access to it.",
+    "OpenDPP serves every public passport through HTTP content negotiation via two doors: send `Accept: application/aas+json` for the IDTA AAS v3.0/3.1 projection, or `Accept: application/vc+jwt` (enveloping, ES256) / `application/vc+ld+json` (embedded W3C Data Integrity, ecdsa-jcs-2019) for the UNTP DigitalProductPassport v0.7.0 projection.",
+    "Address passports by GS1 Digital Link: `GET /passport/{id}` or `/01/{gtin}` for a SKU/model, `GET /unit/{id}` or `/01/{gtin}/21/{serial}` for a serialised unit, and `/8003/{grai}` for a GRAI. `POST /api/v1/gs1/decode` turns raw scan data / AI element strings into those links.",
+    "Validate AAS or UNTP output you produce offline with `node validate/validate.mjs <door> <file>` (doors: aas, untp, semanticids, registry, shacl, sdjwt, gs1). Exit code 0 = conformant, 1 = schema errors (printed), 2 = usage error. The validator pulls in no OpenDPP product code.",
+    "To integrate from code, prefer the published zero-dependency npm packages `@opendpp/gs1` (Digital Link builders + check-digit helpers), `@opendpp/csv` (CSV → bulk-ingest mapper), and `@opendpp/webhooks` (event types + HMAC-SHA256 verifier); sources are mirrored under `packages/`.",
+    "For the full API surface, generate a typed client from `https://opendpp-node.eu/openapi.json` with openapi-typescript or openapi-generator, or use the published `@opendpp/sdk` (TypeScript) / Python SDK from the opendpp-sdk repo. Do not hand-write request types.",
+    "Verify a `vc+jwt` with standard WebCrypto/JOSE — no OpenDPP code needed: read the `kid` from the JWS header, resolve the issuer DID at `GET /tenants/{tenantId}/did.json`, verify the ES256 signature against the matching `publicKeyJwk`, then check revocation against the signed W3C Bitstring Status List at `GET /tenants/{tenantId}/status/revocation`.",
+    "Only PUBLIC-tier data ever enters either projection. Concepts OpenDPP coins use `urn:opendpp:concept:*` and are never presented as eCl@ss; submodel `semanticId`s carry a real IDTA template IRI only where machine-checked — verify with the `semanticids` validator door against idta-semantic-ids.json.",
+    "Respect the conformance honesty boundaries documented in CONFORMANCE.md: the SHACL shapes (`shapes/`) and the CIRPASS-2 EU-registry pointer mapping are explicitly NON-NORMATIVE. Never describe OpenDPP output as 'CIRPASS-2-certified', 'EU-registry-compliant', or 'EU-official'.",
+    "'OpenDPP' is a trademark of Opendpp UAB. Apache-2.0 covers the code, not the name — forks must rename, and the phrase 'OpenDPP-conformant' is reserved for output validated against the hosted node (see TRADEMARK.md)."
+  ],
   "url": "https://context7.com/opendpp/opendpp-interop",
   "public_key": "pk_2HWZXaKNW5pZTGMH3iU6U"
 }
