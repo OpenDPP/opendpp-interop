@@ -1,0 +1,15 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="OpenDPP">
+  <defs>
+    <linearGradient id="odpp" x1="6" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10B981"/>
+      <stop offset="1" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#odpp)"/>
+  <!-- lifecycle ring + connected nodes (circular product passport) -->
+  <circle cx="32" cy="32" r="14" stroke="#fff" stroke-width="3.5" fill="none" opacity="0.95"/>
+  <circle cx="32" cy="32" r="5" fill="#fff"/>
+  <circle cx="32" cy="18" r="3.5" fill="#fff"/>
+  <circle cx="44.1" cy="39" r="3.5" fill="#fff"/>
+  <circle cx="19.9" cy="39" r="3.5" fill="#fff"/>
+</svg>
