@@ -7,7 +7,14 @@ IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
-_Nothing yet._
+### Changed
+- **CIRPASS-2 reference-viewer row** — flipped from 🗺 Roadmap to 🟡 Partial. OpenDPP's public
+  JSON-LD RDF-expandability (the property the `dpp-renderer-be` viewer relies on) is now proven in CI
+  by a hermetic guard — every variant expands with zero OpenDPP-term drops (OpenDPP #174). The
+  one-time live `/fetch/v1` render stays a documented manual reproduction (OpenDPP #432); its
+  captured sample will be added here when run. Recorded the **Option B** vocabulary stance (OpenDPP
+  stays on its own vocab; no TalTech EUDPP alias). Non-normative throughout — *reference renderer*,
+  never *certified*. _(Non-contract docs change — no API-contract version bump.)_
 
 ## [1.7.0] — API contract 1.7.0 (programmatic API-write entitlement + bulk label export)
 
