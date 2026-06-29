@@ -91,7 +91,7 @@ opendpp-interop/
 │   └── cirpass2-eu-registry-pointer.schema.json   (CIRPASS-2, NON-NORMATIVE)
 ├── shapes/                 OpenDPP-authored SHACL shapes (NON-NORMATIVE) for the DPP / battery vertical
 │   └── opendpp-dpp-shapes.ttl
-├── samples/                validated reference artifacts (a battery via both doors + a textile UNTP credential + the EU-registry pointer + the JSON-LD passport)
+├── samples/                validated reference artifacts (a battery via both doors + a textile UNTP credential + the EU-registry pointer + the JSON-LD passport + its CIRPASS-2 renderer expansion)
 │   ├── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
 │   └── gs1-digital-link.txt      GS1 Digital Link URIs / AI element strings (validated by the `gs1` door)
 ├── packages/               the @opendpp/* npm client libraries (gs1 · csv · webhooks; mirror-managed, see packages/README.md)
@@ -174,6 +174,11 @@ the `curl`). Synthetic demo data — see [`NOTICE`](./NOTICE):
 - `battery-registry-pointer-model.json`, `battery-registry-pointer-item.json` — the **CIRPASS-2
   EU-registry pointer** (NON-NORMATIVE) for the model and a per-unit item (`node validate/validate.mjs
   registry …`).
+- `cirpass2-renderer-expanded.json` — the **CIRPASS-2 reference renderer** (`dpp-renderer-be`
+  `GET /fetch/v1`) output for the JSON-LD passport: the live Jena-parsed + Titanium-JSON-LD-**expanded**
+  RDF (30 nodes, every IRI under `opendpp-node.eu`). Captured by running the renderer (reproduction in
+  OpenDPP's `CIRPASS2-Harness.md`), not via `validate.mjs`. NON-NORMATIVE — *reference renderer*, never
+  *certified*.
 - `AAS-VALIDATION.md`, `VC-VALIDATION.md` — how each artifact was validated.
 
 ## Verify a signature
@@ -259,8 +264,11 @@ those bare IRDIs on its discoverability-critical leaves (Nameplate `Manufacturer
 `ManufacturerProductDesignation`, CarbonFootprint nested `PcfCO2eq` / `ReferenceImpactUnitForCalculation`,
 ProductClassifications `ProductClassId` / `ClassificationSystem`) in the OpenDPP emitters
 `src/utils/aas-mapper.ts` + `src/utils/aas-category-templates.ts`. (The CIRPASS-2 **viewer**
-`dpp-renderer-fe` separately consumes JSON-LD / RDF via an inline `@context` — it reads OpenDPP's
-JSON-LD door, **not** its AAS or VC door; OpenDPP's JSON-LD context is built in `src/utils/jsonld.ts`.)
+separately consumes JSON-LD / RDF via an inline `@context` — it reads OpenDPP's JSON-LD door, **not**
+its AAS or VC door. Its backend `dpp-renderer-be` `GET /fetch/v1` was run against a live OpenDPP
+passport and Titanium-JSON-LD-**expanded** it cleanly — see the ✅ viewer row in
+[`CONFORMANCE.md`](./CONFORMANCE.md) + the [`cirpass2-renderer-expanded.json`](./samples/cirpass2-renderer-expanded.json)
+sample; OpenDPP's JSON-LD context is built in `src/utils/jsonld.ts`.)
 
 | Search-key | Status | Search-key | Status |
 | --- | --- | --- | --- |

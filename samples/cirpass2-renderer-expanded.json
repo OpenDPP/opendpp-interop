@@ -1,0 +1,767 @@
+[
+  {
+    "@id": "_:9b27fcd4c7641c0d9f33027dfa73c084",
+    "https://opendpp-node.eu/ns/dpp#validUntil": [
+      {
+        "@value": "2027-12-31"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#referenceNumber": [
+      {
+        "@value": "SAMPLE-GOTS-88392-PT"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#name": [
+      {
+        "@value": "Global Organic Textile Standard (GOTS)"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#issuer": [
+      {
+        "@value": "Ecocert Greenlife (SAMPLE)"
+      }
+    ]
+  },
+  {
+    "@id": "_:9e830d116a0eba07b5aed1aa260a52bd",
+    "https://opendpp-node.eu/ns/dpp#name": [
+      {
+        "@value": "Porto Circular Textiles Factory (SAMPLE)"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#id": [
+      {
+        "@value": "facility-demo-001"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#gln": [
+      {
+        "@value": "0950110153014"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#country": [
+      {
+        "@value": "PT"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#activity": [
+      {
+        "@value": "Weaving & garment assembly"
+      }
+    ],
+    "@type": [
+      "https://opendpp-node.eu/ns/dpp#Facility"
+    ]
+  },
+  {
+    "@id": "_:5bee286e009bf2bb223ed36db9683cf0",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "ppm"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#substanceName": [
+      {
+        "@value": "Lead"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#concentration": [
+      {
+        "@value": "5.0E-1",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ]
+  },
+  {
+    "@id": "_:55e29eea915044da002740d9840b5471",
+    "https://opendpp-node.eu/ns/dpp#source": [
+      {
+        "@value": "post-consumer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "20",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ]
+  },
+  {
+    "@id": "_:cd8db623373ec6a1d6bc78b94f130c74",
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "20",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#fiber": [
+      {
+        "@value": "Recycled Polyester"
+      }
+    ]
+  },
+  {
+    "@id": "_:14c775310312b16d595606fc38319901",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "kg CO2e"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#scope3": [
+      {
+        "@value": "5",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#scope2": [
+      {
+        "@value": "2.3E0",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#scope1": [
+      {
+        "@value": "1.2E0",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#co2eKg": [
+      {
+        "@value": "8.5E0",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ]
+  },
+  {
+    "@id": "_:b93d0d84c96321c20d96dc2fa8f3418c",
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "80",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#material": [
+      {
+        "@value": "Organic Cotton"
+      }
+    ]
+  },
+  {
+    "@id": "_:a37ed265d3d091d75ffcafcb75f1e12a",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "mg/kg"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#substanceName": [
+      {
+        "@value": "Arylamines"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#concentration": [
+      {
+        "@value": "10",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ]
+  },
+  {
+    "@id": "_:8964832579871d3b2f502daaa42debc7",
+    "https://opendpp-node.eu/ns/dpp#declarationOfConformityUrl": [
+      {
+        "@value": "https://compliance.example.opendpp-node.eu/docs/conformity-jacket-100.pdf"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#certificates": [
+      {
+        "@id": "_:79d357086b2153781c5cbfb7fd16400f"
+      },
+      {
+        "@id": "_:9fd6ce8a6bb637e287e9ed6080099094"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#ceMarking": [
+      {
+        "@value": "true",
+        "@type": "http://www.w3.org/2001/XMLSchema#boolean"
+      }
+    ]
+  },
+  {
+    "@id": "_:79d357086b2153781c5cbfb7fd16400f",
+    "https://opendpp-node.eu/ns/dpp#validUntil": [
+      {
+        "@value": "2026-10-15"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#referenceNumber": [
+      {
+        "@value": "SAMPLE-OEKO-TEX-2024-9981"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#name": [
+      {
+        "@value": "OEKO-TEX Standard 100"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#issuer": [
+      {
+        "@value": "AITEX (SAMPLE)"
+      }
+    ]
+  },
+  {
+    "@id": "_:9fd6ce8a6bb637e287e9ed6080099094",
+    "https://opendpp-node.eu/ns/dpp#validUntil": [
+      {
+        "@value": "2027-12-31"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#referenceNumber": [
+      {
+        "@value": "SAMPLE-GOTS-88392-PT"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#name": [
+      {
+        "@value": "Global Organic Textile Standard (GOTS)"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#issuer": [
+      {
+        "@value": "Ecocert Greenlife (SAMPLE)"
+      }
+    ]
+  },
+  {
+    "@id": "_:6c069afbe4552e57d70403759a272aa5",
+    "https://opendpp-node.eu/contexts/dpp/v1#size": [
+      {
+        "@value": "M"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#originCountry": [
+      {
+        "@value": "PT"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#careInstructions": [
+      {
+        "@value": "Do not bleach"
+      },
+      {
+        "@value": "Machine wash cold"
+      },
+      {
+        "@value": "Line dry"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#productName": [
+      {
+        "@value": "Organic Cotton Utility Jacket (SAMPLE)"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#recycledContent": [
+      {
+        "@id": "_:9d9d8a7bb84750cce1dbb991bf0db5a8"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#regulatoryCompliance": [
+      {
+        "@id": "_:8964832579871d3b2f502daaa42debc7"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#fiberComposition": [
+      {
+        "@id": "_:9848a879377b1f50d1c7fba1c291aa4a"
+      },
+      {
+        "@id": "_:68279f14f8215c9394c3f394a89ce73b"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#materialComposition": [
+      {
+        "@id": "_:b93d0d84c96321c20d96dc2fa8f3418c"
+      },
+      {
+        "@id": "_:d89a4b39c46cecd02ed4b88ea63e4ed1"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#hazardousSubstances": [
+      {
+        "@id": "_:d485e3911f82f79f74ded0a7f69e9210"
+      },
+      {
+        "@id": "_:2aaba477402c688abbe56ed15709d6ae"
+      },
+      {
+        "@id": "_:e01205784d9307df5fb4c0cd3c696fb0"
+      },
+      {
+        "@id": "_:3a445bbc5aa7daad73ae593508443c60"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#category": [
+      {
+        "@value": "textiles"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#carbonFootprint": [
+      {
+        "@id": "_:14c775310312b16d595606fc38319901"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#facilityDetails": [
+      {
+        "@value": "[REDACTED - Privileged Access Required]"
+      }
+    ]
+  },
+  {
+    "@id": "_:9d9d8a7bb84750cce1dbb991bf0db5a8",
+    "https://opendpp-node.eu/ns/dpp#source": [
+      {
+        "@value": "post-consumer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "20",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ]
+  },
+  {
+    "@id": "_:9848a879377b1f50d1c7fba1c291aa4a",
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "20",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#fiber": [
+      {
+        "@value": "Recycled Polyester"
+      }
+    ]
+  },
+  {
+    "@id": "_:d485e3911f82f79f74ded0a7f69e9210",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "ppm"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#substanceName": [
+      {
+        "@value": "Formaldehyde"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#concentration": [
+      {
+        "@value": "25",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ]
+  },
+  {
+    "@id": "_:d89a4b39c46cecd02ed4b88ea63e4ed1",
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "20",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#material": [
+      {
+        "@value": "Recycled Polyester"
+      }
+    ]
+  },
+  {
+    "@id": "_:2aaba477402c688abbe56ed15709d6ae",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "%"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#substanceName": [
+      {
+        "@value": "Phthalates"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#concentration": [
+      {
+        "@value": "5.0E-2",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ]
+  },
+  {
+    "@id": "_:68279f14f8215c9394c3f394a89ce73b",
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "80",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#fiber": [
+      {
+        "@value": "Organic Cotton"
+      }
+    ]
+  },
+  {
+    "@id": "_:e01205784d9307df5fb4c0cd3c696fb0",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "ppm"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#substanceName": [
+      {
+        "@value": "Lead"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#concentration": [
+      {
+        "@value": "5.0E-1",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ]
+  },
+  {
+    "@id": "_:3a445bbc5aa7daad73ae593508443c60",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "mg/kg"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#substanceName": [
+      {
+        "@value": "Arylamines"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#concentration": [
+      {
+        "@value": "10",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ]
+  },
+  {
+    "@id": "_:8397e136b9a4ffb794865061227f5c01",
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "80",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#fiber": [
+      {
+        "@value": "Organic Cotton"
+      }
+    ]
+  },
+  {
+    "@id": "_:7ccd0c830a29b2cc16d691ac81544747",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "ppm"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#substanceName": [
+      {
+        "@value": "Formaldehyde"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#concentration": [
+      {
+        "@value": "25",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ]
+  },
+  {
+    "@id": "https://opendpp-node.eu/01/09501101531000/21/demo-textiles-jacket-100",
+    "https://opendpp-node.eu/contexts/dpp/v1#materialComposition": [
+      {
+        "@id": "_:90109e03756e75fec9166c2be1e329f6"
+      },
+      {
+        "@id": "_:b0f64e3efa341cc0fb3bb5a8e6f46bb1"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#updatedAt": [
+      {
+        "@value": "2026-06-12T10:43:00.154Z"
+      }
+    ],
+    "@type": [
+      "https://opendpp-node.eu/ns/dpp#DigitalProductPassport"
+    ],
+    "https://opendpp-node.eu/ns/dpp#digitalLinkUri": [
+      {
+        "@value": "https://opendpp-node.eu/01/09501101531000/21/demo-textiles-jacket-100"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#regulatoryCompliance": [
+      {
+        "@id": "_:65bc84a047c219831885ab2e3929e1f5"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#careInstructions": [
+      {
+        "@value": "Do not bleach"
+      },
+      {
+        "@value": "Line dry"
+      },
+      {
+        "@value": "Machine wash cold"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#hazardousSubstances": [
+      {
+        "@id": "_:7ccd0c830a29b2cc16d691ac81544747"
+      },
+      {
+        "@id": "_:a37ed265d3d091d75ffcafcb75f1e12a"
+      },
+      {
+        "@id": "_:5bee286e009bf2bb223ed36db9683cf0"
+      },
+      {
+        "@id": "_:80723f8bd968ddfeb8b6d2facb5a4ef9"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#originCountry": [
+      {
+        "@value": "PT"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#economicOperator": [
+      {
+        "@id": "_:61d0a2e2ab608d2a6a133b165eb49a4b"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#productId": [
+      {
+        "@value": "09501101531000"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#fiberComposition": [
+      {
+        "@id": "_:cd8db623373ec6a1d6bc78b94f130c74"
+      },
+      {
+        "@id": "_:8397e136b9a4ffb794865061227f5c01"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#status": [
+      {
+        "@value": "ACTIVE"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#carbonFootprint": [
+      {
+        "@id": "_:34fb8b14f8099facf3019ae79f0e4a23"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#category": [
+      {
+        "@value": "textiles"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#manufacturingFacility": [
+      {
+        "@id": "_:9e830d116a0eba07b5aed1aa260a52bd"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#metadata": [
+      {
+        "@id": "_:6c069afbe4552e57d70403759a272aa5"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#facilityDetails": [
+      {
+        "@value": "[REDACTED - Privileged Access Required]"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#recycledContent": [
+      {
+        "@id": "_:55e29eea915044da002740d9840b5471"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#id": [
+      {
+        "@value": "demo-textiles-jacket-100"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#size": [
+      {
+        "@value": "M"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#createdAt": [
+      {
+        "@value": "2026-06-12T10:43:00.154Z"
+      }
+    ],
+    "https://opendpp-node.eu/contexts/dpp/v1#productName": [
+      {
+        "@value": "Organic Cotton Utility Jacket (SAMPLE)"
+      }
+    ]
+  },
+  {
+    "@id": "_:90109e03756e75fec9166c2be1e329f6",
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "80",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#material": [
+      {
+        "@value": "Organic Cotton"
+      }
+    ]
+  },
+  {
+    "@id": "_:65bc84a047c219831885ab2e3929e1f5",
+    "https://opendpp-node.eu/ns/dpp#declarationOfConformityUrl": [
+      {
+        "@value": "https://compliance.example.opendpp-node.eu/docs/conformity-jacket-100.pdf"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#certificates": [
+      {
+        "@id": "_:887d88f65d94583d84f5a0e0a30c31b4"
+      },
+      {
+        "@id": "_:9b27fcd4c7641c0d9f33027dfa73c084"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#ceMarking": [
+      {
+        "@value": "true",
+        "@type": "http://www.w3.org/2001/XMLSchema#boolean"
+      }
+    ]
+  },
+  {
+    "@id": "_:61d0a2e2ab608d2a6a133b165eb49a4b",
+    "https://opendpp-node.eu/ns/dpp#role": [
+      {
+        "@value": "MANUFACTURER"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#regId": [
+      {
+        "@value": "EU-DEFAULT-001"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#name": [
+      {
+        "@value": "OpenDPP Demo Eco Industries (SAMPLE)"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#id": [
+      {
+        "@value": "operator-demo-opendpp"
+      }
+    ],
+    "@type": [
+      "https://opendpp-node.eu/ns/dpp#EconomicOperator"
+    ]
+  },
+  {
+    "@id": "_:34fb8b14f8099facf3019ae79f0e4a23",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "kg CO2e"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#scope3": [
+      {
+        "@value": "5",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#scope2": [
+      {
+        "@value": "2.3E0",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#scope1": [
+      {
+        "@value": "1.2E0",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#co2eKg": [
+      {
+        "@value": "8.5E0",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ]
+  },
+  {
+    "@id": "_:80723f8bd968ddfeb8b6d2facb5a4ef9",
+    "https://opendpp-node.eu/ns/dpp#unit": [
+      {
+        "@value": "%"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#substanceName": [
+      {
+        "@value": "Phthalates"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#concentration": [
+      {
+        "@value": "5.0E-2",
+        "@type": "http://www.w3.org/2001/XMLSchema#double"
+      }
+    ]
+  },
+  {
+    "@id": "_:b0f64e3efa341cc0fb3bb5a8e6f46bb1",
+    "https://opendpp-node.eu/ns/dpp#percentage": [
+      {
+        "@value": "20",
+        "@type": "http://www.w3.org/2001/XMLSchema#integer"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#material": [
+      {
+        "@value": "Recycled Polyester"
+      }
+    ]
+  },
+  {
+    "@id": "_:887d88f65d94583d84f5a0e0a30c31b4",
+    "https://opendpp-node.eu/ns/dpp#validUntil": [
+      {
+        "@value": "2026-10-15"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#referenceNumber": [
+      {
+        "@value": "SAMPLE-OEKO-TEX-2024-9981"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#name": [
+      {
+        "@value": "OEKO-TEX Standard 100"
+      }
+    ],
+    "https://opendpp-node.eu/ns/dpp#issuer": [
+      {
+        "@value": "AITEX (SAMPLE)"
+      }
+    ]
+  }
+]
