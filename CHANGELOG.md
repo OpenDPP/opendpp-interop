@@ -7,14 +7,18 @@ IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachange
 
 ## [Unreleased]
 
+### Added
+- **`samples/cirpass2-renderer-expanded.json`** — the CIRPASS-2 reference renderer's verbatim
+  `GET /fetch/v1` output for a live OpenDPP passport: 30 Titanium-JSON-LD-expanded RDF nodes, every
+  IRI under `opendpp-node.eu`. The captured viewer-interop evidence (OpenDPP #174).
+
 ### Changed
-- **CIRPASS-2 reference-viewer row** — flipped from 🗺 Roadmap to 🟡 Partial. OpenDPP's public
-  JSON-LD RDF-expandability (the property the `dpp-renderer-be` viewer relies on) is now proven in CI
-  by a hermetic guard — every variant expands with zero OpenDPP-term drops (OpenDPP #174). The
-  one-time live `/fetch/v1` render stays a documented manual reproduction (OpenDPP #432); its
-  captured sample will be added here when run. Recorded the **Option B** vocabulary stance (OpenDPP
-  stays on its own vocab; no TalTech EUDPP alias). Non-normative throughout — *reference renderer*,
-  never *certified*. _(Non-contract docs change — no API-contract version bump.)_
+- **CIRPASS-2 reference-viewer row** — flipped from 🗺 Roadmap to ✅. **Verified live (2026-06-30):**
+  the real `dpp-renderer-be` 1.0.2 fetched + Jena-parsed + Titanium-expanded a live prod OpenDPP
+  passport (HTTP 200, no expansion error). The same RDF-expandability is also guarded hermetically in
+  CI (OpenDPP #174). Recorded the **Option B** vocabulary stance (OpenDPP stays on its own vocab; no
+  TalTech EUDPP alias). Non-normative throughout — *reference renderer*, never *certified*.
+  _(Non-contract docs/sample change — no API-contract version bump.)_
 
 ## [1.7.0] — API contract 1.7.0 (programmatic API-write entitlement + bulk label export)
 
