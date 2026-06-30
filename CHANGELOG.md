@@ -5,9 +5,18 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
-## [Unreleased]
+## [1.8.0] — API contract 1.8.0 (first-class commodityCode + EU trade-identity packages)
+
+Carries OpenDPP public API contract **1.8.0** (`openapi.json`). Additive (MINOR) — no breaking change.
 
 ### Added
+- **`commodityCode` (HS/TARIC) is now a first-class optional passport-metadata field** in the public
+  contract — the registry-pointer field the EU DPP index (ESPR Art. 13 / CIRPASS-2) requires; it flows
+  through every ingest path and is advertised on `GET /schemas/{category}` (OpenDPP #435).
+- **`publish-eori.yml` + `publish-aeo.yml`** — keyless-OIDC npm publish workflows for the two new EU
+  trade-identity client packages **`@opendpp/eori`** (EORI validation vs the EU Commission EOS service)
+  and **`@opendpp/aeo`** (Authorised Economic Operator trusted-trader lookup), which mirror into
+  `packages/` from opendpp-node (OpenDPP #438 / #440).
 - **`samples/cirpass2-renderer-expanded.json`** — the CIRPASS-2 reference renderer's verbatim
   `GET /fetch/v1` output for a live OpenDPP passport: 30 Titanium-JSON-LD-expanded RDF nodes, every
   IRI under `opendpp-node.eu`. The captured viewer-interop evidence (OpenDPP #174).
