@@ -64,15 +64,19 @@ work, and [mirror-managed](./packages/) here.
 | **`@opendpp/gs1`** | GS1 Digital Link builders + mod-10 / GLN check-digit helpers | [![npm](https://img.shields.io/npm/v/@opendpp/gs1.svg)](https://www.npmjs.com/package/@opendpp/gs1) |
 | **`@opendpp/csv`** | CSV → passport mapper to the public ingest shape (bulk import) | [![npm](https://img.shields.io/npm/v/@opendpp/csv.svg)](https://www.npmjs.com/package/@opendpp/csv) |
 | **`@opendpp/webhooks`** | Webhook event types + a constant-time HMAC-SHA256 signature verifier | [![npm](https://img.shields.io/npm/v/@opendpp/webhooks.svg)](https://www.npmjs.com/package/@opendpp/webhooks) |
+| **`@opendpp/eori`** | EORI validation vs the EU Commission EOS authoritative service + offline syntax/parse helpers | [![npm](https://img.shields.io/npm/v/@opendpp/eori.svg)](https://www.npmjs.com/package/@opendpp/eori) |
+| **`@opendpp/aeo`** | Authorised Economic Operator (trusted-trader) lookup vs the EU Commission EOS service | [![npm](https://img.shields.io/npm/v/@opendpp/aeo.svg)](https://www.npmjs.com/package/@opendpp/aeo) |
 
 ```sh
-npm install @opendpp/gs1          # or @opendpp/csv, @opendpp/webhooks
+npm install @opendpp/gs1          # or @opendpp/csv, @opendpp/webhooks, @opendpp/eori, @opendpp/aeo
 ```
 
 ```ts
 import { isValidGTIN, generateDigitalLinkUri } from "@opendpp/gs1";
 import { mapCsvRowsToPassports } from "@opendpp/csv";       // CSV rows → POST /api/v1/passports/bulk
 import { verifyWebhookRequest } from "@opendpp/webhooks";   // verify an inbound OpenDPP webhook
+import { validateEori } from "@opendpp/eori";               // EORI existence check vs the EU EOS service
+import { lookupAeo } from "@opendpp/aeo";                   // Authorised Economic Operator lookup
 ```
 
 Sources + per-package docs are under [`packages/`](./packages/). The closed surface — eIDAS sealing,
