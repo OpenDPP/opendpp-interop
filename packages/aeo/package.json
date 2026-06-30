@@ -1,0 +1,63 @@
+{
+  "name": "@opendpp/aeo",
+  "version": "0.1.0",
+  "description": "Authorised Economic Operator (AEO) lookup against the European Commission's official EOS aeo-retrieve web service, plus pure offline AEO helpers (ESM, Node >=26). From the OpenDPP Digital Product Passport service.",
+  "keywords": [
+    "aeo",
+    "authorised-economic-operator",
+    "customs",
+    "european-commission",
+    "trusted-trader",
+    "ec",
+    "eos",
+    "due-diligence",
+    "dpp",
+    "digital-product-passport",
+    "espr",
+    "esm"
+  ],
+  "license": "Apache-2.0",
+  "author": "Giovanni Savastano <giovanni.savastano@opendpp-node.eu>",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=26"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenDPP/opendpp-interop.git",
+    "directory": "packages/aeo"
+  },
+  "homepage": "https://github.com/OpenDPP/opendpp-interop#readme",
+  "bugs": {
+    "url": "https://github.com/OpenDPP/opendpp-interop/issues"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --import tsx 'test/*.test.ts'",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}

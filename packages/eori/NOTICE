@@ -1,0 +1,19 @@
+@opendpp/eori
+Copyright (c) Opendpp UAB.
+
+This product includes software developed by Opendpp UAB.
+Licensed under the Apache License, Version 2.0 (see the LICENSE file).
+
+This package validates EORI numbers against the European Commission's official
+EORI validation web service (EOS), part of the Taxation and Customs Union DDS2
+system. Opendpp UAB is not affiliated with, nor endorsed by, the European
+Commission. The service is provided by the European Commission under its own
+terms; this package merely formats requests to, and parses responses from, that
+service. See https://ec.europa.eu/taxation_customs/dds2/eos/eori_validation.jsp
+
+"OpenDPP" is a trademark of Opendpp UAB. Per Section 6 of the Apache License,
+Version 2.0, this license does not grant permission to use the "OpenDPP" trade
+names, trademarks, service marks, or product names. Forks may rebuild and
+redistribute this code but must adopt a different name and may not represent
+themselves as "OpenDPP" or as "OpenDPP-conformant".
+Trademark policy: https://github.com/OpenDPP/opendpp-interop
