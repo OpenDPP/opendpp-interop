@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/OpenDPP/opendpp-interop/main/assets/opendpp-mark.png" alt="OpenDPP" width="80" height="80">
+</p>
+
 # @opendpp/csv
 
 Pure, zero-dependency **CSV → passport** reference mapper for the
