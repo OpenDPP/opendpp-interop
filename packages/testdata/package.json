@@ -28,7 +28,7 @@
     }
   },
   "bin": {
-    "opendpp-testdata": "./dist/cli.js"
+    "opendpp-testdata": "dist/cli.js"
   },
   "sideEffects": false,
   "files": [
