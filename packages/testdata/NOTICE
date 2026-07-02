@@ -1,0 +1,18 @@
+@opendpp/testdata
+Copyright (c) Opendpp UAB.
+
+This product includes software developed by Opendpp UAB.
+Licensed under the Apache License, Version 2.0 (see the LICENSE file).
+
+All data emitted by this package is SYNTHETIC sample data: fictional company and
+facility names marked "(SAMPLE)", GS1 identifiers minted under a fictional company
+prefix (valid mod-10 check digits, no real GS1 licence), and example.opendpp-node.eu
+URLs. It describes no real products, operators or facilities, and it asserts no
+regulatory status of any kind.
+
+"OpenDPP" is a trademark of Opendpp UAB. Per Section 6 of the Apache License,
+Version 2.0, this license does not grant permission to use the "OpenDPP" trade
+names, trademarks, service marks, or product names. Forks may rebuild and
+redistribute this code but must adopt a different name and may not represent
+themselves as "OpenDPP" or as "OpenDPP-conformant".
+Trademark policy: https://github.com/OpenDPP/opendpp-interop

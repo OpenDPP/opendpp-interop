@@ -82,6 +82,42 @@ export function isGRAIVal(val: string): boolean {
 }
 
 /**
+ * GS1 Modulo-10 check digit for a numeric body — the shared algorithm behind GTIN-14 and GLN-13
+ * (weights 3/1 from the rightmost body digit). The generation-side complement of the validators
+ * above, so synthetic identifiers (demo seeds, @opendpp/testdata samples) can be MINTED with a
+ * valid check digit from the same single source that validates them.
+ */
+export function gs1CheckDigit(body: string): number {
+  if (!/^\d+$/.test(body)) {
+    throw new Error(`gs1CheckDigit expects a numeric body, got "${body}"`);
+  }
+  const digits = body.split("").map(Number);
+  let sum = 0;
+  let weight = 3;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    sum += digits[i] * weight;
+    weight = weight === 3 ? 1 : 3;
+  }
+  return (10 - (sum % 10)) % 10;
+}
+
+/** Build a valid 14-digit GTIN from a 13-digit numeric body (appends the mod-10 check digit). */
+export function makeGtin(body13: string): string {
+  if (!/^\d{13}$/.test(body13)) {
+    throw new Error(`makeGtin expects a 13-digit body, got "${body13}"`);
+  }
+  return body13 + gs1CheckDigit(body13);
+}
+
+/** Build a valid 13-digit GLN from a 12-digit numeric body (appends the mod-10 check digit). */
+export function makeGln(body12: string): string {
+  if (!/^\d{12}$/.test(body12)) {
+    throw new Error(`makeGln expects a 12-digit body, got "${body12}"`);
+  }
+  return body12 + gs1CheckDigit(body12);
+}
+
+/**
  * #249: whether a productId resolves to a scannable GS1 Digital Link — a valid GTIN-14 (`/01`) or a
  * valid GRAI (`/8003`). A non-GS1 SKU resolves via the internal `/passport/{id}` route instead.
  */

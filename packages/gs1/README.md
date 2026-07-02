@@ -27,6 +27,8 @@ import {
   isValidGTIN,
   isGs1Keyed,
   gtinIngestError,
+  makeGtin,
+  makeGln,
   generateDigitalLinkUri,
   generateUnitDigitalLinkUri,
   canonicalProductUpi,
@@ -36,6 +38,11 @@ import {
 isValidGTIN("09501101531000");          // true  — valid GTIN-14 mod-10 check digit
 isGs1Keyed("WIDGET-1");                  // false — a non-GS1 SKU
 gtinIngestError("00012345678900");       // "...looks like a GTIN-14 but its check digit is invalid..."
+
+// Mint valid identifiers (since 0.2.0) — the generation-side complement of the validators,
+// e.g. for synthetic/demo data:
+makeGtin("0950110154100");               // "09501101541009" — 13-digit body + mod-10 check digit
+makeGln("095011015401");                 // "0950110154011"  — 12-digit body + mod-10 check digit
 
 // Host-independent GS1 identity (UPI) — never an OpenDPP host:
 canonicalProductUpi("09501101531000");   // "https://id.gs1.org/01/09501101531000"

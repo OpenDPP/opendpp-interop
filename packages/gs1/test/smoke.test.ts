@@ -10,6 +10,9 @@ import {
   isGs1Keyed,
   gtinIngestError,
   nonGs1Warning,
+  gs1CheckDigit,
+  makeGtin,
+  makeGln,
   parseDigitalLinkPath,
   generateDigitalLinkUri,
   generateUnitDigitalLinkUri,
@@ -60,4 +63,25 @@ test("URI builders (suffix-asserted — resolver host is env-dependent)", () => 
     canonicalUnitUpi(VALID_GTIN14, "SER-42"),
     `https://id.gs1.org/01/${VALID_GTIN14}/21/SER-42`,
   );
+});
+
+test("mod-10 minting (gs1CheckDigit / makeGtin / makeGln) round-trips the validators", () => {
+  // Mint from a body, then validate with the SAME package — generation and validation agree by construction.
+  const gtin = makeGtin("0950110154100");
+  assert.equal(gtin.length, 14);
+  assert.equal(isGTINVal(gtin), true);
+  assert.equal(gs1CheckDigit("0950110154100"), Number(gtin[13]));
+
+  const gln = makeGln("095011015401");
+  assert.equal(gln.length, 13);
+  assert.equal(isValidGLN(gln), true);
+
+  // The known-valid fixtures reproduce exactly.
+  assert.equal(makeGtin(VALID_GTIN14.slice(0, 13)), VALID_GTIN14);
+  assert.equal(makeGln(VALID_GLN13.slice(0, 12)), VALID_GLN13);
+
+  // Guard rails: wrong length / non-numeric bodies throw instead of minting garbage.
+  assert.throws(() => makeGtin("123"), /13-digit body/);
+  assert.throws(() => makeGln("123"), /12-digit body/);
+  assert.throws(() => gs1CheckDigit("12a4"), /numeric body/);
 });

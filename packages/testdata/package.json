@@ -1,18 +1,19 @@
 {
-  "name": "@opendpp/gs1",
-  "version": "0.2.0",
-  "description": "Pure, zero-dependency GS1 Digital Link URI builders and GS1 mod-10 check-digit helpers — validate AND mint GTIN-14/GLN-13 (ESM, Node >=26). Extracted from the OpenDPP Digital Product Passport service.",
+  "name": "@opendpp/testdata",
+  "version": "0.1.0",
+  "description": "Deterministic synthetic sample-passport and EPCIS-shaped event-chain generator for the OpenDPP Digital Product Passport API — category-valid ESPR sample data for every category the public contract recognises (ESM, Node >=26).",
   "keywords": [
-    "gs1",
-    "digital-link",
-    "gtin",
-    "gln",
-    "grai",
-    "check-digit",
-    "mod-10",
+    "testdata",
+    "sample-data",
+    "fixtures",
+    "generator",
     "dpp",
     "digital-product-passport",
     "espr",
+    "epcis",
+    "gs1",
+    "gtin",
+    "csv",
     "esm"
   ],
   "license": "Apache-2.0",
@@ -25,6 +26,9 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
+  },
+  "bin": {
+    "opendpp-testdata": "./dist/cli.js"
   },
   "sideEffects": false,
   "files": [
@@ -42,7 +46,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/OpenDPP/opendpp-interop.git",
-    "directory": "packages/gs1"
+    "directory": "packages/testdata"
   },
   "homepage": "https://github.com/OpenDPP/opendpp-interop#readme",
   "bugs": {
@@ -53,6 +57,10 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --test --import tsx 'test/*.test.ts'",
     "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@opendpp/csv": "^0.1.1",
+    "@opendpp/gs1": "^0.2.0"
   },
   "devDependencies": {
     "@types/node": "^26.0.1",
