@@ -36,6 +36,16 @@ above — each retains its own upstream license and terms):
    exploration and do not reflect CEN-CENELEC JTC 24. Vendored verbatim for
    offline validation. Upstream is authoritative.
 
+5. schemas/epcis-2.0.1.schema.json
+   Official GS1 EPCIS 2.0.1 JSON Schema (consolidated standard artifact),
+   JSON Schema draft-07 — verbatim copy.
+   © GS1 AISBL. GS1® and EPCIS® are registered trademarks of GS1 AISBL.
+   Canonical source: https://ref.gs1.org/standards/epcis/epcis-json-schema.json
+   (also https://github.com/gs1/EPCIS). Published by GS1 for implementation
+   under the GS1 IP Policy (https://www.gs1.org/standards/ip), AS IS and
+   without warranty. Vendored verbatim for offline validation; no GS1
+   endorsement or certification is claimed. Upstream is authoritative.
+
 ------------------------------------------------------------------------------
 OpenDPP-authored content (NOT third-party; covered by the Apache-2.0 license
 above):

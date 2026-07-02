@@ -5,6 +5,25 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.9.0] — API contract 1.9.0 (native GS1 EPCIS 2.0 document I/O)
+
+Carries OpenDPP public API contract **1.9.0** (`openapi.json`). Additive (MINOR) — no breaking change.
+
+### Added
+- **Native GS1 EPCIS 2.0 document I/O** in the public contract: `POST /api/v1/events/epcis` captures a
+  standard `EPCISDocument` (JSON/JSON-LD) with per-event partial success and disclosed `ignoredFields`;
+  `GET /api/v1/events/{id}/lineage` content-negotiates `Accept: application/ld+json` into a conformant
+  EPCIS document projection of the lineage walk (OpenDPP #472).
+- **`schemas/epcis-2.0.1.schema.json`** — the official GS1 EPCIS 2.0.1 JSON Schema, vendored verbatim
+  (draft-07; © GS1 AISBL, see NOTICE). The SAME schema the node validates captures against and CI
+  validates emitted documents against.
+- **`validate.mjs epcis`** — a new validator kind: check YOUR EPCIS documents against the official
+  schema, offline. Sample: `samples/epcis-document.json` (a 4-event synthetic chain — commissioning →
+  transformation → packing → shipping — under the fictional `0950110154` sample prefix).
+- **`publish-testdata.yml`** — keyless-OIDC npm publish workflow for **`@opendpp/testdata`** (the
+  deterministic synthetic sample-data generator, OpenDPP #473; first version bootstrapped manually,
+  tags take over from 0.1.1).
+
 ## [1.8.0] — API contract 1.8.0 (first-class commodityCode + EU trade-identity packages)
 
 Carries OpenDPP public API contract **1.8.0** (`openapi.json`). Additive (MINOR) — no breaking change.

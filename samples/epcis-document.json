@@ -1,0 +1,82 @@
+{
+  "@context": [
+    "https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld"
+  ],
+  "type": "EPCISDocument",
+  "schemaVersion": "2.0",
+  "creationDate": "2026-07-02T10:00:00.000Z",
+  "epcisBody": {
+    "eventList": [
+      {
+        "type": "ObjectEvent",
+        "action": "ADD",
+        "bizStep": "commissioning",
+        "disposition": "active",
+        "eventTime": "2026-01-15T08:00:00.000Z",
+        "eventTimeZoneOffset": "+00:00",
+        "epcList": [
+          "urn:epc:id:sgtin:0950110.154904.1",
+          "urn:epc:id:sgtin:0950110.154950.1"
+        ],
+        "readPoint": {
+          "id": "geo:41.1579,-8.6291"
+        },
+        "bizLocation": {
+          "id": "urn:opendpp:location:PT-SAMPLE-SITE-3"
+        }
+      },
+      {
+        "type": "TransformationEvent",
+        "bizStep": "commissioning",
+        "disposition": "in_progress",
+        "eventTime": "2026-01-16T08:00:00.000Z",
+        "eventTimeZoneOffset": "+00:00",
+        "inputEPCList": [
+          "urn:epc:id:sgtin:0950110.154904.1",
+          "urn:epc:id:sgtin:0950110.154950.1"
+        ],
+        "outputEPCList": [
+          "urn:epc:id:sgtin:0950110.154100.1"
+        ],
+        "readPoint": {
+          "id": "geo:41.1579,-8.6291"
+        },
+        "bizLocation": {
+          "id": "urn:opendpp:location:PT-SAMPLE-SITE-3"
+        }
+      },
+      {
+        "type": "AggregationEvent",
+        "action": "ADD",
+        "bizStep": "packing",
+        "disposition": "in_progress",
+        "parentID": "urn:epc:id:sgtin:0950110.154999.7",
+        "childEPCs": [
+          "urn:epc:id:sgtin:0950110.154100.1"
+        ],
+        "eventTime": "2026-01-17T08:00:00.000Z",
+        "eventTimeZoneOffset": "+00:00",
+        "readPoint": {
+          "id": "geo:41.1579,-8.6291"
+        }
+      },
+      {
+        "type": "ObjectEvent",
+        "action": "OBSERVE",
+        "bizStep": "shipping",
+        "disposition": "in_transit",
+        "eventTime": "2026-01-18T08:00:00.000Z",
+        "eventTimeZoneOffset": "+00:00",
+        "epcList": [
+          "urn:epc:id:sgtin:0950110.154100.1"
+        ],
+        "readPoint": {
+          "id": "geo:51.0504,13.7373"
+        },
+        "bizLocation": {
+          "id": "urn:opendpp:location:DE-SAMPLE-SITE-1"
+        }
+      }
+    ]
+  }
+}
