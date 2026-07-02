@@ -51,6 +51,7 @@ node validate.mjs semanticids ../samples/battery-aas-environment.json        # I
 node validate.mjs registry    ../samples/battery-registry-pointer-model.json # CIRPASS-2 EU-registry (NON-NORMATIVE)
 node validate.mjs shacl       ../samples/battery-passport.jsonld             # OpenDPP SHACL shapes (NON-NORMATIVE)
 node validate.mjs sdjwt       ../samples/battery-vc.sdjwt                    # SD-JWT-VC: disclosures + ES256 signature
+node validate.mjs epcis       ../samples/epcis-document.json                 # GS1 EPCIS 2.0 document (official 2.0.1 schema)
 node validate.mjs gs1         ../samples/gs1-digital-link.txt               # GS1 Digital Link: grammar + check digits (GS1's engine)
 ```
 
@@ -103,7 +104,7 @@ opendpp-interop/
 │   ├── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
 │   └── gs1-digital-link.txt      GS1 Digital Link URIs / AI element strings (validated by the `gs1` door)
 ├── packages/               the @opendpp/* npm client libraries (gs1 · csv · webhooks; mirror-managed, see packages/README.md)
-└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl · sdjwt · gs1)
+└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl · sdjwt · gs1 · epcis)
 ```
 
 ## Official schemas (vendored)

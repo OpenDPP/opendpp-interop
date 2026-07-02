@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "OpenDPP Integration API",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "summary": "Create, validate, seal and publish EU Digital Product Passports; serialize battery units; manage facilities, access grants and webhooks; resolve and verify passports publicly.",
     "description": "OpenDPP is a B2B platform for EU Digital Product Passports (DPPs), aligned with the ESPR (Regulation (EU) 2024/1781) data requirements and the EU Battery Regulation (Regulation (EU) 2023/1542). This specification documents the **public integration surface**: everything an external system needs to create, validate, seal, publish, resolve and verify passports.\n\n## Authentication\nAuthenticate with a tenant **API key** sent as a Bearer token: `Authorization: Bearer op_dpp_token_…`. Keys are created in the Client Console (Developers → API keys), are shown **once** at creation, carry a role plus optional narrowed permissions and optional expiry, and can be revoked at any time. API-key clients are exempt from CSRF requirements. Public endpoints (tagged **Public Resolution**, plus the public validators and the audit verifier) need no credentials.\n\n## Tenancy\nTenant identity is **token-bound** — it is derived from your API key, never from the request host. The same paths work on the apex host and on tenant workspace hosts (`https://<workspace>.opendpp-node.eu`); when a workspace host is used, it must match the key's tenant (requests across workspaces are rejected with `403`).\n\n## Errors\nAuthenticated endpoints return `{ success: false, error, message }` (some omit `success`). ESPR metadata validation failures return the richer shape documented as **ValidationFailed** with per-field `errors[]`/`warnings[]` (localizable via `?lang=` or `Accept-Language`; 28 languages). Bulk endpoints report row-level problems as `errors: string[]`. Malformed JSON and query-string violations return Fastify's default `{ statusCode, code, error, message }` body.\n\n## Rate limits\nGlobal limit: **100 requests/min per IP** (higher for verified crawlers), with `x-ratelimit-*` response headers. Public passport resolution is additionally limited to **30 requests/min per IP** (no headers). The public validator is limited to **10 requests/min per IP**. Stay under these limits with client-side queueing; on `429`, back off and retry after the indicated window.\n\n## Sealing & verification\nPassport seals are **eIDAS advanced electronic seals** (ECDSA P-256 over a Merkle root of the passport content, optional RFC 3161 timestamp). Anyone can verify a seal — no account required. `POST /api/v1/audit/verify` recomputes every Merkle leaf from the submitted values, so it requires the unredacted document (caller-supplied redacted-leaf hashes are deliberately not trusted). Redacted documents remain verifiable **offline**: masked fields keep their true leaf hashes in `proof.redactedLeaves`, letting any verifier rebuild the sealed root without the privileged values.\n\n## Public access tiers\nPublic resolution endpoints serve **tiered** views of the same URL: the public tier for anonymous callers; a restricted tier for holders of legitimate-interest (`dpp_li_…`) or authority (`dpp_auth_…`) capability tokens (presented as a Bearer token or `?grant=` query parameter); and the owner tier for the issuing tenant's own credentials.\n\n## Webhooks\nSubscribe to passport lifecycle events (`passport.ingested`, `passport.sealed`, `passport.recalled`, or `*`). Deliveries are HMAC-SHA256-signed; see the **webhooks** section of this document for the exact signature scheme, retry schedule, and payloads.\n\nThis document is also served machine-readably at [`/openapi.json`](https://opendpp-node.eu/openapi.json) and [`/openapi.yaml`](https://opendpp-node.eu/openapi.yaml).\n\n## Open interoperability kit\nThe interoperability boundary — the official AAS + UNTP/W3C-VC schemas, live-reproducible samples, an offline conformance validator, and the field mappings — is **open source** at [github.com/OpenDPP/opendpp-interop](https://github.com/OpenDPP/opendpp-interop) (Apache-2.0). It lets any integrator validate and verify OpenDPP's standards-conformant output without access to the product source.",
     "contact": {
@@ -7991,6 +7991,152 @@
         }
       }
     },
+    "/api/v1/events/epcis": {
+      "post": {
+        "operationId": "captureEpcisDocument",
+        "tags": [
+          "Traceability & Audit"
+        ],
+        "summary": "Capture a native GS1 EPCIS 2.0 document (JSON/JSON-LD)",
+        "description": "Captures a native **GS1 EPCIS 2.0 document** — the standard's own JSON/JSON-LD interchange format — and persists each supported event as an EPCIS event row scoped to your tenant, alongside the VC-shaped `POST /api/v1/events` path. Send the document exactly as your EPCIS infrastructure produces it.\n\n**Permission:** `passport:update` (write operation — subscription gating applies, see 402). When the node operator enforces MFA, writes from user-backed sessions (cookie or Bearer JWT) whose MFA policy requires a second factor (user policy `REQUIRED`, or `DEFAULT` with the workspace's MFA-by-default setting, which is on by default) receive 403 without one; API-key clients are exempt. Cookie-session clients must send the `X-CSRF-Token` header (double-submit with the `opendpp_csrf` cookie); Bearer JWT / API-key clients are exempt.\n\n**Rate limit:** global limiter, 100 requests/min per IP (standard `x-ratelimit-*` headers).\n\n**Validation:** the WHOLE document is validated against the official GS1 EPCIS **2.0.1** JSON Schema (vendored and pinned on the node) before any event is stored — a non-conformant document is rejected 400 with the first few schema violations under `errors[]`. Notable rules the OFFICIAL schema enforces: `@context` and `creationDate` are required; `bizStep`/`disposition` must use the CBV **short names** (e.g. `commissioning`, `in_transit`) or a custom (non-CBV) URI — the legacy `urn:epcglobal:cbv:*` URN form is REJECTED by the standard's schema; `action` is forbidden on `TransformationEvent`; `readPoint`/`bizLocation` carry `{id: <uri>}`. Only `type: \"EPCISDocument\"` is accepted (no `EPCISQueryDocument`, no bare events), and `epcisBody.eventList` must be non-empty.\n\n**Per-event capture (partial success):** events are processed independently and the 201 response reports `results[]` (captured) and `errors[]` (rejected) by `index`. An event is rejected — never silently dropped — when its type is outside this node's traceability model (`ObjectEvent`, `AggregationEvent`, `TransformationEvent`, `AssociationEvent` are supported; `TransactionEvent` is not) or when it identifies stock ONLY by quantity lists (no `epcList`/`parentID`/`childEPCs`/`inputEPCList`/`outputEPCList` — nothing EPC-identified would remain to trace). If EVERY event is rejected the response is 400 `No Events Captured` with the same `errors[]`.\n\n**Fidelity disclosure:** recognized EPCIS fields the node does not persist (`eventID`, quantity lists, `sensorElementList`, `bizTransactionList`, `sourceList`/`destinationList`, `persistentDisposition`, `errorDeclaration`, `ilmd`, custom extension fields, …) are listed per event under `results[].ignoredFields` instead of being silently discarded.\n\n**Persistence:** row ids are ALWAYS server-generated (UUID) — a client-supplied `eventID` is never adopted as the primary key (it is disclosed under `ignoredFields`); CBV short names are normalized to the node's stored URN form (`urn:epcglobal:cbv:bizstep:*` / `urn:epcglobal:cbv:disp:*`, the same form the VC-shaped path stores and the lineage projection reads); defaults when absent: `bizStep` → `receiving`, `disposition` → `in_progress`. Rows captured on this path carry **no per-event credential** and are stored with `isUntpCompliant: false` (API-key provenance only) — they are never presented as UNTP-verified. This endpoint does not create lineage edges between events.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EpcisDocument"
+              },
+              "example": {
+                "@context": [
+                  "https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld"
+                ],
+                "type": "EPCISDocument",
+                "schemaVersion": "2.0",
+                "creationDate": "2026-07-02T10:00:00.000Z",
+                "epcisBody": {
+                  "eventList": [
+                    {
+                      "type": "ObjectEvent",
+                      "action": "ADD",
+                      "bizStep": "commissioning",
+                      "disposition": "active",
+                      "eventTime": "2026-01-15T08:00:00.000Z",
+                      "eventTimeZoneOffset": "+00:00",
+                      "epcList": [
+                        "urn:epc:id:sgtin:0950110.154904.1"
+                      ],
+                      "readPoint": {
+                        "id": "geo:41.1579,-8.6291"
+                      },
+                      "bizLocation": {
+                        "id": "urn:opendpp:location:PT-SAMPLE-SITE-3"
+                      }
+                    },
+                    {
+                      "type": "TransformationEvent",
+                      "bizStep": "commissioning",
+                      "disposition": "in_progress",
+                      "eventTime": "2026-01-16T08:00:00.000Z",
+                      "eventTimeZoneOffset": "+00:00",
+                      "inputEPCList": [
+                        "urn:epc:id:sgtin:0950110.154904.1"
+                      ],
+                      "outputEPCList": [
+                        "urn:epc:id:sgtin:0950110.154100.1"
+                      ],
+                      "readPoint": {
+                        "id": "geo:41.1579,-8.6291"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "At least one event captured. Note the non-standard envelope: `status: \"success\"` (string). `errors[]` lists per-event rejections when the capture was partial.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpcisCaptureResponse"
+                },
+                "example": {
+                  "status": "success",
+                  "captured": 2,
+                  "results": [
+                    {
+                      "index": 0,
+                      "eventId": "9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
+                      "eventType": "ObjectEvent"
+                    },
+                    {
+                      "index": 1,
+                      "eventId": "1c3d4e5f-8a6b-4c8d-9e0f-1a2b9b2fa884",
+                      "eventType": "TransformationEvent"
+                    }
+                  ],
+                  "errors": []
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Always `{success: false, error, message}` (plus `errors[]` detail where noted) with one of: `EPCIS Schema Validation Failed` (the document does not conform to the official GS1 EPCIS 2.0 JSON Schema; `errors[]` carries the first few violations), `Unsupported Document Type` (`type` is not `EPCISDocument`), `Empty Document` (`epcisBody.eventList` is empty), or `No Events Captured` (every event was rejected; `errors[]` carries the per-event reasons).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "schemaInvalid": {
+                    "value": {
+                      "success": false,
+                      "error": "EPCIS Schema Validation Failed",
+                      "message": "The document does not conform to the GS1 EPCIS 2.0 JSON Schema.",
+                      "errors": [
+                        "/epcisBody/eventList/0 must have required property 'eventTime'"
+                      ]
+                    }
+                  },
+                  "noneCaptured": {
+                    "value": {
+                      "success": false,
+                      "error": "No Events Captured",
+                      "message": "Every event in the document was rejected.",
+                      "errors": [
+                        {
+                          "index": 0,
+                          "message": "event type \"TransactionEvent\" is not supported by this node's traceability model (supported: ObjectEvent, AggregationEvent, TransformationEvent, AssociationEvent)."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
     "/api/v1/events/{id}/lineage": {
       "get": {
         "operationId": "getEventLineage",
@@ -7998,7 +8144,7 @@
           "Traceability & Audit"
         ],
         "summary": "Retrieve the upstream pedigree of an event as a recursive lineage DAG",
-        "description": "Returns the full upstream pedigree of a traceability event as a recursive Directed Acyclic Graph: the root event plus, in `parents`, every event linked upstream through lineage relations registered on the node, walked transitively (parents of parents). A shared ancestor reached through multiple downstream paths is repeated under EACH path — the DAG is expanded into a tree in the response, not deduplicated; only a true cycle aborts the walk (400).\n\n**Permission:** `passport:read`. Every node in the walk — the root AND each upstream parent — is scoped to the caller's tenant; an event belonging to another tenant is invisible and the request fails with 404 (no cross-tenant pedigree reads). Sessions with the `SUPER_ADMIN` role are exempt from tenant scoping.\n\n**Rate limit:** global limiter, 100 requests/min per IP (standard `x-ratelimit-*` headers).\n\n**Caveats:** if the lineage graph contains a circular reference the walk aborts with 400. Any other failure (unknown id, other-tenant id, missing parent) is reported as the same deliberately generic 404 body. `eventTime` is serialized as ISO 8601 UTC; `epcs` is parsed from the stored EPC list (a non-array value degrades to `[]`); `location` mirrors the stored `bizLocation`.",
+        "description": "Returns the full upstream pedigree of a traceability event as a recursive Directed Acyclic Graph: the root event plus, in `parents`, every event linked upstream through lineage relations registered on the node, walked transitively (parents of parents). A shared ancestor reached through multiple downstream paths is repeated under EACH path — the DAG is expanded into a tree in the response, not deduplicated; only a true cycle aborts the walk (400).\n\n**Permission:** `passport:read`. Every node in the walk — the root AND each upstream parent — is scoped to the caller's tenant; an event belonging to another tenant is invisible and the request fails with 404 (no cross-tenant pedigree reads). Sessions with the `SUPER_ADMIN` role are exempt from tenant scoping.\n\n**Rate limit:** global limiter, 100 requests/min per IP (standard `x-ratelimit-*` headers).\n\n**Caveats:** if the lineage graph contains a circular reference the walk aborts with 400. Any other failure (unknown id, other-tenant id, missing parent) is reported as the same deliberately generic 404 body. `eventTime` is serialized as ISO 8601 UTC; `epcs` is parsed from the stored EPC list (a non-array value degrades to `[]`); `location` mirrors the stored `bizLocation`.\n\n**Content negotiation (EPCIS projection):** `Accept: application/ld+json` returns the SAME tenant-scoped lineage as a native **GS1 EPCIS 2.0 document** (`EPCISDocument` with the walk's events under `epcisBody.eventList`, ordered by `eventTime`, bounded to 500 events) instead of the recursive JSON tree — another projection of the same canonical rows, mirroring the AAS/VC Accept-header pattern on the passport resolution routes. Emitted documents use the official CBV short names (stored `urn:epcglobal:cbv:*` values are mapped back), expose row ids as `eventID` URNs (`urn:uuid:*`, or `urn:opendpp:event:*` for non-UUID ids), and wrap non-URI stored locations as `urn:opendpp:location:*`.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -8053,6 +8199,38 @@
                         "isUntpCompliant": true,
                         "issuerDid": "did:web:opendpp-node.eu:supplier-pt",
                         "parents": []
+                      }
+                    ]
+                  }
+                }
+              },
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpcisDocument"
+                },
+                "example": {
+                  "@context": [
+                    "https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld"
+                  ],
+                  "type": "EPCISDocument",
+                  "schemaVersion": "2.0",
+                  "creationDate": "2026-07-02T10:00:00.000Z",
+                  "epcisBody": {
+                    "eventList": [
+                      {
+                        "eventID": "urn:uuid:9b2fa884-1c3d-4e5f-8a6b-7c8d9e0f1a2b",
+                        "type": "ObjectEvent",
+                        "action": "ADD",
+                        "bizStep": "commissioning",
+                        "disposition": "active",
+                        "eventTime": "2026-01-15T08:00:00.000Z",
+                        "eventTimeZoneOffset": "+00:00",
+                        "epcList": [
+                          "urn:epc:id:sgtin:0950110.154904.1"
+                        ],
+                        "readPoint": {
+                          "id": "geo:41.1579,-8.6291"
+                        }
                       }
                     ]
                   }
@@ -13873,6 +14051,132 @@
             "type": "string",
             "const": "token present but TSTInfo could not be parsed",
             "description": "Present only when `genTime` is null."
+          }
+        }
+      },
+      "EpcisDocument": {
+        "type": "object",
+        "description": "A GS1 EPCIS 2.0 document (JSON/JSON-LD). This shape is indicative — the OFFICIAL GS1 EPCIS 2.0.1 JSON Schema (vendored on the node, $id https://ref.gs1.org/standards/epcis/2.0.1/epcis-json-schema.json) is authoritative and is what capture validates against.",
+        "required": [
+          "@context",
+          "type",
+          "schemaVersion",
+          "creationDate",
+          "epcisBody"
+        ],
+        "properties": {
+          "@context": {
+            "description": "JSON-LD context — include https://ref.gs1.org/standards/epcis/2.0.0/epcis-context.jsonld.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {}
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "EPCISDocument"
+            ]
+          },
+          "schemaVersion": {
+            "type": "string",
+            "example": "2.0"
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "epcisBody": {
+            "type": "object",
+            "required": [
+              "eventList"
+            ],
+            "properties": {
+              "eventList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "One EPCIS 2.0 event (ObjectEvent, AggregationEvent, TransformationEvent, AssociationEvent — per the official schema).",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "EpcisCaptureResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "captured",
+          "results",
+          "errors"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "captured": {
+            "type": "integer",
+            "description": "How many events were persisted."
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "index",
+                "eventId",
+                "eventType"
+              ],
+              "properties": {
+                "index": {
+                  "type": "integer",
+                  "description": "Position of the event in the submitted eventList."
+                },
+                "eventId": {
+                  "type": "string",
+                  "description": "Server-generated row id (UUID) — the authoritative event identity on this node."
+                },
+                "eventType": {
+                  "type": "string"
+                },
+                "ignoredFields": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Recognized EPCIS fields present on the event that this node does not persist — disclosed, never silently dropped."
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "index",
+                "message"
+              ],
+              "properties": {
+                "index": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       },

@@ -13,6 +13,7 @@
  *   node validate.mjs registry    path/to/eu-registry-pointer.json   (CIRPASS-2, NON-NORMATIVE)
  *   node validate.mjs shacl       path/to/passport.jsonld            (OpenDPP SHACL, NON-NORMATIVE)
  *   node validate.mjs sdjwt       path/to/credential.sdjwt           (SD-JWT-VC: disclosures + ES256 signature)
+ *   node validate.mjs epcis       path/to/epcis-document.json        (GS1 EPCIS 2.0 document, official schema)
  *
  * Exit codes: 0 = conformant · 1 = schema/shape errors (printed) · 2 = usage / read error.
  *
@@ -30,6 +31,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import Ajv from "ajv";
 import Ajv2019 from "ajv/dist/2019.js";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
@@ -45,6 +47,10 @@ const SCHEMAS = {
   untp: { file: "untp-dpp-v0.7.0.schema.json", Ajv: Ajv2020, label: "UNTP DigitalProductPassport v0.7.0" },
   // CIRPASS-2 mock-eu-registry pointer (ESPR Art. 13 index record), draft-2020-12. NON-NORMATIVE reference.
   registry: { file: "cirpass2-eu-registry-pointer.schema.json", Ajv: Ajv2020, label: "CIRPASS-2 EU registry pointer (default-schema.json)" },
+  // Official GS1 EPCIS 2.0.1 JSON Schema (draft-07) — what OpenDPP's native EPCIS capture validates
+  // against and what its lineage `Accept: application/ld+json` projection emits. Note the standard
+  // requires CBV SHORT names (`commissioning`) — the legacy urn:epcglobal:cbv:* form is rejected.
+  epcis: { file: "epcis-2.0.1.schema.json", Ajv, label: "GS1 EPCIS 2.0 document (official EPCIS 2.0.1 JSON Schema)" },
 };
 
 export const INTEROP_KINDS = Object.keys(SCHEMAS);
