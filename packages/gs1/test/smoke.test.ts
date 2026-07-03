@@ -34,6 +34,22 @@ test("mod-10 check-digit validation (GTIN / GLN / GRAI)", () => {
   assert.equal(isGRAIVal(VALID_GTIN14), true); // asset only, no serial
 });
 
+test("GRAI serial accepts the full GS1 CSET-82 charset (audit G-grai)", () => {
+  // The AI-8003 serial component is CSET 82 (alphanumeric PLUS !\"%&'()*+,-./:;<=>?_), not just
+  // [A-Za-z0-9]. Real returnable-asset serials use hyphens/slashes/dots; the engine decodes them fine.
+  for (const serial of ["AB-CD", "A.B", "A/B", "A_B", "LOT(1)", "!%&'*+,:;<=>?", 'A"B']) {
+    assert.equal(isGRAIVal(VALID_GTIN14 + serial), true, `CSET-82 serial ${JSON.stringify(serial)} must be accepted`);
+  }
+  // Still rejects characters OUTSIDE CSET 82.
+  for (const bad of ["A B", "A#B", "A$B", "A@B", "A[B", "A\tB", "café", "A^B", "A`B"]) {
+    assert.equal(isGRAIVal(VALID_GTIN14 + bad), false, `non-CSET-82 serial ${JSON.stringify(bad)} must be rejected`);
+  }
+  // Length + check-digit invariants are unchanged.
+  assert.equal(isGRAIVal(VALID_GTIN14 + "X".repeat(16)), true, "16-char serial (total 30) is the max");
+  assert.equal(isGRAIVal(VALID_GTIN14 + "X".repeat(17)), false, "17-char serial (total 31) exceeds the 30-char cap");
+  assert.equal(isGRAIVal("00012345678900" + "AB-CD"), false, "a bad asset check digit is still rejected");
+});
+
 test("GS1-keyed detection + ingest guard", () => {
   assert.equal(isGs1Keyed(VALID_GTIN14), true);
   assert.equal(isGs1Keyed("WIDGET-1"), false);

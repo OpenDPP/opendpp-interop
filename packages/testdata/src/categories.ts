@@ -183,6 +183,11 @@ export function buildMetadata(category: EsprCategory, rng: Rng): Record<string, 
       m.electrochemicalCapacity = { value: rng.int(20, 300), unit: "Ah" };
       m.stateOfCharge = rng.int(20, 80);
       m.durability = { cycleLife: rng.int(2000, 8000), calendarLifeYears: rng.int(8, 20) };
+      // Annex XIII battery identity fields (audit H4) — CSV-expressible via the manufacturerName /
+      // dateOfManufacture / placeOfManufactureCountry columns of the @opendpp/csv batteries template.
+      m.manufacturer = { name: `${rng.pick(["Saxony Battery Works", "Trondheim Cell", "Iberia Energy Cells", "Baltic Power Systems"])} GmbH (SAMPLE)` };
+      m.dateOfManufacture = `2026-${String(rng.int(1, 12)).padStart(2, "0")}-${String(rng.int(1, 28)).padStart(2, "0")}`;
+      m.placeOfManufacture = { country: (facilities[0].eori as string).slice(0, 2) };
       m.recycledContentShare = {
         cobalt: rng.int(0, 25),
         lithium: rng.int(0, 12),

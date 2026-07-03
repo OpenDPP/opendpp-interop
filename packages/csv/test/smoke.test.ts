@@ -26,6 +26,9 @@ test("maps a battery row to the public passport-create shape", () => {
     chemistry: "NMC",
     electrochemicalCapacity: "100:Ah",
     carbonFootprint: "12.5",
+    manufacturerName: "Iberia Energy Cells GmbH",
+    dateOfManufacture: "2026-05-14",
+    placeOfManufactureCountry: "PT",
   };
   const out = mapCsvRowToPassport(row);
   assert.equal(out.productId, "09501101531000");
@@ -48,6 +51,11 @@ test("maps a battery row to the public passport-create shape", () => {
   assert.equal(m.batteryCategory, "EV");
   assert.deepEqual(m.electrochemicalCapacity, { value: 100, unit: "Ah" });
   assert.deepEqual(m.carbonFootprint, { unit: "kg CO2e", co2eKg: 12.5 });
+  // Annex XIII identity columns → nested objects (only the provided sub-fields; no fabricated blanks).
+  assert.deepEqual(m.manufacturer, { name: "Iberia Energy Cells GmbH" });
+  assert.equal(m.dateOfManufacture, "2026-05-14");
+  assert.deepEqual(m.placeOfManufacture, { country: "PT" });
+  assert.equal("city" in (m.placeOfManufacture ?? {}), false, "a blank city column must not fabricate a key");
 });
 
 test("DATA INTEGRITY: a blank cell yields an absent field (never a fabricated default)", () => {

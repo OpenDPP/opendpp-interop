@@ -23,6 +23,18 @@ test("every category round-trips row → mapCsvRowToPassport losslessly (minus p
   }
 });
 
+test("battery samples carry Annex XIII identity fields that round-trip via the CSV template (audit H4)", () => {
+  const p = generatePassport({ category: "batteries", index: 0, operatorId: "op_x13", facilityId: "fac_x13" });
+  const m = p.metadata as Record<string, any>;
+  assert.ok(m.manufacturer?.name, "sample carries manufacturer.name");
+  assert.ok(m.dateOfManufacture, "sample carries dateOfManufacture");
+  assert.ok(m.placeOfManufacture?.country, "sample carries placeOfManufacture.country");
+  const rt = mapCsvRowToPassport(passportToCsvRow(p)).metadata as Record<string, any>;
+  assert.deepEqual(rt.manufacturer, m.manufacturer, "manufacturer must survive the CSV round-trip");
+  assert.equal(rt.dateOfManufacture, m.dateOfManufacture, "dateOfManufacture must survive the CSV round-trip");
+  assert.deepEqual(rt.placeOfManufacture, m.placeOfManufacture, "placeOfManufacture must survive the CSV round-trip");
+});
+
 test("row cells never contain the ':' / '|' micro-format separators unescaped", () => {
   // ',' is fine (the CSV writer quotes it) — but ':' and '|' would corrupt the cell micro-formats,
   // so generated values must simply never contain them outside the joins that produce them.

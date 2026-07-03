@@ -74,17 +74,20 @@ export function isValidGLN(gln: string): boolean {
 
 /**
  * Checks if a string is a valid GS1 GRAI (Global Returnable Asset Identifier).
- * Format: 14-digit asset identification (starts with '0') + optional up to 16 alphanumeric characters.
+ * Format: 14-digit asset identification (starts with '0') + optional serial of up to 16 characters
+ * drawn from the GS1 encodable character set 82 (CSET 82) — alphanumerics PLUS !"%&'()*+,-./:;<=>?_.
  * Total length between 14 and 30 characters.
  */
+// GS1 CSET 82: `!"` (0x21-0x22) + `%`…`?` (0x25-0x3F: %&'()*+,-./ digits :;<=>?) + `A-Z` + `_` + `a-z`.
+const GRAI_SERIAL_CSET82 = /^[!"%-?A-Z_a-z]+$/;
 export function isGRAIVal(val: string): boolean {
   if (val.length < 14 || val.length > 30) return false;
   const assetId = val.substring(0, 14);
   const serialPart = val.substring(14);
-  
+
   if (!/^\d{14}$/.test(assetId)) return false;
   if (!isValidGTIN(assetId)) return false;
-  if (serialPart && !/^[a-zA-Z0-9]+$/.test(serialPart)) return false;
+  if (serialPart && !GRAI_SERIAL_CSET82.test(serialPart)) return false;
   return true;
 }
 

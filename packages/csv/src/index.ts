@@ -303,6 +303,24 @@ function rowToMetadata(row: PassportCsvRow): Record<string, unknown> {
       set(e, "nickelCountryOfOrigin", niO);
       m.esgDueDiligence = e;
     }
+    // Annex XIII battery identity (audit H4): manufacturer / date / place of manufacture.
+    set(m, "dateOfManufacture", str(row.dateOfManufacture));
+    const mfrName = str(row.manufacturerName);
+    const mfrAddress = str(row.manufacturerAddress);
+    if (mfrName || mfrAddress) {
+      const mf: Record<string, unknown> = {};
+      set(mf, "name", mfrName);
+      set(mf, "address", mfrAddress);
+      m.manufacturer = mf;
+    }
+    const pomCountry = str(row.placeOfManufactureCountry);
+    const pomCity = str(row.placeOfManufactureCity);
+    if (pomCountry || pomCity) {
+      const pom: Record<string, unknown> = {};
+      set(pom, "country", pomCountry);
+      set(pom, "city", pomCity);
+      m.placeOfManufacture = pom;
+    }
   } else if (cat === "electronics") {
     set(m, "model", str(row.model));
     set(m, "standbyPower", scalarUnit(str(row.standbyPower), "W"));
@@ -431,6 +449,11 @@ const CATEGORY_COLUMNS: Record<EsprCategory, CsvColumn[]> = {
     col("cobaltCountryOfOrigin", "Cobalt country of origin (ISO 3166-1 alpha-2)."),
     col("lithiumCountryOfOrigin", "Lithium country of origin (ISO 3166-1 alpha-2)."),
     col("nickelCountryOfOrigin", "Nickel country of origin (ISO 3166-1 alpha-2)."),
+    col("manufacturerName", "Legal manufacturer name (Annex XIII)."),
+    col("manufacturerAddress", "Manufacturer registered address (optional)."),
+    col("dateOfManufacture", "Date of manufacture (YYYY-MM-DD)."),
+    col("placeOfManufactureCountry", "Place of manufacture — country (ISO 3166-1 alpha-2)."),
+    col("placeOfManufactureCity", "Place of manufacture — city (optional)."),
   ],
   electronics: [
     col("model", "Product model designation."),

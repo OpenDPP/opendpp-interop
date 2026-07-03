@@ -94,6 +94,11 @@ export function passportToCsvRow(passport: PassportCreateInput): Record<string, 
       setCell(row, "cobaltCountryOfOrigin", m.esgDueDiligence?.cobaltCountryOfOrigin);
       setCell(row, "lithiumCountryOfOrigin", m.esgDueDiligence?.lithiumCountryOfOrigin);
       setCell(row, "nickelCountryOfOrigin", m.esgDueDiligence?.nickelCountryOfOrigin);
+      setCell(row, "manufacturerName", m.manufacturer?.name);
+      setCell(row, "manufacturerAddress", m.manufacturer?.address);
+      setCell(row, "dateOfManufacture", m.dateOfManufacture);
+      setCell(row, "placeOfManufactureCountry", m.placeOfManufacture?.country);
+      setCell(row, "placeOfManufactureCity", m.placeOfManufacture?.city);
       break;
     case "electronics":
       setCell(row, "model", m.model);
