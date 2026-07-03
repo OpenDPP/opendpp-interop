@@ -33,6 +33,13 @@ export function isValidGTIN(gtin: string): boolean {
   if (!/^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/.test(gtin)) {
     return false;
   }
+  // Hygiene (audit "GS1 hygiene"): an all-zeros key has a zero GS1 Company Prefix and names no real
+  // allocation, yet its mod-10 check digit is itself 0 so it would otherwise pass the checksum. Reject
+  // it so an all-zeros GTIN/GLN is never treated as a scannable GS1 key. (Leading zeros from a
+  // zero-padded GTIN-8/12 are fine — only an ENTIRELY zero value is structurally impossible.)
+  if (/^0+$/.test(gtin)) {
+    return false;
+  }
   const digits = gtin.split("").map(Number);
   const checkDigit = digits[digits.length - 1];
   const dataDigits = digits.slice(0, -1);
