@@ -5,6 +5,19 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [uncommitted]
+
+Not tied to an API-contract version bump — these changes land in the next tagged release.
+
+### Changed
+- **VC reference samples now carry `credentialSchema`.** Regenerated the VC sample set
+  (`samples/battery-vc*.{json,jwt,sdjwt,jsonld}`, `samples/battery-unit-vc*`, `samples/textile-vc*`,
+  `samples/battery-issuer-did.json`) so each conformant UNTP DigitalProductPassport credential now
+  references the node-hosted UNTP DPP v0.7.0 JSON Schema via `credentialSchema`
+  (`{"id": "https://opendpp-node.eu/public/schemas/untp/dpp/0.7.0.json", "type": "JsonSchema"}`) —
+  OpenDPP #500 (audit *V-schema*). The field is additive to the VC body, so it is **not** an OpenAPI
+  contract change (no `openapi.json`/version bump).
+
 ## [1.9.0] — API contract 1.9.0 (native GS1 EPCIS 2.0 document I/O)
 
 Carries OpenDPP public API contract **1.9.0** (`openapi.json`). Additive (MINOR) — no breaking change.

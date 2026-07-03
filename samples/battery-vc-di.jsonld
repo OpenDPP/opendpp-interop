@@ -14,6 +14,10 @@
   },
   "validFrom": "2026-02-18T00:00:00.000Z",
   "name": "Digital Product Passport — BATT-MODEL-X",
+  "credentialSchema": {
+    "id": "https://opendpp-node.eu/public/schemas/untp/dpp/0.7.0.json",
+    "type": "JsonSchema"
+  },
   "credentialSubject": {
     "type": [
       "Product"
@@ -76,7 +80,6 @@
       }
     ],
     "characteristics": {
-      "ratedCapacity": 75000,
       "carbonFootprint": {
         "co2eKg": 4200.5,
         "calculationMethod": "ISO 14067"
@@ -93,6 +96,6 @@
       "https://www.w3.org/ns/credentials/v2",
       "https://vocabulary.uncefact.org/untp/0.7.0/context/"
     ],
-    "proofValue": "z4BgEVWvWb69asdBndD4AY3TkR9TT29bG2YKwAuFs11oUiXVzmiXzp7xq1PccVcyLacCu9M1rsfBjSEMs8N1Y8GZn"
+    "proofValue": "z5qfYU3o3CnZPcsa1ecnmXWPFUXdNayXtHGtKk431x1zaT8RtMhTs7ANAU7pMkZsSoLaMpX9P1h23paeofab9rk83"
   }
 }
