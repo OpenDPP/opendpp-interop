@@ -1,6 +1,6 @@
 {
   "name": "@opendpp/csv",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Pure, zero-dependency CSV → passport reference mapper for the OpenDPP Digital Product Passport API (ESM, Node >=26). Maps parsed CSV rows to the public passport-create shape; bring your own RFC-4180 parser.",
   "keywords": [
     "opendpp",

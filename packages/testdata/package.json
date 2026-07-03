@@ -1,6 +1,6 @@
 {
   "name": "@opendpp/testdata",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Deterministic synthetic sample-passport and EPCIS-shaped event-chain generator for the OpenDPP Digital Product Passport API — category-valid ESPR sample data for every category the public contract recognises (ESM, Node >=26).",
   "keywords": [
     "testdata",
@@ -59,7 +59,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@opendpp/csv": "^0.1.1",
+    "@opendpp/csv": "^0.2.0",
     "@opendpp/gs1": "^0.2.0"
   },
   "devDependencies": {
