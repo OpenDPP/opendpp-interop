@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "info": {
     "title": "OpenDPP Integration API",
-    "version": "1.9.0",
+    "version": "1.10.0",
     "summary": "Create, validate, seal and publish EU Digital Product Passports; serialize battery units; manage facilities, access grants and webhooks; resolve and verify passports publicly.",
-    "description": "OpenDPP is a B2B platform for EU Digital Product Passports (DPPs), aligned with the ESPR (Regulation (EU) 2024/1781) data requirements and the EU Battery Regulation (Regulation (EU) 2023/1542). This specification documents the **public integration surface**: everything an external system needs to create, validate, seal, publish, resolve and verify passports.\n\n## Authentication\nAuthenticate with a tenant **API key** sent as a Bearer token: `Authorization: Bearer op_dpp_token_…`. Keys are created in the Client Console (Developers → API keys), are shown **once** at creation, carry a role plus optional narrowed permissions and optional expiry, and can be revoked at any time. API-key clients are exempt from CSRF requirements. Public endpoints (tagged **Public Resolution**, plus the public validators and the audit verifier) need no credentials.\n\n## Tenancy\nTenant identity is **token-bound** — it is derived from your API key, never from the request host. The same paths work on the apex host and on tenant workspace hosts (`https://<workspace>.opendpp-node.eu`); when a workspace host is used, it must match the key's tenant (requests across workspaces are rejected with `403`).\n\n## Errors\nAuthenticated endpoints return `{ success: false, error, message }` (some omit `success`). ESPR metadata validation failures return the richer shape documented as **ValidationFailed** with per-field `errors[]`/`warnings[]` (localizable via `?lang=` or `Accept-Language`; 28 languages). Bulk endpoints report row-level problems as `errors: string[]`. Malformed JSON and query-string violations return Fastify's default `{ statusCode, code, error, message }` body.\n\n## Rate limits\nGlobal limit: **100 requests/min per IP** (higher for verified crawlers), with `x-ratelimit-*` response headers. Public passport resolution is additionally limited to **30 requests/min per IP** (no headers). The public validator is limited to **10 requests/min per IP**. Stay under these limits with client-side queueing; on `429`, back off and retry after the indicated window.\n\n## Sealing & verification\nPassport seals are **eIDAS advanced electronic seals** (ECDSA P-256 over a Merkle root of the passport content, optional RFC 3161 timestamp). Anyone can verify a seal — no account required. `POST /api/v1/audit/verify` recomputes every Merkle leaf from the submitted values, so it requires the unredacted document (caller-supplied redacted-leaf hashes are deliberately not trusted). Redacted documents remain verifiable **offline**: masked fields keep their true leaf hashes in `proof.redactedLeaves`, letting any verifier rebuild the sealed root without the privileged values.\n\n## Public access tiers\nPublic resolution endpoints serve **tiered** views of the same URL: the public tier for anonymous callers; a restricted tier for holders of legitimate-interest (`dpp_li_…`) or authority (`dpp_auth_…`) capability tokens (presented as a Bearer token or `?grant=` query parameter); and the owner tier for the issuing tenant's own credentials.\n\n## Webhooks\nSubscribe to passport lifecycle events (`passport.ingested`, `passport.sealed`, `passport.recalled`, or `*`). Deliveries are HMAC-SHA256-signed; see the **webhooks** section of this document for the exact signature scheme, retry schedule, and payloads.\n\nThis document is also served machine-readably at [`/openapi.json`](https://opendpp-node.eu/openapi.json) and [`/openapi.yaml`](https://opendpp-node.eu/openapi.yaml).\n\n## Open interoperability kit\nThe interoperability boundary — the official AAS + UNTP/W3C-VC schemas, live-reproducible samples, an offline conformance validator, and the field mappings — is **open source** at [github.com/OpenDPP/opendpp-interop](https://github.com/OpenDPP/opendpp-interop) (Apache-2.0). It lets any integrator validate and verify OpenDPP's standards-conformant output without access to the product source.",
+    "description": "OpenDPP is a B2B platform for EU Digital Product Passports (DPPs), aligned with the ESPR (Regulation (EU) 2024/1781) data requirements and the EU Battery Regulation (Regulation (EU) 2023/1542). This specification documents the **public integration surface**: everything an external system needs to create, validate, seal, publish, resolve and verify passports.\n\n## Authentication\nAuthenticate with a tenant **API key** sent as a Bearer token: `Authorization: Bearer op_dpp_token_…`. Keys are created in the Client Console (Developers → API keys), are shown **once** at creation, carry a role plus optional narrowed permissions and optional expiry, and can be revoked at any time. API-key clients are exempt from CSRF requirements. Public endpoints (tagged **Public Resolution**, plus the public validators and the audit verifier) need no credentials.\n\n## Tenancy\nTenant identity is **token-bound** — it is derived from your API key, never from the request host. The same paths work on the apex host and on tenant workspace hosts (`https://<workspace>.opendpp-node.eu`); when a workspace host is used, it must match the key's tenant (requests across workspaces are rejected with `403`).\n\n## Errors\nAuthenticated endpoints return `{ success: false, error, message }` (some omit `success`). Across the developer-facing write/ingest surface (passport / operator / unit / resolver / facility / events / webhooks) the body also carries a **machine-stable `code`** you can branch on instead of parsing `message` — see the `code` enum on the shared **Error** schema for the full set. ESPR metadata validation failures return the richer shape documented as **ValidationFailed** with per-field `errors[]`/`warnings[]` (localizable via `?lang=` or `Accept-Language`; 28 languages). Bulk endpoints report row-level problems as `errors: string[]`. Malformed JSON and query-string violations return Fastify's default `{ statusCode, code, error, message }` body.\n\nEvery response — success or error — carries an **`X-Request-Id`** header; generic (server-error / framework) bodies also include it as `requestId`. Quote it to support to correlate with server logs. Send your own well-formed `X-Request-Id` and it is adopted for end-to-end tracing.\n\n## Advisories: `warnings[]` & `notices[]`\nSuccess responses may carry two non-blocking advisory channels of **coded** items (`AdvisoryItem`: `{ code, path?, message, friendlyMessage }`). **`warnings[]`** are heads-ups the request still succeeded on (`NON_GS1_PRODUCT_ID`, `PII_SHAPE_DETECTED`, `UNIT_NO_SCANNABLE_LINK`, `DRAFT_DEMOTED`, `EORI_NOT_FOUND`); **`notices[]`** are informational — helpful things the API did (`OPERATOR_AUTO_ATTRIBUTED`, `GTIN_AUTO_COPIED`). Branch on the STABLE `code`; treat `message` (developer English) and `friendlyMessage` (end-user, localized via `?lang=`/`Accept-Language` across 28 languages) as display text that may be reworded. Interfaces may also map a `code` to their own localized string.\n\n## Rate limits\nGlobal limit: **100 requests/min per IP** (higher for verified crawlers), with `x-ratelimit-*` response headers. Public passport resolution is additionally limited to **30 requests/min per IP** (no headers). The public validator is limited to **10 requests/min per IP**. Stay under these limits with client-side queueing; on `429`, back off and retry after the indicated window.\n\n## Sealing & verification\nPassport seals are **eIDAS advanced electronic seals** (ECDSA P-256 over a Merkle root of the passport content, optional RFC 3161 timestamp). Anyone can verify a seal — no account required. `POST /api/v1/audit/verify` recomputes every Merkle leaf from the submitted values, so it requires the unredacted document (caller-supplied redacted-leaf hashes are deliberately not trusted). Redacted documents remain verifiable **offline**: masked fields keep their true leaf hashes in `proof.redactedLeaves`, letting any verifier rebuild the sealed root without the privileged values.\n\n## Public access tiers\nPublic resolution endpoints serve **tiered** views of the same URL: the public tier for anonymous callers; a restricted tier for holders of legitimate-interest (`dpp_li_…`) or authority (`dpp_auth_…`) capability tokens (presented as a Bearer token or `?grant=` query parameter); and the owner tier for the issuing tenant's own credentials.\n\n## Webhooks\nSubscribe to passport lifecycle events (`passport.ingested`, `passport.sealed`, `passport.recalled`, or `*`). Deliveries are HMAC-SHA256-signed; see the **webhooks** section of this document for the exact signature scheme, retry schedule, and payloads.\n\nThis document is also served machine-readably at [`/openapi.json`](https://opendpp-node.eu/openapi.json) and [`/openapi.yaml`](https://opendpp-node.eu/openapi.yaml).\n\n## Open interoperability kit\nThe interoperability boundary — the official AAS + UNTP/W3C-VC schemas, live-reproducible samples, an offline conformance validator, and the field mappings — is **open source** at [github.com/OpenDPP/opendpp-interop](https://github.com/OpenDPP/opendpp-interop) (Apache-2.0). It lets any integrator validate and verify OpenDPP's standards-conformant output without access to the product source.",
     "contact": {
       "name": "OpenDPP",
       "url": "https://opendpp-node.eu/contact",
@@ -189,7 +189,7 @@
           "Battery Units"
         ],
         "summary": "Pre-flight: validate battery-unit identifiers without persisting (#263)",
-        "description": "NON-MUTATING pre-flight for bulk unit import. Runs the SAME engine-backed AI-21 / GS1 Digital Link conformance + field checks as `POST /api/v1/passports/{passportId}/units` and returns a per-item verdict — **persisting nothing**. Send a single unit or `{\"units\": [...]}` (≤200). Lets a bulk importer ask \"would these serials be GS1-conformant?\" before committing a batch.\n\n**Permission:** `battery:write` (gated as the write permission, like other validate-only checks; subscription gating → 402). **Validation:** `serialNumber` charset/length (`^[A-Za-z0-9._-]{1,20}$`); for a GTIN-keyed passport the unit Digital Link must parse cleanly through GS1's authoritative engine; `status` must be a valid unit status; `manufacturedAt` must be Date-parseable. Predecessor linkage is NOT checked here (a persistence-time concern). The verdict order matches the input order.\n\n**Rate limits:** global limiter only — 100 req/min per IP.",
+        "description": "NON-MUTATING pre-flight for bulk unit import. Runs the SAME engine-backed AI-21 / GS1 Digital Link conformance + field checks as `POST /api/v1/passports/{passportId}/units` and returns a per-item verdict — **persisting nothing**. Send a single unit or `{\"units\": [...]}` (≤200). Lets a bulk importer ask \"would these serials be GS1-conformant?\" before committing a batch.\n\n**Permission:** `battery:write` (gated as the write permission, like other validate-only checks; subscription gating → 402). **Validation:** `serialNumber` charset/length (`^[A-Za-z0-9._-]{1,20}$`, a URL-safe subset of GS1 AI-21 CSET 82) PLUS authoritative GS1-engine conformance for EVERY unit — a GTIN-keyed passport's unit Digital Link must parse cleanly through the engine, and a non-GTIN passport's AI-21 serial VALUE is validated through the same engine (CSET-82 charset + length); `status` must be a valid unit status; `manufacturedAt` must be Date-parseable. Predecessor linkage is NOT checked here (a persistence-time concern). The verdict order matches the input order.\n\n**Rate limits:** global limiter only — 100 req/min per IP.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -340,7 +340,7 @@
           "Battery Units"
         ],
         "summary": "Serialise individual battery units under a passport (bulk, up to 200)",
-        "description": "Creates one or many **individual physical battery units** (Battery Reg. (EU) 2023/1542 Art. 77(2)) under a SKU/type-level passport. Send either a single unit object or `{\"units\": [...]}` with **at most 200 items** (if `units` is present and an array it is used; otherwise the whole body is treated as one unit).\n\n**Permission:** `battery:write`. Bearer API key (`op_dpp_token_…`) or session JWT; cookie-session clients must send `X-CSRF-Token`. Operator-scoped credentials may only serialise under passports of their own Economic Operator (403). Write operations pass subscription gating (402) and optional tenant MFA enforcement (403).\n\n**Per-item validation (collected as plain-string errors, not a rejection of the whole batch):** `serialNumber` is trimmed then must match `^[A-Za-z0-9._-]{1,20}$` (GS1 AI-21 recommends ≤ 20 chars); `status` must be a valid unit status; `manufacturedAt` must be Date-parseable; duplicate `(passport, serialNumber)` pairs are skipped with *\"A unit with this serial already exists for this passport\"*. Each created unit gets a per-unit GS1 Digital Link URI `/{01|8003}/{productId}/21/{serialNumber}` carrying the **real physical serial** in AI-21.\n\n**Predecessor linkage (Art. 77(7) repurpose/remanufacture):** `predecessorUnitId` must reference an existing unit **in your tenant** (any passport). A recycled predecessor (`ceasedAt` set) is refused — its passport has ceased to exist (Art. 77(8)). (The check keys on `ceasedAt`, which only the events-route `RECYCLED` transition stamps — a unit merely *created* with status `RECYCLED` has no `ceasedAt` and is still accepted as a predecessor.) In one transaction the new unit is created, an append-only `STATUS_CHANGE` event (`{status, successorUnitId, successorSerial}` payload) is written to the predecessor, and the predecessor's status is set to `predecessorStatus` (default `REPURPOSED`; only `REPURPOSED|REMANUFACTURED|REUSED` allowed).\n\n**Partial success:** the response is **201 when at least one unit was created**; skipped items are listed in `errors`. If *every* item failed you get **400 `Serialisation Failed`** with the same string array. A `batteryunit.created` audit event and a tenant notification are emitted on success.\n\n**Rate limits:** global limiter only — 100 req/min per IP (`x-ratelimit-*` headers).",
+        "description": "Creates one or many **individual physical battery units** (Battery Reg. (EU) 2023/1542 Art. 77(2)) under a SKU/type-level passport. Send either a single unit object or `{\"units\": [...]}` with **at most 200 items** (if `units` is present and an array it is used; otherwise the whole body is treated as one unit).\n\n**Permission:** `battery:write`. Bearer API key (`op_dpp_token_…`) or session JWT; cookie-session clients must send `X-CSRF-Token`. Operator-scoped credentials may only serialise under passports of their own Economic Operator (403). Write operations pass subscription gating (402) and optional tenant MFA enforcement (403).\n\n**Per-item validation (collected as plain-string errors, not a rejection of the whole batch):** `serialNumber` is trimmed then must match `^[A-Za-z0-9._-]{1,20}$` (a URL-safe subset of GS1 AI-21 CSET 82, ≤ 20 chars) AND is validated to full AI-21 conformance by GS1's authoritative engine — a GTIN-keyed unit through its full Digital Link, a non-GTIN unit through its AI-21 serial value; `status` must be a valid unit status; `manufacturedAt` must be Date-parseable; duplicate `(passport, serialNumber)` pairs are skipped with *\"A unit with this serial already exists for this passport\"*. Each created unit gets a per-unit GS1 Digital Link URI `/{01|8003}/{productId}/21/{serialNumber}` carrying the **real physical serial** in AI-21.\n\n**Predecessor linkage (Art. 77(7) repurpose/remanufacture):** `predecessorUnitId` must reference an existing unit **in your tenant** (any passport). A recycled predecessor (`ceasedAt` set) is refused — its passport has ceased to exist (Art. 77(8)). (The check keys on `ceasedAt`, which only the events-route `RECYCLED` transition stamps — a unit merely *created* with status `RECYCLED` has no `ceasedAt` and is still accepted as a predecessor.) In one transaction the new unit is created, an append-only `STATUS_CHANGE` event (`{status, successorUnitId, successorSerial}` payload) is written to the predecessor, and the predecessor's status is set to `predecessorStatus` (default `REPURPOSED`; only `REPURPOSED|REMANUFACTURED|REUSED` allowed).\n\n**Partial success:** the response is **201 when at least one unit was created**; skipped items are listed in `errors`. If *every* item failed you get **400 `Serialisation Failed`** with the same string array. A `batteryunit.created` audit event and a tenant notification are emitted on success.\n\n**Rate limits:** global limiter only — 100 req/min per IP (`x-ratelimit-*` headers).",
         "security": [
           {
             "ApiKeyAuth": []
@@ -2186,7 +2186,7 @@
           "Economic Operators"
         ],
         "summary": "Register an economic operator and bind it to your workspace",
-        "description": "Registers an economic operator (manufacturer, importer, supplier, …) and binds it to your workspace.\n\n**Permission:** `operator:create`. Cookie-session clients must send the `X-CSRF-Token` header (double-submit); Bearer clients (API key / JWT) are exempt.\n\n**Deduplication (per workspace):** operators are scoped to your workspace — `regId` is unique *within* your workspace, not across the platform. If **your workspace** already has an operator with the submitted `regId`, that existing record is returned and the submitted `name`, `role` and `regIdScheme` are **ignored**. A `regId` already used by *another* workspace is irrelevant — you always get **your own** operator row (so one workspace can never bind to, rename, or archive another's operator). The call is idempotent: re-registering an already-bound operator succeeds with `201` again. The per-workspace match includes **archived** operators: if your workspace's operator for that `regId` is archived, the archived record is returned as-is (`archivedAt` non-null) with `201` — registration does not un-archive it; use `POST /api/v1/operators/{id}/restore` to reactivate it.\n\n**Registration-id integrity:** fabricated `EORI-MOCK…` ids are rejected on every path. When `regIdScheme` is `EORI`, `regId` must match `^[A-Z]{2}[A-Za-z0-9]{1,15}$` (2-letter ISO 3166 country prefix followed by up to 15 alphanumerics, e.g. `DE1234567890`). Validation is syntax-only — existence is not checked against the EU EORI online validation service.\n\nSide effects: an `operator.created` audit event and an in-app notification are recorded.\n\n**Rate limit:** global limiter, 100 requests/min/IP (429 carries `x-ratelimit-*` headers).",
+        "description": "Registers an economic operator (manufacturer, importer, supplier, …) and binds it to your workspace.\n\n**Permission:** `operator:create`. Cookie-session clients must send the `X-CSRF-Token` header (double-submit); Bearer clients (API key / JWT) are exempt.\n\n**Deduplication (per workspace):** operators are scoped to your workspace — `regId` is unique *within* your workspace, not across the platform. If **your workspace** already has an operator with the submitted `regId`, that existing record is returned and the submitted `name`, `role` and `regIdScheme` are **ignored**. A `regId` already used by *another* workspace is irrelevant — you always get **your own** operator row (so one workspace can never bind to, rename, or archive another's operator). The call is idempotent: re-registering an already-bound operator succeeds with `201` again. The per-workspace match includes **archived** operators: if your workspace's operator for that `regId` is archived, the archived record is returned as-is (`archivedAt` non-null) with `201` — registration does not un-archive it; use `POST /api/v1/operators/{id}/restore` to reactivate it.\n\n**Registration-id integrity:** fabricated `EORI-MOCK…` ids are rejected on every path. When `regIdScheme` is `EORI`, `regId` must match `^[A-Z]{2}[A-Za-z0-9]{1,15}$` (2-letter ISO 3166 country prefix followed by up to 15 alphanumerics, e.g. `DE1234567890`). Validation is syntax-only by default. When the node operator enables the OPT-IN `EORI_EXISTENCE_CHECK` (#404), a declared `EORI` `regId` is additionally checked for EXISTENCE against the EU Commission EOS validation service and, if not found, a NON-BLOCKING advisory is added to the 201 `warnings[]` — the operator is still registered (best-effort, fail-open: a network error, or a freshly-issued / GB EORI, never blocks registration). With the check off, `warnings` is `[]`.\n\nSide effects: an `operator.created` audit event and an in-app notification are recorded.\n\n**Rate limit:** global limiter, 100 requests/min/IP (429 carries `x-ratelimit-*` headers).",
         "security": [
           {
             "ApiKeyAuth": []
@@ -2738,7 +2738,7 @@
           "Passports"
         ],
         "summary": "Create (ingest) a Digital Product Passport",
-        "description": "Creates a SKU/type-level Digital Product Passport.\n\n**Permission:** `passport:create` (Bearer `op_dpp_token_…` API key or session JWT; cookie sessions must also send the `X-CSRF-Token` double-submit header). Write operations are subject to subscription gating (**402**) and, where the workspace enforces it, MFA (**403**).\n\n**Rate limit:** global 100 requests/min per IP (`x-ratelimit-*` headers). **Body limit: 1 MiB (1,048,576 bytes)** → **413** beyond that.\n\n**Validation.** Unless `draft: true`, `metadata` is validated against the ESPR category rules for `metadata.category` plus cross-field rules (e.g. `materialComposition` percentages must sum to 100 ±0.1, `originCountry` must be a real ISO 3166-1 alpha-2 code), and the product's EPCIS traceability lineage is audited. For five categories (textiles, batteries, electronics, chemicals, construction) the authoritative per-category JSON Schema is served live at `GET /api/v1/schemas/{category}`; the other four (cosmetics, toys, iron-steel, aluminium) are validated by built-in server-side rules and `GET /api/v1/schemas/{category}` returns **404** for them. Failure returns the **400 Validation Failed** body with per-field `errors[]` (plus `warnings[]` when any exist — the key is omitted entirely when there are none). A passing payload may still produce non-blocking `warnings[]`, echoed in the 201. `friendlyMessage` texts are localized via `?lang=` or `Accept-Language` (default `en`); category-validity errors (`metadata.category` missing or unknown) carry no `friendlyMessage`.\n\n**Drafts.** `draft: true` skips ALL validation, stores the passport with `status: \"DRAFT\"` (not publicly resolvable), returns `message: \"Draft passport saved\"` with `warnings: []`, and does **not** emit a webhook.\n\n**Identifier handling.** `productId` may be a GTIN-14 (14 digits, GS1 mod-10 check digit), a GRAI (14-digit numeric asset id + up to 16 alphanumeric serial chars), or a free-form SKU. A 14-digit `productId` whose GS1 mod-10 check digit is invalid is rejected with **400** (a typo'd GTIN is never silently downgraded to a SKU); a non-numeric or non-14-digit `productId` is accepted as a non-GS1 SKU and carries a non-blocking `warnings[]` advisory that it resolves via `/passport/{id}` with no scannable GS1 QR. A valid GTIN-14 is auto-copied into `metadata.gtin` (a GRAI into `metadata.grai`) before storage. The server mints a UUID passport id and a GS1 Digital Link URI `https://opendpp-node.eu/{01|8003}/{productId}`.\n\n**Operator binding.** With `operatorId` omitted, the passport is attributed to the first economic operator bound to your workspace; if no operator is bound at all the request fails **400** (the API never fabricates an operator identity — register one via `POST /api/v1/operators`). An `operatorId` not bound to your workspace → **403**. Operator-scoped API keys force their own operator and **403** on mismatch. The `(productId, operatorId)` pair is unique → **409** on duplicates. An optional `facilityId` must reference a Facility in your workspace (**400** otherwise).\n\n**Webhook:** non-draft creation transactionally enqueues a `passport.ingested` event whose payload is the public redacted JSON-LD passport document (same masking as the 201 `passport` field). Drafts emit nothing.\n\n**Response caveats:** the 201 `passport` field is the **public, redacted** JSON-LD representation — even for the creator. The owner-only metadata key `facilityDetails` is replaced with the literal placeholder `\"[REDACTED - Privileged Access Required]\"` (it appears as the placeholder even when you did not supply it), and for `category: \"batteries\"` the restricted legitimate-interest keys `detailedPerformance`, `lifecycleAndInUse` and `circularityAndDisassembly` (Battery Reg. Annex XIII parts 2-4) are masked the same way when present. `enrichment` is stored outside the validated metadata and Merkle seal and never appears in the JSON-LD document. The 201 body's top-level fields are `success`, `message`, `passport`, `warnings`, and the `vcReady`/`vcReadyReason` UNTP Verifiable-Credential readiness signal (#247).\n\n**Other 400 bodies:** non-validation failures (whitespace-only `productId`, no bound operator, unknown `facilityId`) reuse status 400 with the plain `{\"success\": false, \"error\": \"Bad Request\", \"message\": …}` triple and **no** `errors`/`warnings` arrays. Requests rejected before the handler runs — request-body schema violations (e.g. missing `productId`) and malformed JSON — come back as just `{\"error\": \"Bad Request\", \"message\": …}`.",
+        "description": "Creates a SKU/type-level Digital Product Passport.\n\n**Permission:** `passport:create` (Bearer `op_dpp_token_…` API key or session JWT; cookie sessions must also send the `X-CSRF-Token` double-submit header). Write operations are subject to subscription gating (**402**) and, where the workspace enforces it, MFA (**403**).\n\n**Rate limit:** global 100 requests/min per IP (`x-ratelimit-*` headers). **Body limit: 1 MiB (1,048,576 bytes)** → **413** beyond that.\n\n**Validation.** Unless `draft: true`, `metadata` is validated against the ESPR category rules for `metadata.category` plus cross-field rules (e.g. `materialComposition` percentages must sum to 100 ±0.1, `originCountry` must be a real ISO 3166-1 alpha-2 code), and the product's EPCIS traceability lineage is audited. For five categories (textiles, batteries, electronics, chemicals, construction) the authoritative per-category JSON Schema is served live at `GET /api/v1/schemas/{category}`; the other four (cosmetics, toys, iron-steel, aluminium) are validated by built-in server-side rules and `GET /api/v1/schemas/{category}` returns **404** for them. Failure returns the **400 Validation Failed** body with per-field `errors[]` (plus `warnings[]` when any exist — the key is omitted entirely when there are none). A passing payload may still produce non-blocking `warnings[]`, echoed in the 201 — including a **privacy-by-design advisory** (#400) when the metadata *looks* like it carries personal data (a clearly-personal field name such as `email`/`firstName`, or an email-shaped value; scanned one level deep, at most one such advisory). A DPP should carry PRODUCT data, not PII (ESPR FAQ Q16); this advisory never blocks the save. `friendlyMessage` texts are localized via `?lang=` or `Accept-Language` (default `en`); category-validity errors (`metadata.category` missing or unknown) carry no `friendlyMessage`.\n\n**Drafts.** `draft: true` skips ALL validation, stores the passport with `status: \"DRAFT\"` (not publicly resolvable), returns `message: \"Draft passport saved\"` with `warnings: []`, and does **not** emit a webhook.\n\n**Identifier handling.** `productId` may be a GTIN-14 (14 digits, GS1 mod-10 check digit), a GRAI (14-digit numeric asset id + up to 16 alphanumeric serial chars), or a free-form SKU. A 14-digit `productId` whose GS1 mod-10 check digit is invalid is rejected with **400** (a typo'd GTIN is never silently downgraded to a SKU); a non-numeric or non-14-digit `productId` is accepted as a non-GS1 SKU and carries a non-blocking `warnings[]` advisory that it resolves via `/passport/{id}` with no scannable GS1 QR. A valid GTIN-14 is auto-copied into `metadata.gtin` (a GRAI into `metadata.grai`) before storage. The server mints a UUID passport id and a GS1 Digital Link URI `https://opendpp-node.eu/{01|8003}/{productId}`.\n\n**Operator binding.** With `operatorId` omitted, the passport is attributed to the first economic operator bound to your workspace; if no operator is bound at all the request fails **400** (the API never fabricates an operator identity — register one via `POST /api/v1/operators`). An `operatorId` not bound to your workspace → **403**. Operator-scoped API keys force their own operator and **403** on mismatch. The `(productId, operatorId)` pair is unique → **409** on duplicates. An optional `facilityId` must reference a Facility in your workspace (**400** otherwise).\n\n**Webhook:** non-draft creation transactionally enqueues a `passport.ingested` event whose payload is the public redacted JSON-LD passport document (same masking as the 201 `passport` field). Drafts emit nothing.\n\n**Response caveats:** the 201 `passport` field is the **public, redacted** JSON-LD representation — even for the creator. The owner-only metadata key `facilityDetails` is replaced with the literal placeholder `\"[REDACTED - Privileged Access Required]\"` (it appears as the placeholder even when you did not supply it), and for `category: \"batteries\"` the restricted legitimate-interest keys `detailedPerformance`, `lifecycleAndInUse` and `circularityAndDisassembly` (Battery Reg. Annex XIII parts 2-4) are masked the same way when present. `enrichment` is stored outside the validated metadata and Merkle seal and never appears in the JSON-LD document. The 201 body's top-level fields are `success`, `message`, `passport`, `warnings`, and the `vcReady`/`vcReadyReason` UNTP Verifiable-Credential readiness signal (#247).\n\n**Other 400 bodies:** non-validation failures (whitespace-only `productId`, no bound operator, unknown `facilityId`) reuse status 400 with the plain `{\"success\": false, \"error\": \"Bad Request\", \"message\": …}` triple and **no** `errors`/`warnings` arrays. Requests rejected before the handler runs — request-body schema violations (e.g. missing `productId`) and malformed JSON — come back as just `{\"error\": \"Bad Request\", \"message\": …}`.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -4148,6 +4148,133 @@
         }
       }
     },
+    "/api/v1/passports/vc-readiness": {
+      "get": {
+        "operationId": "passportVcReadinessReport",
+        "tags": [
+          "Passports"
+        ],
+        "summary": "Catalog-wide UNTP Verifiable-Credential readiness report",
+        "description": "A read-only, tenant-scoped report of which SKUs in your catalog can / can't emit a UNTP **Verifiable Credential**, and why — so you can fix a whole catalog before relying on VCs, instead of probing passports one at a time. It **aggregates the same per-passport `vcReady` signal** (#247) returned on every ingest response: a passport is VC-ready only when it links a manufacturing `Facility` with a country of production.\n\n**Permission:** `passport:read` (read-only — no subscription/402 gate). Operator scoping + the non-archived filter match the passports list.\n\n**Shape:** each `results[]` row is `{ id, productId, vcReady, blockers[] }` — `blockers[]` reuses the SAME actionable reason the single-passport signal exposes (empty when ready). The top-level `ready` / `notReady` rollup is **catalog-wide** (counts every non-archived passport), while `results` is **paginated** — `page` (default 1) + `limit` (default 100, max 200), with `total` / `totalPages`. NOTE: because the rollup is catalog-wide but `results` is one page, `ready` is generally NOT the count of `vcReady:true` rows on the current page — page through all `totalPages` to enumerate every SKU.\n\n**Rate limits:** global limiter, 100 requests/min per IP.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/LimitParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The paginated VC-readiness report with a catalog-wide ready/notReady rollup.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "page",
+                    "limit",
+                    "total",
+                    "totalPages",
+                    "ready",
+                    "notReady",
+                    "results"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "Total non-archived passports in the catalog (the rollup base, not the page size)."
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    },
+                    "ready": {
+                      "type": "integer",
+                      "description": "Catalog-wide count of VC-ready SKUs (a facility with a country of production)."
+                    },
+                    "notReady": {
+                      "type": "integer",
+                      "description": "Catalog-wide count of not-yet-ready SKUs (= `total - ready`)."
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "productId",
+                          "vcReady",
+                          "blockers"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The passport UUID."
+                          },
+                          "productId": {
+                            "type": "string"
+                          },
+                          "vcReady": {
+                            "type": "boolean"
+                          },
+                          "blockers": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Actionable reasons this SKU can't emit a VC (same text as the single-passport signal); empty when `vcReady` is true."
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "page": 1,
+                  "limit": 100,
+                  "total": 3,
+                  "totalPages": 1,
+                  "ready": 2,
+                  "notReady": 1,
+                  "results": [
+                    {
+                      "id": "9b2fa884-3f1e-4c2a-9d4b-5e6f7a8b9c0d",
+                      "productId": "09501101530003",
+                      "vcReady": true,
+                      "blockers": []
+                    },
+                    {
+                      "id": "1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f",
+                      "productId": "SKU-NO-FACILITY",
+                      "vcReady": false,
+                      "blockers": [
+                        "Link a manufacturing facility with a country of production to enable Verifiable Credential (UNTP) representations. The passport still publishes and resolves as AAS / JSON-LD / HTML."
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/passports/{id}": {
       "get": {
         "operationId": "getPassport",
@@ -5378,7 +5505,7 @@
           "Public Resolution"
         ],
         "summary": "Resolve a passport by UUID (JSON-LD / AAS / HTML)",
-        "description": "Public, content-negotiated resolution of a Digital Product Passport by its server-assigned UUID. Lookup is by primary key only — GTIN/GRAI/serial lookups go through the GS1 Digital Link gateway (`GET /01/{gtin14}`, `GET /8003/{grai}`).\n\n**Content negotiation** (substring match on `Accept`, checked in order): `application/aas+json` (or bare `aas+json`) → role-filtered Asset Administration Shell environment; `application/vc+jwt` (or bare `vc+jwt`) → a signed UNTP DigitalProductPassport credential (public tier; `406 Not Acceptable` when the passport has no manufacturing facility with a country of production); `application/vc+ld+json` (or bare `vc+ld+json`) → the same credential with an embedded W3C Data Integrity proof (`ecdsa-jcs-2019`), same `406` condition; `application/dc+sd-jwt` (or the legacy `vc+sd-jwt`) → the same credential as an SD-JWT-VC for cryptographic selective disclosure (a holder presents a subset of `credentialSubject` claims), same `406` condition; `text/html` → server-rendered passport page; anything else (including `application/json`, `*/*`, or no header) → JSON-LD (`application/ld+json`, the default). `Vary: Accept` is always set on the 200.\n\n**Access tiers** — no permission string (public endpoint). Credentials are *optional* and never produce 401/402/403 here; an invalid or foreign credential silently degrades to the public tier:\n- **Public** (anonymous): restricted metadata keys (for category `batteries`: `detailedPerformance`, `lifecycleAndInUse`, `circularityAndDisassembly` — masked only when present) and the owner-only key `facilityDetails` (present-as-placeholder in every non-owner response, even when the underlying metadata never contained it) carry the literal placeholder `[REDACTED - Privileged Access Required]`. Each masked key that exists in the sealed metadata keeps its true Merkle leaf hash in `proof.redactedLeaves`, so the eIDAS seal stays offline-verifiable after redaction; a placeholder-valued key with no `redactedLeaves` entry was never in the sealed metadata and must be excluded when rebuilding the root.\n- **Legitimate interest / authority**: a capability grant token — `dpp_li_…` (tenant-issued) or `dpp_auth_…` (platform-issued, not tenant-revocable) — sent as `Authorization: Bearer <token>` or `?grant=<token>`, with TENANT or PASSPORT scope covering this passport, unlocks the restricted tier-2 keys. `facilityDetails`, the facility street address and DRAFT passports stay hidden. Grant-unlocked responses add `Cache-Control: private, no-store` and `Referrer-Policy: no-referrer`.\n- **Owner**: a tenant **API key** (`op_dpp_token_…`, shown once at creation) belonging to the owning tenant or to a tenant bound to the passport's economic operator — sent as Bearer or, legacy, as the literal value of the `opendpp_session` cookie. Only API keys are matched on the public resolvers: a Console JWT login session in that cookie does **not** unlock owner tier (it silently resolves as public). Owners see everything, including DRAFT passports, owner-only metadata keys and the facility street address (`manufacturingFacility.streetAddress`/`city`/`postalCode`). In the AAS representation the owner credential's API-key role drives element filtering; a grant maps to the `legitimate_interest` filter tier, anonymous to `public`.\n\nDRAFT passports are hidden from everyone but the owner (404 with a body identical to a true miss). Every resolution is recorded in the passport's access audit log with an anonymized IP.\n\n**Rate limit:** 30 requests/min/IP via a per-process in-memory limiter; its 429 body is the two-field public error shape (no `success` field). This limiter adds no headers of its own — the `x-ratelimit-*` headers still present on responses (including these 429s) belong to the global platform limit (100 req/min/IP, 600/min for known crawler user agents), which applies on top.",
+        "description": "Public, content-negotiated resolution of a Digital Product Passport by its server-assigned UUID. Lookup is by primary key only — GTIN/GRAI/serial lookups go through the GS1 Digital Link gateway (`GET /01/{gtin14}`, `GET /8003/{grai}`).\n\n**Content negotiation** — the representation is chosen by RFC 7231 §5.3.2 `Accept` q-value negotiation (highest q wins; ties broken by media-range specificity, then the client's stated order): `application/aas+json` (or bare `aas+json`) → role-filtered Asset Administration Shell environment; `application/vc+jwt` (or bare `vc+jwt`) → a signed UNTP DigitalProductPassport credential (public tier; `406 Not Acceptable` when the passport has no manufacturing facility with a country of production); `application/vc+ld+json` (or bare `vc+ld+json`) → the same credential with an embedded W3C Data Integrity proof (`ecdsa-jcs-2019`), same `406` condition; `application/dc+sd-jwt` (or the legacy `vc+sd-jwt`) → the same credential as an SD-JWT-VC for cryptographic selective disclosure (a holder presents a subset of `credentialSubject` claims), same `406` condition; `text/html` → server-rendered passport page. An absent `Accept`, or one matching only `*/*`, yields the canonical default JSON-LD (`application/ld+json`); an unsupported type is ignored. Because q-values and client order are honoured, `Accept: text/html, application/vc+jwt` selects HTML (the client's first preference), NOT `vc+jwt`. `Vary: Accept` is always set on the 200.\n\n**Access tiers** — no permission string (public endpoint). Credentials are *optional* and never produce 401/402/403 here; an invalid or foreign credential silently degrades to the public tier:\n- **Public** (anonymous): restricted metadata keys (for category `batteries`: `detailedPerformance`, `lifecycleAndInUse`, `circularityAndDisassembly` — masked only when present) and the owner-only key `facilityDetails` (present-as-placeholder in every non-owner response, even when the underlying metadata never contained it) carry the literal placeholder `[REDACTED - Privileged Access Required]`. Each masked key that exists in the sealed metadata keeps its true Merkle leaf hash in `proof.redactedLeaves`, so the eIDAS seal stays offline-verifiable after redaction; a placeholder-valued key with no `redactedLeaves` entry was never in the sealed metadata and must be excluded when rebuilding the root.\n- **Legitimate interest / authority**: a capability grant token — `dpp_li_…` (tenant-issued) or `dpp_auth_…` (platform-issued, not tenant-revocable) — sent as `Authorization: Bearer <token>` or `?grant=<token>`, with TENANT or PASSPORT scope covering this passport, unlocks the restricted tier-2 keys. `facilityDetails`, the facility street address and DRAFT passports stay hidden. Grant-unlocked responses add `Cache-Control: private, no-store` and `Referrer-Policy: no-referrer`.\n- **Owner**: a tenant **API key** (`op_dpp_token_…`, shown once at creation) belonging to the owning tenant or to a tenant bound to the passport's economic operator — sent as Bearer or, legacy, as the literal value of the `opendpp_session` cookie. Only API keys are matched on the public resolvers: a Console JWT login session in that cookie does **not** unlock owner tier (it silently resolves as public). Owners see everything, including DRAFT passports, owner-only metadata keys and the facility street address (`manufacturingFacility.streetAddress`/`city`/`postalCode`). In the AAS representation the owner credential's API-key role drives element filtering; a grant maps to the `legitimate_interest` filter tier, anonymous to `public`.\n\nDRAFT passports are hidden from everyone but the owner (404 with a body identical to a true miss). Every resolution is recorded in the passport's access audit log with an anonymized IP.\n\n**Rate limit:** 30 requests/min/IP via a per-process in-memory limiter; its 429 body is the two-field public error shape (no `success` field). This limiter adds no headers of its own — the `x-ratelimit-*` headers still present on responses (including these 429s) belong to the global platform limit (100 req/min/IP, 600/min for known crawler user agents), which applies on top.",
         "security": [
           {},
           {
@@ -5639,7 +5766,7 @@
           "Public Resolution"
         ],
         "summary": "GS1 Digital Link resolution by GTIN-14 (AI 01)",
-        "description": "Unified GS1 Digital Link gateway, GTIN branch. The GTIN-14 is matched against `metadata.gtin`, `metadata.grai`, or the passport's `productId`. On tenant workspaces (`https://{tenant}.opendpp-node.eu`) the lookup is scoped to that tenant — an unknown subdomain returns 404. Without a tenant scope, a GTIN matching more than one passport is rejected with 400 (ambiguous); disambiguate via a brand subdomain (the `?subdomain=` query override is honoured in non-production environments only).\n\nContent negotiation (JSON-LD default / `application/aas+json` / `application/vc+jwt` / `application/vc+ld+json` / `application/dc+sd-jwt` / `text/html`, `Vary: Accept` always set), access tiers (public / `dpp_li_…`·`dpp_auth_…` grant via Bearer or `?grant=` / owner = a tenant **API key** sent as Bearer or, legacy, as the literal `opendpp_session` cookie value — Console JWT login sessions do **not** unlock owner tier), DRAFT hiding, access-audit logging (anonymized IP), and grant response headers (`Cache-Control: private, no-store`, `Referrer-Policy: no-referrer`) are identical to `GET /passport/{id}` — see that operation for the full tier semantics. No permission string (public endpoint); invalid credentials silently degrade to the public tier, never 401/403.\n\nThe gateway also accepts additional GS1 AI key/value path pairs after the GTIN; the only one acted on is AI 21 (serial) — documented separately as `GET /01/{gtin14}/21/{serial}`. (The underlying route is `GET /{ai}/*`; AI prefixes other than `01` and `8003` get a 400.)\n\n**Rate limit:** 30 requests/min/IP, per-process in-memory limiter; two-field 429 body without `success`. The limiter adds no headers of its own — `x-ratelimit-*` headers on responses come from the global platform limit (100 req/min/IP), which applies on top.",
+        "description": "Unified GS1 Digital Link gateway, GTIN branch. The GTIN-14 is matched against `metadata.gtin`, `metadata.grai`, or the passport's `productId`. On tenant workspaces (`https://{tenant}.opendpp-node.eu`) the lookup is scoped to that tenant — an unknown subdomain returns 404. Without a tenant scope, a GTIN matching more than one passport is rejected with 400 (ambiguous); disambiguate via a brand subdomain (the `?subdomain=` query override is honoured in non-production environments only).\n\nContent negotiation (RFC 7231 §5.3.2 `Accept` q-value negotiation; JSON-LD default / `application/aas+json` / `application/vc+jwt` / `application/vc+ld+json` / `application/dc+sd-jwt` / `text/html`, `Vary: Accept` always set), access tiers (public / `dpp_li_…`·`dpp_auth_…` grant via Bearer or `?grant=` / owner = a tenant **API key** sent as Bearer or, legacy, as the literal `opendpp_session` cookie value — Console JWT login sessions do **not** unlock owner tier), DRAFT hiding, access-audit logging (anonymized IP), and grant response headers (`Cache-Control: private, no-store`, `Referrer-Policy: no-referrer`) are identical to `GET /passport/{id}` — see that operation for the full tier semantics. No permission string (public endpoint); invalid credentials silently degrade to the public tier, never 401/403.\n\nThe gateway also accepts additional GS1 AI key/value path pairs after the GTIN; the only one acted on is AI 21 (serial) — documented separately as `GET /01/{gtin14}/21/{serial}`. (The underlying route is `GET /{ai}/*`; AI prefixes other than `01` and `8003` get a 400.) This resolver handles only the **UNCOMPRESSED** GS1 Digital Link grammar; a **compressed** Digital Link (its AI data encoded as a base64url blob) is detected and rejected with a clear 400 that points to the uncompressed form (#261).\n\n**Rate limit:** 30 requests/min/IP, per-process in-memory limiter; two-field 429 body without `success`. The limiter adds no headers of its own — `x-ratelimit-*` headers on responses come from the global platform limit (100 req/min/IP), which applies on top.",
         "security": [
           {},
           {
@@ -6946,6 +7073,125 @@
         }
       }
     },
+    "/api/v1/gs1/gtin": {
+      "post": {
+        "operationId": "mintGtinCheckDigit",
+        "tags": [
+          "Public Resolution"
+        ],
+        "summary": "Compute a GTIN check digit from a company prefix + item reference",
+        "description": "The actionable counterpart to the non-GS1 ingest advisory (#255): given the **GS1 company prefix your organisation legally owns** plus an item reference, OpenDPP computes the GS1 **mod-10 check digit** and returns the resulting 14-digit GTIN + a Digital Link preview. Set the GTIN as a passport `productId` to get a scannable GS1 Digital Link.\n\n**It ONLY completes the check digit** — it never allocates a GS1 company prefix or asserts ownership (a real GTIN requires a prefix licensed to you by GS1). `gs1CompanyPrefix` is REQUIRED; a request with none is refused (**400**). `gs1CompanyPrefix + itemRef` must be exactly **13 digits** (the check digit forms the 14th) and both must be digit strings, else **400**.\n\nPublic + stateless (pure arithmetic; no tenant data). No authentication. Rate limit: global 100 requests/min per IP.",
+        "security": [
+          {}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "gs1CompanyPrefix"
+                ],
+                "properties": {
+                  "gs1CompanyPrefix": {
+                    "type": "string",
+                    "description": "The GS1 company prefix your organisation legally owns (digits only, typically 7-10 digits)."
+                  },
+                  "itemRef": {
+                    "type": "string",
+                    "description": "The item reference (digits only) that, appended to the prefix, makes exactly 13 digits."
+                  }
+                }
+              },
+              "example": {
+                "gs1CompanyPrefix": "0950110153",
+                "itemRef": "000"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The computed GTIN + Digital Link preview.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "gtin",
+                    "gs1CompanyPrefix",
+                    "itemRef",
+                    "checkDigit",
+                    "digitalLink",
+                    "note"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "gtin": {
+                      "type": "string",
+                      "description": "The 14-digit GTIN (`prefix + itemRef + check digit`)."
+                    },
+                    "gs1CompanyPrefix": {
+                      "type": "string"
+                    },
+                    "itemRef": {
+                      "type": "string"
+                    },
+                    "checkDigit": {
+                      "type": "string",
+                      "description": "The computed GS1 mod-10 check digit (the 14th digit)."
+                    },
+                    "digitalLink": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "A Digital Link preview `https://opendpp-node.eu/01/{gtin}` — resolvable once a passport uses this GTIN as its `productId`."
+                    },
+                    "note": {
+                      "type": "string",
+                      "description": "The ownership caveat: OpenDPP computes only the check digit and never allocates a prefix or asserts ownership."
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "gtin": "09501101530003",
+                  "gs1CompanyPrefix": "0950110153",
+                  "itemRef": "000",
+                  "checkDigit": "3",
+                  "digitalLink": "https://opendpp-node.eu/01/09501101530003",
+                  "note": "OpenDPP computed the GS1 mod-10 check digit for the 13-digit body you supplied. Use this GTIN ONLY if your organisation legally owns this GS1 company prefix — OpenDPP does not allocate prefixes or assert ownership. Set it as the passport productId to get a scannable GS1 Digital Link."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`gs1CompanyPrefix` missing (we never fabricate a GTIN), non-digit input, or `prefix + itemRef` not exactly 13 digits. Body: `{success:false, error:\"Bad Request\", message}`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/gs1/decode": {
       "post": {
         "operationId": "decodeGs1",
@@ -7851,7 +8097,7 @@
           "Traceability & Audit"
         ],
         "summary": "Register a UNTP/EPCIS 2.0 traceability event (VC-shaped)",
-        "description": "Registers a supply-chain traceability event carried as a VC-shaped UNTP credential and persists it as an EPCIS 2.0 event row scoped to your tenant.\n\n**Permission:** `passport:update` (write operation — subscription gating applies, see 402). When the node operator enforces MFA, writes from user-backed sessions (cookie or Bearer JWT) whose MFA policy requires a second factor (user policy `REQUIRED`, or `DEFAULT` with the workspace's MFA-by-default setting, which is on by default) receive 403 without one; API-key clients are exempt. Cookie-session clients must send the `X-CSRF-Token` header (double-submit with the `opendpp_csrf` cookie); Bearer JWT / API-key clients are exempt.\n\n**Rate limit:** global limiter, 100 requests/min per IP (standard `x-ratelimit-*` headers).\n\n**Validation pipeline (in order):**\n1. *Structural* — the body must be an object containing `credentialSubject`, otherwise 400 `Bad Request`.\n2. *EPCIS rule* — `action` is strictly forbidden on `TransformationEvent` (any non-null value → 400 `Schema Validation Error`).\n3. *Cryptographic* — the ECDSA (P-256 / SHA-256) signature in `proof.proofValue` (base64) is verified over the deterministically canonicalized credential (key-sorted JSON with `proof.proofValue` blanked — OpenDPP's own canonicalization scheme, NOT RFC 8785 JCS, so this is not a conformant W3C Data Integrity suite). The verification key is resolved in trust order: (a) an embedded `proof.verificationMethod.x5c` chain, accepted ONLY when the node has eIDAS trust anchors configured, the chain validates against them, every certificate is currently valid, and the leaf attests the issuer; (b) the registered eIDAS public key of the tenant whose subdomain or company name EXACTLY equals the trailing `:`-segment of the issuer DID. If no key resolves or the signature does not verify → 400 `Cryptographic Verification Failed`.\n4. *Operator scoping* — if your API key is scoped to an Economic Operator, the credential's declared operator DID — the `issuer` DID, or `credentialSubject.responsibleOperatorDid` only when `issuer` is absent — must contain the bound operator's registration id (e.g. `EU-DEFAULT-001`), otherwise 403 with `message: \"Your access is restricted to Economic Operator: <operatorId> (<regId>)\"`.\n\n**Persistence:** the stored event id is ALWAYS server-generated (UUID) — the credential's own `id` is never used as the primary key (prevents cross-tenant id squatting); the issuer DID is retained as `issuerDid`. Defaults applied on write: `bizStep` → `urn:epcglobal:cbv:bizstep:receiving`; `disposition` → `urn:epcglobal:cbv:disp:in_progress`; `readPoint` → `geo:<latitude>,<longitude>` derived from `credentialSubject.originLocation` when present; `bizLocation` → `responsibleOperatorDid`; `eventTime` → `issuanceDate`, else the server clock; `epcList` → `[credentialSubject.id]` when not supplied as an array (or `[]`). The row is stored with `isUntpCompliant: true` and the `proof.proofValue` retained.\n\n**Caveats:** `credentialSubject.eventType` must be one of the documented event-type values and `action` (when present) one of `ADD`/`OBSERVE`/`DELETE` — both map to server-side enums, and a missing or unknown value is only rejected at the persistence layer and surfaces as the 500 `Database Persistence Failed` body, not as a 400. Note the 201 envelope is `{status: \"success\", ...}`, NOT the usual `{success: true, ...}` shape. This endpoint does not create lineage edges between events; the lineage DAG read by `GET /api/v1/events/{id}/lineage` is built from lineage relations maintained separately on the node.",
+        "description": "Registers a supply-chain traceability event carried as a VC-shaped UNTP credential and persists it as an EPCIS 2.0 event row scoped to your tenant.\n\n**Permission:** `passport:update` (write operation — subscription gating applies, see 402). When the node operator enforces MFA, writes from user-backed sessions (cookie or Bearer JWT) whose MFA policy requires a second factor (user policy `REQUIRED`, or `DEFAULT` with the workspace's MFA-by-default setting, which is on by default) receive 403 without one; API-key clients are exempt. Cookie-session clients must send the `X-CSRF-Token` header (double-submit with the `opendpp_csrf` cookie); Bearer JWT / API-key clients are exempt.\n\n**Rate limit:** global limiter, 100 requests/min per IP (standard `x-ratelimit-*` headers).\n\n**Validation pipeline (in order):**\n1. *Structural* — the body must be an object containing `credentialSubject`, otherwise 400 `Bad Request`.\n2. *EPCIS rule* — `action` is strictly forbidden on `TransformationEvent` (any non-null value → 400 `Schema Validation Error`).\n3. *Cryptographic* — the credential's `proof` MUST be a conformant W3C `DataIntegrityProof` with `cryptosuite: \"ecdsa-jcs-2019\"` and a multibase base58btc (`z…`) `proofValue`; any other proof shape (e.g. the legacy key-sorted `MerkleTreeAttestationProof`) is rejected. The ECDSA P-256 signature is verified per that cryptosuite over `sha256(JCS(proof options)) ‖ sha256(JCS(credential without proof))` — RFC 8785 JCS canonicalization, IEEE-P1363 raw r‖s — a conformant, interoperable Data Integrity suite, which is what makes the persisted `isUntpCompliant: true` honest. The verification key is resolved in trust order: (a) an embedded `proof.verificationMethod.x5c` chain, accepted ONLY when the node has eIDAS trust anchors configured, the chain validates against them, every certificate is currently valid, and the leaf attests the issuer; (b) ALL of the authoritative vault keys (current + retired, so a pre-rotation credential still verifies) of the tenant whose UNIQUE subdomain EXACTLY equals the trailing `:`-segment of the issuer DID. If no key resolves or the signature does not verify → 400 `Cryptographic Verification Failed`.\n4. *Operator scoping* — if your API key is scoped to an Economic Operator, the credential's declared operator DID — the `issuer` DID, or `credentialSubject.responsibleOperatorDid` only when `issuer` is absent — must contain the bound operator's registration id (e.g. `EU-DEFAULT-001`), otherwise 403 with `message: \"Your access is restricted to Economic Operator: <operatorId> (<regId>)\"`.\n\n**Persistence:** the stored event id is ALWAYS server-generated (UUID) — the credential's own `id` is never used as the primary key (prevents cross-tenant id squatting); the issuer DID is retained as `issuerDid`. Defaults applied on write: `bizStep` → `urn:epcglobal:cbv:bizstep:receiving`; `disposition` → `urn:epcglobal:cbv:disp:in_progress`; `readPoint` → `geo:<latitude>,<longitude>` derived from `credentialSubject.originLocation` when present; `bizLocation` → `responsibleOperatorDid`; `eventTime` → `issuanceDate`, else the server clock; `epcList` → `[credentialSubject.id]` when not supplied as an array (or `[]`). The row is stored with `isUntpCompliant: true` and the `proof.proofValue` retained.\n\n**Caveats:** `credentialSubject.eventType` must be one of the documented event-type values and `action` (when present) one of `ADD`/`OBSERVE`/`DELETE` — both map to server-side enums, and a missing or unknown value is only rejected at the persistence layer and surfaces as the 500 `Database Persistence Failed` body, not as a 400. Note the 201 envelope is `{status: \"success\", ...}`, NOT the usual `{success: true, ...}` shape. This endpoint does not create lineage edges between events; the lineage DAG read by `GET /api/v1/events/{id}/lineage` is built from lineage relations maintained separately on the node.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -7892,10 +8138,11 @@
                 },
                 "proof": {
                   "type": "DataIntegrityProof",
+                  "cryptosuite": "ecdsa-jcs-2019",
                   "created": "2026-06-12T09:41:00.000Z",
                   "proofPurpose": "assertionMethod",
                   "verificationMethod": "did:web:opendpp-node.eu:EU-DEFAULT-001:demo#key-1",
-                  "proofValue": "MEUCIQDkx0VqFholm0Oa7lzwL9C5cqcRBYRJWcExampleEcdsaDerAiBJ4dY0YxV5n7pUq2tHj8sExampleSecondIntegerValue9w=="
+                  "proofValue": "z4oey5q2M3XKaxup3tmzN4DRFTLVqpLMweBrSxMY2xEQLExampleEcdsaJcs2019MultibaseBase58btcProofValue"
                 }
               }
             }
@@ -8387,7 +8634,7 @@
           "Traceability & Audit"
         ],
         "summary": "Publicly verify a passport's eIDAS seal, certificate chain and timestamp",
-        "description": "**Public seal-verification API** — cryptographically verifies that a Digital Product Passport document was sealed by an economic-operator tenant registered on this node and has not been tampered with. No authentication required.\n\n**Rate limit:** custom in-memory token bucket, **30 requests/min per IP** (per app instance). This bucket emits no rate-limit headers of its own — any `x-ratelimit-*` headers on responses (including this 429) come from the global 100 req/min limiter and describe that budget, not the 30/min one. The 429 body is the two-field `{\"error\": \"Too Many Requests\", \"message\": \"Rate limit exceeded.\"}`.\n\n**Input resolution.** `payload` is required. `signature` and `publicKey` may be supplied top-level, or are extracted from the document's embedded proof block: `signature` ← `payload.proof.proofValue` (else `payload.proof.signatureValue`); `publicKey` ← `payload.proof.publicKeyPem`, else the leaf certificate's SPKI when `payload.proof.x5c` is present. If, after extraction, any of the three is still missing → 400. The public key is CRLF-normalized and trimmed before matching.\n\n**Verification pipeline (in order):**\n1. **Certificate-chain report (optional).** If `payload.proof.x5c` is a non-empty array of base64-DER certificates (leaf first), the chain is parsed and a `certificate` report is built: the leaf's `subject` / `issuer` / `validFrom` / `validTo` (X.509 textual dates such as `Jan 10 00:00:00 2026 GMT` — NOT ISO 8601), `chainValid` (every link signature-verifies against the next certificate, every certificate is inside its validity window, and the top of the chain is anchored to this node's seal CA — SHA-256 fingerprint match or signature under the CA key; the CA is published at `GET /.well-known/opendpp-seal-ca.pem`), and `keyMatchesProof` (the leaf SPKI equals the supplied `publicKey`, whitespace-insensitive; always `true` when no explicit key was supplied). An unparseable chain yields `{\"chainValid\": false, \"error\": \"Unparseable x5c certificate chain\"}` and does NOT fail the request. This reports the CERTIFIED identity of the seal creator (eIDAS Art. 36(1)(b)). The report is attached only to the final verification outcome (step 4) — the two policy-failure responses below omit it.\n2. **Key-registration gate.** The `publicKey` must exactly match the registered eIDAS public key of a tenant on this node (trailing-newline tolerant) — otherwise HTTP **200** with `verified: false` and an explanatory `message`. Verification-policy failures are reported in-band, never as HTTP errors.\n3. **Operator-binding gate (fail-closed).** If the payload declares an operator registration id (`payload.operator.regId`, else `payload.economicOperator.regId`), that id MUST resolve to an Economic Operator registered on this node AND that operator MUST be bound to the signing tenant (a workspace–operator binding registered on this node). A declared operator that is unregistered, or registered but not bound to the key-owning tenant, → 200 `verified: false` with an explanatory `message`. Payloads that declare no operator id skip this gate.\n4. **Signature verification (two phases).** *Phase 1 — Merkle seal:* when `payload.metadata` is an object (or, when the `metadata` key is entirely absent, the whole `payload` is treated as the metadata), the SHA-256 Merkle tree over the metadata's top-level properties is rebuilt and the base64 ECDSA (P-256 / SHA-256) `signature` is verified against the recomputed root. Every leaf is recomputed from the actual values — caller-supplied redacted-leaf hashes are NOT accepted (they would let a tampered field be smuggled past verification), so a publicly redacted document will not pass the Merkle phase: verify the unredacted, privileged document. *Phase 2 — fallback:* if the Merkle phase does not verify, the signature is verified over the deterministic key-sorted canonicalization of the entire `payload`.\n5. **RFC 3161 timestamp report (optional).** When `payload.proof.rfc3161.token` is a non-empty base64-DER TimeStampToken, the response includes `timestamp` with the TSA-asserted `genTime` parsed from the token's TSTInfo (or `genTime: null` plus a `note` when the token cannot be parsed). This reports presence + asserted time only — full cryptographic TSR validation is the verifier's own step (e.g. `openssl ts -verify` against the TSA certificate). Like `certificate`, it appears only on the final verification outcome.\n\n**Outcome.** A processed verification ALWAYS returns HTTP 200 with `verified: true|false`; 400 is reserved for missing parameters or an exception thrown while verifying (e.g. an undecodable public key). `certificate` and `timestamp` are attached only when verification proceeds past the key-registration and operator-binding gates — the two policy `verified: false` responses contain only `{success, verified, message}`, even when an x5c chain and/or an RFC 3161 token were supplied. The 400 bodies on this public endpoint are `{\"success\": false, \"message\": \"...\"}` — they include `success` but OMIT the `error` field. (A syntactically malformed JSON body is rejected earlier by the framework with its default `{statusCode, error, message}` body; a POST with no body at all — no `Content-Type` — fails before processing with a framework-default 500, so send at least `{}`. An empty `application/json` body is treated as `{}` and yields the documented 400.)",
+        "description": "**Public seal-verification API** — cryptographically verifies that a Digital Product Passport document was sealed by an economic-operator tenant registered on this node and has not been tampered with. No authentication required.\n\n**Rate limit:** custom in-memory token bucket, **30 requests/min per IP** (per app instance). This bucket emits no rate-limit headers of its own — any `x-ratelimit-*` headers on responses (including this 429) come from the global 100 req/min limiter and describe that budget, not the 30/min one. The 429 body is the two-field `{\"error\": \"Too Many Requests\", \"message\": \"Rate limit exceeded.\"}`.\n\n**Input resolution.** `payload` is required. `signature` and `publicKey` may be supplied top-level, or are extracted from the document's embedded proof block: `signature` ← `payload.proof.proofValue` (else `payload.proof.signatureValue`); `publicKey` ← `payload.proof.publicKeyPem`, else the leaf certificate's SPKI when `payload.proof.x5c` is present. If, after extraction, any of the three is still missing → 400. The public key is CRLF-normalized and trimmed before matching.\n\n**Verification pipeline (in order):**\n1. **Certificate-chain report (optional).** If `payload.proof.x5c` is a non-empty array of base64-DER certificates (leaf first), the chain is parsed and a `certificate` report is built: the leaf's `subject` / `issuer` / `validFrom` / `validTo` (X.509 textual dates such as `Jan 10 00:00:00 2026 GMT` — NOT ISO 8601), `chainValid` (every link signature-verifies against the next certificate, every certificate is inside its validity window, and the top of the chain is anchored to this node's seal CA — SHA-256 fingerprint match or signature under the CA key; the CA is published at `GET /.well-known/opendpp-seal-ca.pem`), and `keyMatchesProof` (the leaf SPKI equals the supplied `publicKey`, whitespace-insensitive; always `true` when no explicit key was supplied). An unparseable chain yields `{\"chainValid\": false, \"error\": \"Unparseable x5c certificate chain\"}` and does NOT fail the request. This reports the CERTIFIED identity of the seal creator (eIDAS Art. 36(1)(b)). SECURITY: the report is attached ONLY on a `verified: true` outcome whose chain is TRUSTED (`chainValid` AND `keyMatchesProof` both true) — an untrusted/self-signed chain, one outside its validity window or not anchored to this node's seal CA, or one whose leaf key does not match the verifying key, is never surfaced as a `certificate` block (it must not present an unverified identity as authoritative). The two policy-failure responses omit it too.\n2. **Key-registration gate.** The `publicKey` must exactly match the registered eIDAS public key of a tenant on this node (trailing-newline tolerant) — otherwise HTTP **200** with `verified: false` and an explanatory `message`. Verification-policy failures are reported in-band, never as HTTP errors.\n3. **Operator-binding gate (fail-closed).** If the payload declares an operator registration id (`payload.operator.regId`, else `payload.economicOperator.regId`), that id MUST resolve to an Economic Operator registered on this node AND that operator MUST be bound to the signing tenant (a workspace–operator binding registered on this node). A declared operator that is unregistered, or registered but not bound to the key-owning tenant, → 200 `verified: false` with an explanatory `message`. Payloads that declare no operator id skip this gate.\n4. **Signature verification (two phases).** *Phase 1 — Merkle seal:* when `payload.metadata` is an object (or, when the `metadata` key is entirely absent, the whole `payload` is treated as the metadata), the SHA-256 Merkle tree over the metadata's top-level properties is rebuilt and the base64 ECDSA (P-256 / SHA-256) `signature` is verified against the recomputed root. Every leaf is recomputed from the actual values — caller-supplied redacted-leaf hashes are NOT accepted (they would let a tampered field be smuggled past verification), so a publicly redacted document will not pass the Merkle phase: verify the unredacted, privileged document. *Phase 2 — fallback:* if the Merkle phase does not verify, the signature is verified over the deterministic key-sorted canonicalization of the entire `payload`.\n5. **RFC 3161 timestamp report (optional).** When `payload.proof.rfc3161.token` is a non-empty base64-DER TimeStampToken, the response includes `timestamp` with the TSA-asserted `genTime` parsed from the token's TSTInfo (or `genTime: null` plus a `note` when the token cannot be parsed). When the node has a TSA CA configured (`TSA_CA_PEM`), the report also carries `timeAuthenticated` — the node's own verification of the token's CMS SignedData signature over its TSTInfo PLUS full RFC 3161 trust-path validation of the signer to that anchor (a critical `id-kp-timeStamping` EKU, validity at the asserted `genTime`, CA-constrained intermediates) (`false`, and the asserted time unauthenticated, when no CA is configured, the signature fails, or the path is not policy-valid); a verifier may still run its own `openssl ts -verify`. Like `certificate`, it appears only on the final verification outcome.\n\n**Outcome.** A processed verification ALWAYS returns HTTP 200 with `verified: true|false`; 400 is reserved for missing parameters or an exception thrown while verifying (e.g. an undecodable public key). `timestamp` is attached only when verification proceeds past the key-registration and operator-binding gates; `certificate` is attached only on a `verified: true` outcome whose chain is trusted (`chainValid` AND `keyMatchesProof`) — the two policy `verified: false` responses (and any untrusted-chain outcome) omit `certificate`, even when an x5c chain and/or an RFC 3161 token were supplied. The 400 bodies on this public endpoint are `{\"success\": false, \"message\": \"...\"}` — they include `success` but OMIT the `error` field. (A syntactically malformed JSON body is rejected earlier by the framework with its default `{statusCode, error, message}` body; a POST with no body at all — no `Content-Type` — fails before processing with a framework-default 500, so send at least `{}`. An empty `application/json` body is treated as `{}` and yields the documented 400.)",
         "security": [],
         "requestBody": {
           "required": true,
@@ -8437,7 +8684,7 @@
         },
         "responses": {
           "200": {
-            "description": "Verification processed. `verified` reports the cryptographic outcome; policy failures (unregistered key, unbound operator) come back as `verified: false` with a `message` — still HTTP 200, and WITHOUT `certificate`/`timestamp` even when an x5c chain or RFC 3161 token was supplied. Once verification proceeds past the policy gates, `certificate` is present for x5c-carrying proofs and `timestamp` when an RFC 3161 token was embedded.",
+            "description": "Verification processed. `verified` reports the cryptographic outcome; policy failures (unregistered key, unbound operator) come back as `verified: false` with a `message` — still HTTP 200, and WITHOUT `certificate`/`timestamp` even when an x5c chain or RFC 3161 token was supplied. Once verification proceeds past the policy gates, `certificate` is present for x5c-carrying proofs ONLY when the outcome is `verified: true` with a trusted chain (`chainValid` AND `keyMatchesProof`), and `timestamp` when an RFC 3161 token was embedded.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9888,6 +10135,30 @@
           "message": {
             "type": "string",
             "description": "Human-readable explanation."
+          },
+          "requestId": {
+            "type": "string",
+            "description": "Correlation id for this request, also returned as the `X-Request-Id` response header on EVERY response. Present in generic (server-error / framework) bodies; quote it to support to correlate with server logs. Adopts a well-formed inbound `X-Request-Id` if you send one."
+          },
+          "code": {
+            "type": "string",
+            "description": "Optional MACHINE-STABLE error code for the developer-facing write/ingest surface (passport / operator / unit / resolver / facility / events / webhooks) — branch on this instead of parsing `message`. Present on the errors it covers (see src/constants/api-error-codes.ts), omitted otherwise.",
+            "enum": [
+              "OPERATOR_NOT_BOUND",
+              "OPERATOR_AMBIGUOUS",
+              "OPERATOR_SCOPE_FORBIDDEN",
+              "GTIN_CHECK_DIGIT_INVALID",
+              "GLN_CHECK_DIGIT_INVALID",
+              "COMPRESSED_DIGITAL_LINK",
+              "PASSPORT_DUPLICATE",
+              "PASSPORT_SEALED_IMMUTABLE",
+              "CATEGORY_IMMUTABLE",
+              "FACILITY_NOT_FOUND",
+              "FACILITY_DUPLICATE",
+              "WEBHOOK_NOT_FOUND",
+              "WEBHOOK_LIMIT_REACHED",
+              "WEBHOOK_URL_REJECTED"
+            ]
           }
         }
       },
@@ -9910,6 +10181,42 @@
           "friendlyMessage": {
             "type": "string",
             "description": "Localized, human-friendly explanation (language from `?lang=` or `Accept-Language`; 28 languages, default `en`)."
+          }
+        }
+      },
+      "AdvisoryItem": {
+        "type": "object",
+        "description": "One non-blocking advisory on a response's `warnings[]` (a heads-up — the request still succeeded) or `notices[]` (informational — something helpful the API did). The `code` is a MACHINE-STABLE handle an interface can switch on, map to its own localized string, or link to docs; the human `message` (developer-facing) and `friendlyMessage` (end-user, localizable) wording may change, but the code will not.",
+        "required": [
+          "code",
+          "message",
+          "friendlyMessage"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Stable advisory code. WARNINGS: `NON_GS1_PRODUCT_ID` (the productId is not a GS1 GTIN/GRAI → no scannable GS1 link), `PII_SHAPE_DETECTED` (metadata looks like personal data), `UNIT_NO_SCANNABLE_LINK` (units under a non-GTIN passport have no scannable unit link), `DRAFT_DEMOTED` (draft:true took an already-published passport offline), `EORI_NOT_FOUND` (a declared EORI was not in the EU EOS register). NOTICES: `OPERATOR_AUTO_ATTRIBUTED` (operatorId omitted → the workspace's first bound operator was used), `GTIN_AUTO_COPIED` (a valid GTIN-14/GRAI productId was copied into metadata.gtin/metadata.grai).",
+            "enum": [
+              "NON_GS1_PRODUCT_ID",
+              "PII_SHAPE_DETECTED",
+              "UNIT_NO_SCANNABLE_LINK",
+              "DRAFT_DEMOTED",
+              "EORI_NOT_FOUND",
+              "OPERATOR_AUTO_ATTRIBUTED",
+              "GTIN_AUTO_COPIED"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "description": "The field the advisory is about (e.g. `productId`, `draft`, `regId`), when applicable."
+          },
+          "message": {
+            "type": "string",
+            "description": "Developer-facing detail (English)."
+          },
+          "friendlyMessage": {
+            "type": "string",
+            "description": "End-user-facing, localizable summary."
           }
         }
       },
@@ -10375,13 +10682,21 @@
               "type": "string"
             },
             "description": "Present only when some items were skipped — one plain-English string per skipped item, generally prefixed `[<serialNumber>]`."
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Non-blocking advisories. Carries a single note when the passport's `productId` is NOT a GS1 GTIN — the created units then have no scannable GS1 unit Digital Link (`/01/{gtin}/21/{serial}`) and resolve only via `/unit/{id}`. Empty `[]` for a GTIN-keyed passport.",
+            "items": {
+              "$ref": "#/components/schemas/AdvisoryItem"
+            }
           }
         },
         "required": [
           "success",
           "message",
           "count",
-          "units"
+          "units",
+          "warnings"
         ]
       },
       "BatteryUnitSerialisationFailedError": {
@@ -11470,7 +11785,8 @@
         "required": [
           "success",
           "message",
-          "operator"
+          "operator",
+          "warnings"
         ],
         "properties": {
           "success": {
@@ -11483,6 +11799,13 @@
           },
           "operator": {
             "$ref": "#/components/schemas/OperatorRow"
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Non-blocking advisories (#404). Carries a single EORI-not-found note when the OPT-IN `EORI_EXISTENCE_CHECK` is enabled and a declared EORI is not found in the EU EOS register. Empty `[]` otherwise. Never blocks registration.",
+            "items": {
+              "$ref": "#/components/schemas/AdvisoryItem"
+            }
           }
         }
       },
@@ -11757,9 +12080,10 @@
           "success",
           "message",
           "passport",
-          "warnings"
+          "warnings",
+          "notices"
         ],
-        "description": "201 envelope of `POST /api/v1/passports`. `passport` is the public redacted JSON-LD; `warnings` is always present (empty for drafts); `vcReady`/`vcReadyReason` report UNTP Verifiable-Credential readiness.",
+        "description": "201 envelope of `POST /api/v1/passports`. `passport` is the public redacted JSON-LD; `warnings`/`notices` are always present (possibly empty); `vcReady`/`vcReadyReason` report UNTP Verifiable-Credential readiness.",
         "properties": {
           "success": {
             "type": "boolean",
@@ -11778,7 +12102,14 @@
             "items": {
               "$ref": "#/components/schemas/ValidationErrorItem"
             },
-            "description": "Non-blocking validation findings. Always present; empty array when none and always empty for drafts."
+            "description": "Non-blocking findings — a MIX of ESPR validation warnings (no `code`) and machine-coded advisories (a `code` per src/constants/api-advisories.ts, e.g. `NON_GS1_PRODUCT_ID`, `PII_SHAPE_DETECTED`). Always present; empty for drafts. See `AdvisoryItem` for the coded shape."
+          },
+          "notices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdvisoryItem"
+            },
+            "description": "Informational advisories about helpful things the API did (always coded): `OPERATOR_AUTO_ATTRIBUTED` (operatorId omitted → the workspace's sole bound operator used), `GTIN_AUTO_COPIED` (a valid GTIN/GRAI copied into metadata.gtin/grai). Always present; empty when nothing to note."
           },
           "vcReady": {
             "type": "boolean",
@@ -11949,7 +12280,7 @@
           "insertedCount",
           "results"
         ],
-        "description": "201 partial-success envelope of `POST /api/v1/passports/bulk`. Returned whenever at least one row was inserted, even if other rows failed. Each result row carries a `vcReady` UNTP Verifiable-Credential readiness signal (#247).",
+        "description": "201 partial-success envelope of `POST /api/v1/passports/bulk`. Returned whenever at least one row was inserted, even if other rows failed. Each result row carries a `vcReady` UNTP Verifiable-Credential readiness signal (#247) and a per-row non-blocking `warnings[]` (#249 non-GS1 advisory + #400 PII-shape privacy advisory; empty when the row is clean).",
         "properties": {
           "success": {
             "type": "boolean",
@@ -11992,6 +12323,13 @@
                     "null"
                   ],
                   "description": "Null when `vcReady` is true; otherwise a short, actionable reason (link a facility with a country of production)."
+                },
+                "warnings": {
+                  "type": "array",
+                  "description": "Per-row non-blocking advisories — the #249 non-GS1 \"no scannable QR\" note and the #400 PII-shape privacy advisory. Empty `[]` when the row is clean; never blocks the row.",
+                  "items": {
+                    "$ref": "#/components/schemas/AdvisoryItem"
+                  }
                 }
               }
             }
@@ -12229,11 +12567,12 @@
       },
       "PassportUpdateResponse": {
         "type": "object",
-        "description": "200 envelope of PUT /api/v1/passports/{id}. The passport document is serialized at the PUBLIC redaction tier (owner-only/restricted metadata keys masked) even for the owner.",
+        "description": "200 envelope of PUT /api/v1/passports/{id}. The passport document is serialized at the PUBLIC redaction tier (owner-only/restricted metadata keys masked) even for the owner. Also carries the `vcReady`/`vcReadyReason` UNTP readiness signal (#247) and a non-blocking `warnings[]`.",
         "required": [
           "success",
           "message",
-          "passport"
+          "passport",
+          "warnings"
         ],
         "properties": {
           "success": {
@@ -12250,6 +12589,13 @@
           },
           "passport": {
             "$ref": "#/components/schemas/PublicPassportJsonLd"
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Non-blocking advisories. Carries a single note when saving with `\"draft\": true` DEMOTED an already-published (ACTIVE/RECALLED/DECOMMISSIONED) passport to DRAFT — it is then no longer publicly resolvable. Empty `[]` otherwise.",
+            "items": {
+              "$ref": "#/components/schemas/AdvisoryItem"
+            }
           }
         }
       },
@@ -12292,7 +12638,8 @@
           "message",
           "digitalSeal",
           "signingPublicKey",
-          "passport"
+          "passport",
+          "warnings"
         ],
         "properties": {
           "success": {
@@ -12313,6 +12660,13 @@
           },
           "passport": {
             "$ref": "#/components/schemas/PublicPassportJsonLd"
+          },
+          "warnings": {
+            "type": "array",
+            "description": "#255 publish-time re-warning: a single non-GS1 advisory when the sealed passport's `productId` is not a GS1 GTIN/GRAI (it has no scannable Digital Link — mint a GTIN you own via `POST /api/v1/gs1/gtin`). Empty `[]` when the productId is GS1-keyed. Non-blocking.",
+            "items": {
+              "$ref": "#/components/schemas/AdvisoryItem"
+            }
           }
         }
       },
@@ -13470,7 +13824,7 @@
       },
       "UntpEventCredential": {
         "type": "object",
-        "description": "A UNTP/EPCIS 2.0 traceability event wrapped as a VC-shaped credential (a vendor proof, not a conformant W3C VC). The only hard structural requirement is `credentialSubject`; a missing or unverifiable `proof` is rejected with the 400 `Cryptographic Verification Failed` body. Extra properties are permitted — the entire credential (with `proof.proofValue` blanked) is what the signature covers.",
+        "description": "A UNTP/EPCIS 2.0 traceability event wrapped as a VC-shaped credential. The only hard structural requirement is `credentialSubject`; the `proof` MUST be a conformant W3C `DataIntegrityProof` (`cryptosuite: \"ecdsa-jcs-2019\"`) and a missing, non-conformant, or unverifiable proof is rejected with the 400 `Cryptographic Verification Failed` body. Extra properties are permitted — the signature covers `sha256(JCS(proof options)) ‖ sha256(JCS(credential without proof))` (RFC 8785 JCS canonicalization).",
         "required": [
           "credentialSubject",
           "proof"
@@ -13621,14 +13975,22 @@
       },
       "UntpEventProof": {
         "type": "object",
-        "description": "Credential proof. Verified with ECDSA P-256 / SHA-256 over OpenDPP's deterministic key-sorted JSON canonicalization of the credential with `proofValue` blanked (NOT RFC 8785 JCS — not a conformant W3C Data Integrity suite).",
+        "description": "Credential proof. MUST be a conformant W3C `DataIntegrityProof` with `cryptosuite: \"ecdsa-jcs-2019\"` and a multibase base58btc (`z…`) `proofValue`. Verified (ECDSA P-256, IEEE-P1363 raw r‖s) over `sha256(JCS(proof options)) ‖ sha256(JCS(credential without proof))` — RFC 8785 JCS canonicalization, a conformant W3C Data Integrity suite.",
         "required": [
+          "type",
+          "cryptosuite",
           "proofValue"
         ],
         "properties": {
           "type": {
             "type": "string",
-            "description": "e.g. `DataIntegrityProof`."
+            "const": "DataIntegrityProof",
+            "description": "MUST be `DataIntegrityProof`."
+          },
+          "cryptosuite": {
+            "type": "string",
+            "const": "ecdsa-jcs-2019",
+            "description": "MUST be `ecdsa-jcs-2019` (RFC 8785 JCS)."
           },
           "created": {
             "type": "string",
@@ -13652,7 +14014,7 @@
           },
           "proofValue": {
             "type": "string",
-            "description": "Base64 ECDSA signature. Stored verbatim with the event."
+            "description": "Multibase base58btc (`z…`) ecdsa-jcs-2019 signature. Stored verbatim with the event."
           }
         }
       },
@@ -13991,7 +14353,7 @@
       },
       "SealCertificateReport": {
         "type": "object",
-        "description": "Present only for x5c-carrying proofs AND only when verification proceeds past the key-registration and operator-binding gates (the two policy `verified: false` responses omit it): the certified legal identity of the seal creator (eIDAS Art. 36(1)(b)). On an unparseable chain only `chainValid: false` and `error` are present.",
+        "description": "Present only for x5c-carrying proofs on a `verified: true` outcome whose chain is TRUSTED — `chainValid` AND `keyMatchesProof` both true (the two policy `verified: false` responses AND any untrusted-chain outcome omit it): the certified legal identity of the seal creator (eIDAS Art. 36(1)(b)). An untrusted chain is never surfaced, so an emitted report always has `chainValid: true`.",
         "required": [
           "chainValid"
         ],
@@ -14029,7 +14391,7 @@
       },
       "SealTimestampReport": {
         "type": "object",
-        "description": "Present only when `payload.proof.rfc3161.token` was supplied AND verification proceeds past the key-registration and operator-binding gates (the two policy `verified: false` responses omit it). Reports presence and the TSA-asserted genTime from the token's TSTInfo — full cryptographic TSR validation is the verifier's own step.",
+        "description": "Present only when `payload.proof.rfc3161.token` was supplied AND verification proceeds past the key-registration and operator-binding gates (the two policy `verified: false` responses omit it). Reports presence, the TSA-asserted genTime from the token's TSTInfo, and — when the node has a TSA CA configured (`TSA_CA_PEM`) — `timeAuthenticated`: the result of verifying the token's CMS SignedData signature over its TSTInfo and chaining the signer certificate to that anchor.",
         "required": [
           "present",
           "genTime"
@@ -14046,6 +14408,10 @@
             ],
             "format": "date-time",
             "description": "TSA-asserted generation time (ISO 8601), or null when the token's TSTInfo could not be parsed."
+          },
+          "timeAuthenticated": {
+            "type": "boolean",
+            "description": "True only when the token's RFC 3161 CMS SignedData signature verifies over its TSTInfo AND the signer passes full trust-path validation to the node's configured TSA CA anchor (`TSA_CA_PEM`): the signer is an end-entity timestamping certificate (a CRITICAL `id-kp-timeStamping` EKU, not a CA) that is VALID at the asserted `genTime` and chains through CA-constrained, genTime-valid intermediates to the anchor (itself a CA valid at `genTime`). False when the signature fails, when the path is not policy-valid, and when no TSA CA is configured (the asserted `genTime` is then unauthenticated). This is the node's own cryptographic check and does not replace a verifier's independent `openssl ts -verify`."
           },
           "note": {
             "type": "string",
