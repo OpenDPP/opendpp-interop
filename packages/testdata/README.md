@@ -34,8 +34,9 @@ npx @opendpp/testdata batteries --format events            # EPCIS-shaped event 
 npx @opendpp/testdata all --count 2                        # 2 samples of every category
 ```
 
-Flags: `--count/-c`, `--seed/-s`, `--format/-f json|csv|events`, `--prefix`
-(your own 10-digit GS1 prefix), `--operator-id`, `--facility-id`, `--help`.
+Flags: `--count/-c`, `--seed/-s`, `--format/-f json|csv|events` (`all` supports
+`--format json` only), `--prefix` (your own 10-digit GS1 prefix),
+`--operator-id`, `--facility-id`, `--help`.
 
 ## Library
 

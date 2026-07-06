@@ -4,8 +4,8 @@
 
 # @opendpp/gs1
 
-Pure, zero-dependency **GS1 Digital Link** URI builders and **GS1 mod-10 / GLN
-check-digit** helpers (ESM, Node ≥ 26). Extracted from the
+Pure, zero-dependency **GS1 Digital Link** URI builders (GTIN / GLN / GRAI) and
+**mod-10 check-digit** helpers (ESM, Node ≥ 26). Extracted from the
 [OpenDPP](https://opendpp-node.eu) Digital Product Passport service so any client
 can build and validate the same GS1 identifiers the hosted node resolves.
 
@@ -33,6 +33,7 @@ import {
   generateUnitDigitalLinkUri,
   canonicalProductUpi,
   parseDigitalLinkPath,
+  toNdefUriRecord,
 } from "@opendpp/gs1";
 
 isValidGTIN("09501101531000");          // true  — valid GTIN-14 mod-10 check digit
@@ -69,6 +70,19 @@ GS1 identity host `https://id.gs1.org`. The two **resolver** builders
 `process.env.BASE_URL` and fall back to `https://opendpp-node.eu`. This is a
 deliberate carry-over from the extraction; a future release will accept an
 explicit `baseUrl` option so the package has no implicit environment coupling.
+
+## API
+
+Beyond the helpers shown above, the package also exports:
+
+| Export | Purpose |
+|---|---|
+| `isGTINVal(val)` | Strict GTIN-14 check — exactly 14 digits with a valid mod-10 check digit. |
+| `isValidGLN(gln)` | GLN-13 (Global Location Number) check — 13 digits + mod-10. |
+| `isGRAIVal(val)` | GRAI (AI 8003) check — 14-digit asset id (mod-10) + optional CSET-82 serial (≤ 16 chars). |
+| `gs1CheckDigit(body)` | The GS1 mod-10 check digit for a numeric body — the algorithm behind `makeGtin`/`makeGln`. |
+| `nonGs1Warning(productId)` | The non-blocking `warnings[]` advisory for a non-GS1 `productId` (it saves, but gets no scannable GS1 Digital Link / QR). |
+| `NON_GS1_PRODUCT_ID_WARNING_CODE` | That advisory's machine-stable `code` (`"NON_GS1_PRODUCT_ID"`). |
 
 ## License
 

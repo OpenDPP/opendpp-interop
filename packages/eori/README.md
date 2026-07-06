@@ -137,6 +137,7 @@ import {
   normalizeEori,
   parseEori,
   classifyEoriCountry,
+  REG_ID_SCHEMES,
 } from "@opendpp/eori";
 
 isValidEoriSyntax("DE1234567890"); // true
