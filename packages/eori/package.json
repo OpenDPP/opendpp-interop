@@ -1,6 +1,6 @@
 {
   "name": "@opendpp/eori",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "EORI number validation against the European Commission's official EOS validation web service, plus pure offline EORI syntax/parse helpers (ESM, Node >=26). From the OpenDPP Digital Product Passport service.",
   "keywords": [
     "eori",

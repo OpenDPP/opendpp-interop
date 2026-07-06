@@ -82,9 +82,165 @@ function xmlEscape(value: string): string {
     .replace(/'/g, "&apos;");
 }
 
+/**
+ * Maximum SOAP response body we will parse. A real `retrieveAEOResponse` is a few KB; a body past
+ * this is rejected before scanning. SECURITY (js/polynomial-redos): {@link parseRetrieveAeoResponse}
+ * is exported and receives `await response.text()` with no size cap and an injectable transport — the
+ * input is untrusted. The readers below are LINEAR (indexOf, no lazy backtracking); this cap is a
+ * coarse defence-in-depth bound on top of them.
+ */
+export const MAX_RESPONSE_BYTES = 4 * 1024 * 1024;
+
+function isNameChar(ch: string): boolean {
+  return (
+    (ch >= "a" && ch <= "z") ||
+    (ch >= "A" && ch <= "Z") ||
+    (ch >= "0" && ch <= "9") ||
+    ch === "_" ||
+    ch === "-" ||
+    ch === "."
+  );
+}
+function isSpace(ch: string): boolean {
+  return ch === " " || ch === "\t" || ch === "\n" || ch === "\r" || ch === "\f" || ch === "\v";
+}
+
+/**
+ * Linear, namespace-prefix + attribute tolerant, case-insensitive XML element readers. These REPLACE
+ * the previous lazy `[\s\S]*?` regexes whose backtracking was O(n²) on a crafted response
+ * (js/polynomial-redos). Semantics match the old regexes exactly (guarded in `soap.test.ts`): an open
+ * tag is `<[ns:]name` whose name is followed by whitespace or `>` (so `<name…>`, not `<namefoo>`), its
+ * `>` ends the tag; the matching close is the next `</[ns:]name\s*>`; inner text is everything between.
+ */
+// The scanners take a PRE-LOWERCASED `lower` (== body.toLowerCase()) and an already-lowercased
+// `target`, computed ONCE by the callers below. Computing them per-call made a many-element parse
+// O(n²) (each of N result blocks re-lowercased the whole body) — a reintroduced polynomial DoS.
+function findOpenTag(body: string, lower: string, target: string, from: number): { contentStart: number } | null {
+  let i = Math.max(from, 0);
+  while (i < body.length) {
+    const lt = body.indexOf("<", i);
+    if (lt < 0) return null;
+    if (body[lt + 1] === "/") {
+      i = lt + 1;
+      continue; // a close tag — skip
+    }
+    let namePos = lt + 1;
+    let q = namePos;
+    while (q < body.length && isNameChar(body[q]!)) q++;
+    if (q > lt + 1 && body[q] === ":") namePos = q + 1; // consume a namespace prefix ([\w.-]+ before ':')
+    if (lower.startsWith(target, namePos)) {
+      const after = namePos + target.length;
+      const ch = body[after];
+      if (ch === ">" || ch === undefined || isSpace(ch)) {
+        const gt = body.indexOf(">", after);
+        if (gt < 0) return null;
+        return { contentStart: gt + 1 };
+      }
+    }
+    i = lt + 1;
+  }
+  return null;
+}
+
+/** Index of the `<` of the next `</[ns:]name\s*>` close tag at/after `from`, or -1. Linear. */
+function findCloseTag(body: string, lower: string, target: string, from: number): number {
+  let i = Math.max(from, 0);
+  while (i < body.length) {
+    const lt = body.indexOf("</", i);
+    if (lt < 0) return -1;
+    let namePos = lt + 2;
+    let q = namePos;
+    while (q < body.length && isNameChar(body[q]!)) q++;
+    if (q > lt + 2 && body[q] === ":") namePos = q + 1;
+    if (lower.startsWith(target, namePos)) {
+      let after = namePos + target.length;
+      while (after < body.length && isSpace(body[after]!)) after++;
+      if (body[after] === ">") return lt;
+    }
+    i = lt + 2;
+  }
+  return -1;
+}
+
+/** Inner text of the FIRST `<[ns:]name…>…</[ns:]name>` in `body`, or null. Linear. */
+function firstTagInner(body: string, name: string): string | null {
+  const lower = body.toLowerCase();
+  const target = name.toLowerCase();
+  const open = findOpenTag(body, lower, target, 0);
+  if (!open) return null;
+  const close = findCloseTag(body, lower, target, open.contentStart);
+  if (close < 0) return null;
+  return body.slice(open.contentStart, close);
+}
+
+/** Inner text of EVERY `<[ns:]name…>…</[ns:]name>` (non-overlapping), matching the old global regex. Linear. */
+function allTagInners(body: string, name: string): string[] {
+  const lower = body.toLowerCase(); // ONCE for the whole scan — not per block (that was O(n²)).
+  const target = name.toLowerCase();
+  const inners: string[] = [];
+  let from = 0;
+  for (;;) {
+    const open = findOpenTag(body, lower, target, from);
+    if (!open) break;
+    const close = findCloseTag(body, lower, target, open.contentStart);
+    if (close < 0) break;
+    inners.push(body.slice(open.contentStart, close));
+    const gt = body.indexOf(">", close);
+    from = gt < 0 ? body.length : gt + 1;
+  }
+  return inners;
+}
+
+/**
+ * True iff `body` contains an opening `<[ns:]name` whose name is immediately followed by whitespace or
+ * `>` — the exact semantics of the old `/<(?:[\w.-]+:)?name(?:\s|>)/i` presence check, but linear.
+ * (Unlike {@link findOpenTag} this does NOT require the tag's closing `>`.)
+ */
+function hasTag(body: string, name: string): boolean {
+  const lower = body.toLowerCase();
+  const target = name.toLowerCase();
+  let i = 0;
+  while (i < body.length) {
+    const lt = body.indexOf("<", i);
+    if (lt < 0) return false;
+    if (body[lt + 1] === "/") {
+      i = lt + 1;
+      continue;
+    }
+    let namePos = lt + 1;
+    let q = namePos;
+    while (q < body.length && isNameChar(body[q]!)) q++;
+    if (q > lt + 1 && body[q] === ":") namePos = q + 1;
+    if (lower.startsWith(target, namePos)) {
+      const ch = body[namePos + target.length];
+      if (ch === ">" || (ch !== undefined && isSpace(ch))) return true;
+    }
+    i = lt + 1;
+  }
+  return false;
+}
+
+/** Replace every `<![CDATA[ … ]]>` with its inner content (linear indexOf scan; the old lazy `/g` regex was O(n²)). */
+function stripCdata(value: string): string {
+  const OPEN = "<![CDATA[";
+  const CLOSE = "]]>";
+  if (value.indexOf(OPEN) < 0) return value;
+  let out = "";
+  let i = 0;
+  for (;;) {
+    const s = value.indexOf(OPEN, i);
+    if (s < 0) return out + value.slice(i);
+    out += value.slice(i, s);
+    const cs = s + OPEN.length;
+    const e = value.indexOf(CLOSE, cs);
+    if (e < 0) return out + value.slice(s); // unterminated CDATA → leave untouched (matches the old non-match)
+    out += value.slice(cs, e);
+    i = e + CLOSE.length;
+  }
+}
+
 function xmlUnescape(value: string): string {
-  return value
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+  return stripCdata(value)
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
@@ -92,10 +248,6 @@ function xmlUnescape(value: string): string {
     .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
     .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
     .replace(/&amp;/g, "&");
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -131,13 +283,11 @@ export function buildRetrieveAeoEnvelope(criteria: readonly AeoRequestCriteria[]
   );
 }
 
-/** Read a single leaf element's text by local name (ignoring any namespace prefix). */
+/** Read a single leaf element's text by local name (ignoring any namespace prefix). Linear. */
 function leaf(scope: string, localName: string): string | undefined {
-  const ln = escapeRegExp(localName);
-  const re = new RegExp(`<(?:[\\w.-]+:)?${ln}(?:\\s[^>]*)?>([\\s\\S]*?)</(?:[\\w.-]+:)?${ln}\\s*>`, "i");
-  const m = re.exec(scope);
-  if (!m) return undefined;
-  return xmlUnescape(m[1] ?? "").trim();
+  const inner = firstTagInner(scope, localName);
+  if (inner === null) return undefined;
+  return xmlUnescape(inner).trim();
 }
 
 function optional(value: string | undefined): string | undefined {
@@ -151,21 +301,24 @@ function optional(value: string | undefined): string | undefined {
 export function parseRetrieveAeoResponse(xml: string): ParsedAeoResponse {
   const body = String(xml ?? "");
 
-  const fault = /<(?:[\w.-]+:)?Fault(?:\s[^>]*)?>([\s\S]*?)<\/(?:[\w.-]+:)?Fault\s*>/i.exec(body);
-  if (fault) {
-    const inner = fault[1] ?? "";
-    const faultString = leaf(inner, "faultstring") || leaf(inner, "Reason") || "SOAP Fault";
-    const faultCode = leaf(inner, "faultcode") || leaf(inner, "Code");
+  // SECURITY (js/polynomial-redos): reject an oversized body before any scanning (untrusted input).
+  if (body.length > MAX_RESPONSE_BYTES) {
+    throw new AeoServiceError(`AEO service response too large to parse (${body.length} bytes).`);
+  }
+
+  const faultInner = firstTagInner(body, "Fault");
+  if (faultInner !== null) {
+    const faultString = leaf(faultInner, "faultstring") || leaf(faultInner, "Reason") || "SOAP Fault";
+    const faultCode = leaf(faultInner, "faultcode") || leaf(faultInner, "Code");
     throw new AeoServiceError(`AEO service fault: ${faultString}`, { faultCode });
   }
 
   // A retrieveAEOResponse wrapper must be present (even when it carries no result).
-  if (!/<(?:[\w.-]+:)?retrieveAEOResponse(?:\s|>)/i.test(body) && !/<(?:[\w.-]+:)?return(?:\s|>)/i.test(body)) {
+  if (!hasTag(body, "retrieveAEOResponse") && !hasTag(body, "return")) {
     throw new AeoServiceError("AEO service response did not contain a retrieveAEOResponse.");
   }
 
-  const blocks =
-    body.match(/<(?:[\w.-]+:)?result(?:\s[^>]*)?>([\s\S]*?)<\/(?:[\w.-]+:)?result\s*>/gi) ?? [];
+  const blocks = allTagInners(body, "result");
 
   const results: AeoRawResult[] = blocks.map((block) => ({
     authorisationHolderName: optional(leaf(block, "authorisationHolderName")),
