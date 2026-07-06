@@ -5,6 +5,21 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.11.0] — API contract 1.11.0 (client idempotency)
+
+Carries OpenDPP public API contract **1.11.0** (`openapi.json`). A backward-compatible MINOR — no
+existing request or response shape changed; the sole machine-contract change is one new optional
+request header (below). The vendored standards, schemas, samples and validators are unchanged.
+
+### Added
+- **Optional `Idempotency-Key` request header on `POST /api/v1/passports` and
+  `POST /api/v1/passports/bulk`** (OpenDPP #502). Retrying a request with the same key replays the
+  ORIGINAL response — same status and body, plus an `idempotent-replayed: true` response header —
+  instead of performing a duplicate write or returning **409**. Scoped per (workspace, endpoint, key)
+  and consulted within a 24-hour window; a malformed key returns **400**. Best-effort: the replay is
+  recorded after the write commits, so a rare failure in that window falls back to normal processing
+  (a duplicate write is still impossible — the `(productId, operator)` unique key holds).
+
 ## [1.10.0] — API contract 1.10.0 (Audit Pass 2: trust-stack + resolver hardening)
 
 Carries OpenDPP public API contract **1.10.0** (`openapi.json`) — trust-stack + resolver hardening from
