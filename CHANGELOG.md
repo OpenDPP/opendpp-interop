@@ -5,18 +5,49 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
-## [uncommitted]
+## [1.10.0] — API contract 1.10.0 (Audit Pass 2: trust-stack + resolver hardening)
 
-Not tied to an API-contract version bump — these changes land in the next tagged release.
+Carries OpenDPP public API contract **1.10.0** (`openapi.json`) — trust-stack + resolver hardening from
+OpenDPP's Audit Pass 2 (#501). Some changes are behavioural breaks on the `/api/v1` line; consumers on
+`POST /api/v1/events` and the content-negotiated resolvers should review the notes below.
 
 ### Changed
+- **`POST /api/v1/events` now requires a conformant W3C Data Integrity proof (audit I-untp).** The
+  credential `proof` MUST be a `DataIntegrityProof` with `cryptosuite: "ecdsa-jcs-2019"` (RFC 8785 JCS,
+  multibase base58btc `proofValue`); the legacy key-sorted `MerkleTreeAttestationProof` is rejected. This
+  makes the persisted `isUntpCompliant: true` honest / independently verifiable (OpenDPP #478).
+- **The public resolvers select a representation by RFC 7231 §5.3.2 `Accept` q-value negotiation.**
+  `GET /passport/{id}`, the GS1 Digital Link gateways, `GET /unit/{id}`, the mirror resolver and
+  `GET /api/v1/schemas/{category}` honour q-values + media-range specificity instead of a fixed branch
+  order — so `Accept: text/html, application/vc+jwt` yields HTML. Absent/bare-wildcard `Accept` still
+  defaults to JSON; `Vary: Accept` unchanged (OpenDPP #375).
+- **`POST /api/v1/audit/verify` no longer surfaces an untrusted seal certificate (audit H2).** The
+  `certificate` report attaches ONLY on a `verified: true` outcome with a trusted chain
+  (`chainValid` + `keyMatchesProof`).
 - **VC reference samples now carry `credentialSchema`.** Regenerated the VC sample set
   (`samples/battery-vc*.{json,jwt,sdjwt,jsonld}`, `samples/battery-unit-vc*`, `samples/textile-vc*`,
   `samples/battery-issuer-did.json`) so each conformant UNTP DigitalProductPassport credential now
   references the node-hosted UNTP DPP v0.7.0 JSON Schema via `credentialSchema`
   (`{"id": "https://opendpp-node.eu/public/schemas/untp/dpp/0.7.0.json", "type": "JsonSchema"}`) —
-  OpenDPP #500 (audit *V-schema*). The field is additive to the VC body, so it is **not** an OpenAPI
-  contract change (no `openapi.json`/version bump).
+  OpenDPP #500 (audit *V-schema*). The field is additive to the VC body.
+
+### Added
+- **`timestamp.timeAuthenticated` on `POST /api/v1/audit/verify` (audit TS)** — when the node has a TSA CA
+  configured it verifies the RFC 3161 token's CMS signature over its TSTInfo and chains the signer to that
+  anchor; `false` (asserted `genTime` unauthenticated) otherwise.
+- **Engine-authoritative AI-21 serial conformance for every unit (OpenDPP #370)** — non-GTIN passport unit
+  serials are validated through the GS1 Barcode Syntax Engine (CSET-82 + length), not just the URL-safe regex.
+- **Machine-stable, self-describing responses (developer experience).** 4xx bodies carry a stable
+  `Error.code`; success responses carry coded `warnings[]` / `notices[]` (`AdvisoryItem`: `{code, path?, message,
+  friendlyMessage}`, `friendlyMessage` localized via `?lang=`/`Accept-Language`); every response carries an
+  `X-Request-Id` header (also `requestId` in generic error bodies) — OpenDPP #501.
+- **New contract operations:** bulk VC-readiness report, GS1 GTIN mint affordance for non-GS1 productIds,
+  opt-in EORI existence check at operator registration, and a compressed GS1 Digital Link `400` on the resolver
+  (OpenDPP #253 / #255 / #404 / #261). The GS1 helper package adds an NFC/NDEF data-carrier helper (#403).
+
+_CONFORMANCE.md: adds one ✅ row — a conformant `DataIntegrityProof` (`ecdsa-jcs-2019`) is now REQUIRED on
+`POST /api/v1/events` ingest (#478). The passport-seal `MerkleTreeAttestationProof` caveat and the
+roadmap/partial rows (BBS+, `did:webvh`, discovery-key coverage, non-battery category typing) are unchanged._
 
 ## [1.9.0] — API contract 1.9.0 (native GS1 EPCIS 2.0 document I/O)
 
