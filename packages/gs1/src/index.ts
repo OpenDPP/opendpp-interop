@@ -5,9 +5,9 @@
  * (GTIN / GLN / GRAI) and the ESPR/DPP-oriented ingest guards. Pure module, zero
  * runtime dependencies.
  *
- * Extracted verbatim from the OpenDPP node (src/utils/digital-link.ts) and kept in
- * lockstep by tests/functional/gs1-package-parity.test.ts until the backend is
- * migrated to consume this package.
+ * Originally extracted from the OpenDPP node (src/utils/digital-link.ts); since
+ * #393 this file is the SINGLE source for these helpers — the backend consumes the
+ * package directly, and the old util (with its lockstep parity test) is deleted.
  *
  * Copyright (c) Opendpp UAB.
  * SPDX-License-Identifier: Apache-2.0
