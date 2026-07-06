@@ -18,6 +18,7 @@ import {
   generateUnitDigitalLinkUri,
   canonicalProductUpi,
   canonicalUnitUpi,
+  toNdefUriRecord,
 } from "../src/index.ts";
 
 const VALID_GTIN14 = "09501101531000"; // valid GTIN-14 (mod-10 check digit = 0)
@@ -100,4 +101,21 @@ test("mod-10 minting (gs1CheckDigit / makeGtin / makeGln) round-trips the valida
   assert.throws(() => makeGtin("123"), /13-digit body/);
   assert.throws(() => makeGln("123"), /12-digit body/);
   assert.throws(() => gs1CheckDigit("12a4"), /numeric body/);
+});
+
+test("toNdefUriRecord wraps a Digital Link as an NFC URI record (#403, carrier-agnostic)", () => {
+  const uri = generateUnitDigitalLinkUri(VALID_GTIN14, "SN-1");
+  assert.ok(uri.startsWith("https://"));
+  const rec = toNdefUriRecord(uri);
+  // NDEF short record: header 0xD1, type-length 1, payload-length, type 'U' (0x55), prefix code, remainder.
+  assert.equal(rec[0], 0xd1, "MB|ME|SR|TNF-well-known header");
+  assert.equal(rec[1], 0x01, "type length = 1");
+  assert.equal(rec[3], 0x55, "record type 'U'");
+  assert.equal(rec[4], 0x04, "https:// abbreviated to prefix code 0x04");
+  assert.equal(rec[2], rec.length - 4, "payload length is consistent with the record length");
+  // The stored remainder is the URI minus the abbreviated https:// prefix — round-trips to the same URL.
+  const remainder = new TextDecoder().decode(rec.slice(5));
+  assert.equal("https://" + remainder, uri, "an NFC tag carries the SAME resolvable URL as the QR");
+  // http://www. picks the two-byte-shorter www-abbreviated code (0x01), proving longest-prefix match.
+  assert.equal(toNdefUriRecord("http://www.example.com/x")[4], 0x01);
 });

@@ -152,13 +152,18 @@ export function gtinIngestError(productId: string): string | null {
   return null;
 }
 
+/** Machine-stable advisory code for {@link nonGs1Warning} — an interface can switch/localize/link on it. */
+export const NON_GS1_PRODUCT_ID_WARNING_CODE = "NON_GS1_PRODUCT_ID";
+
 /**
  * #249: the single non-blocking advisory for a non-GS1 productId, shared by every ingest path
  * (create / bulk / AAS / validate-only) so the wording can't drift. The passport still saves and
- * resolves via `/passport/{id}`; it just has no scannable GS1 Digital Link / QR.
+ * resolves via `/passport/{id}`; it just has no scannable GS1 Digital Link / QR. The `code` is a
+ * permanent machine handle; the `message`/`friendlyMessage` wording may change, the code will not.
  */
-export function nonGs1Warning(productId: string): { path: string; message: string; friendlyMessage: string } {
+export function nonGs1Warning(productId: string): { code: string; path: string; message: string; friendlyMessage: string } {
   return {
+    code: NON_GS1_PRODUCT_ID_WARNING_CODE,
     path: "productId",
     message: `productId "${productId.trim()}" is not a GS1 GTIN-14 or GRAI; this passport resolves via /passport/{id} and has no scannable GS1 Digital Link / QR.`,
     friendlyMessage: "This product has no GS1 GTIN, so it won't have a scannable GS1 QR code — it resolves via its internal link instead.",
@@ -265,4 +270,46 @@ export function canonicalUnitUpi(productId: string, serialNumber: string): strin
   const cleanSerial = encodeURIComponent(serialNumber.trim());
   const ai = resolvePrimaryAi(trimId);
   return `${GS1_CANONICAL_HOST}/${ai}/${encodeURIComponent(trimId)}/21/${cleanSerial}`;
+}
+
+// NFC Forum URI Record Type Definition (RTD) — well-known prefix abbreviation codes (subset). The first
+// payload byte is the code; the record stores only the URI remainder after the abbreviated prefix. Longest
+// match wins so `https://` compresses to one byte. #403 — a data carrier is carrier-agnostic at the URL
+// level: an NFC tag encoded with the SAME GS1 Digital Link URL the QR carries resolves identically.
+const NDEF_URI_PREFIXES: ReadonlyArray<[number, string]> = [
+  [0x02, "https://www."],
+  [0x01, "http://www."],
+  [0x04, "https://"],
+  [0x03, "http://"],
+];
+
+/**
+ * Wrap a GS1 Digital Link URI as an **NDEF URI record** (NFC Forum URI RTD) ready to write to an NFC
+ * tag, so QR and NFC carry the SAME resolvable URL (#403). Returns the complete single-record NDEF
+ * message bytes: header (`MB=ME=SR=1`, TNF well-known) + type `U` + payload `[prefix-code, …uri-remainder]`.
+ * Only short records (payload ≤ 255 bytes) are emitted — a Digital Link URI is always well within that.
+ * This is a pure encoder; it performs NO NFC I/O. Pair with `generateDigitalLinkUri` / `canonicalUnitUpi`.
+ */
+export function toNdefUriRecord(digitalLinkUri: string): Uint8Array {
+  const uri = digitalLinkUri.trim();
+  let code = 0x00;
+  let remainder = uri;
+  for (const [c, prefix] of NDEF_URI_PREFIXES) {
+    if (uri.toLowerCase().startsWith(prefix)) { code = c; remainder = uri.slice(prefix.length); break; }
+  }
+  const remainderBytes = new TextEncoder().encode(remainder);
+  const payloadLen = remainderBytes.length + 1; // + the 1-byte prefix code
+  if (payloadLen > 255) {
+    throw new Error(`toNdefUriRecord: URI too long for a short NDEF record (${payloadLen} > 255 bytes)`);
+  }
+  // Header 0xD1 = MB(1) ME(1) CF(0) SR(1) IL(0) TNF(0x01 well-known); type length 1; payload length;
+  // type 0x55 = 'U'; then the payload.
+  const out = new Uint8Array(4 + payloadLen);
+  out[0] = 0xd1;
+  out[1] = 0x01;
+  out[2] = payloadLen;
+  out[3] = 0x55;
+  out[4] = code;
+  out.set(remainderBytes, 5);
+  return out;
 }

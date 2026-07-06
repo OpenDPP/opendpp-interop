@@ -53,6 +53,12 @@ generateUnitDigitalLinkUri("09501101531000", "BATTERY-SERIAL"); // ".../01/09501
 
 parseDigitalLinkPath("09501101531000/21/ABC");
 // { primaryId: "09501101531000", additionalAttributes: { "21": "ABC" } }
+
+// NFC: wrap a Digital Link as an NDEF URI record to write to a tag. A data carrier is
+// carrier-agnostic at the URL level — an NFC tag encoded with the SAME Digital Link URL a QR
+// carries resolves identically. This is a pure encoder (no NFC I/O; you write the bytes to the tag).
+toNdefUriRecord(generateUnitDigitalLinkUri("09501101531000", "SN-1"));
+// Uint8Array: NDEF URI record — [0xD1,0x01,len,0x55, 0x04(https://), …"…/01/…/21/SN-1"]
 ```
 
 ### `baseUrl` and `process.env.BASE_URL`
