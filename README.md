@@ -71,9 +71,11 @@ work, and [mirror-managed](./packages/) here.
 | **`@opendpp/webhooks`** | Webhook event types + a constant-time HMAC-SHA256 signature verifier | [![npm](https://img.shields.io/npm/v/@opendpp/webhooks.svg)](https://www.npmjs.com/package/@opendpp/webhooks) |
 | **`@opendpp/eori`** | EORI validation vs the EU Commission EOS authoritative service + offline syntax/parse helpers | [![npm](https://img.shields.io/npm/v/@opendpp/eori.svg)](https://www.npmjs.com/package/@opendpp/eori) |
 | **`@opendpp/aeo`** | Authorised Economic Operator (trusted-trader) lookup vs the EU Commission EOS service | [![npm](https://img.shields.io/npm/v/@opendpp/aeo.svg)](https://www.npmjs.com/package/@opendpp/aeo) |
+| **`@opendpp/testdata`** | Deterministic synthetic sample passports for every ESPR category + EPCIS-shaped supply-chain event chains (CLI + API) | [![npm](https://img.shields.io/npm/v/@opendpp/testdata.svg)](https://www.npmjs.com/package/@opendpp/testdata) |
+| **`@opendpp/vies`** | EU VAT-number validation against the EU Commission's authoritative VIES service + offline VAT-ID syntax/parse helpers | [![npm](https://img.shields.io/npm/v/@opendpp/vies.svg)](https://www.npmjs.com/package/@opendpp/vies) |
 
 ```sh
-npm install @opendpp/gs1          # or @opendpp/csv, @opendpp/webhooks, @opendpp/eori, @opendpp/aeo
+npm install @opendpp/gs1          # or @opendpp/csv, @opendpp/webhooks, @opendpp/eori, @opendpp/aeo, @opendpp/testdata, @opendpp/vies
 ```
 
 ```ts
@@ -82,6 +84,7 @@ import { mapCsvRowsToPassports } from "@opendpp/csv";       // CSV rows → POST
 import { verifyWebhookRequest } from "@opendpp/webhooks";   // verify an inbound OpenDPP webhook
 import { validateEori } from "@opendpp/eori";               // EORI existence check vs the EU EOS service
 import { lookupAeo } from "@opendpp/aeo";                   // Authorised Economic Operator lookup
+import { checkVatId } from "@opendpp/vies";                 // validate an EU VAT number vs VIES
 ```
 
 Sources + per-package docs are under [`packages/`](./packages/). The closed surface — eIDAS sealing,
@@ -103,7 +106,7 @@ opendpp-interop/
 ├── samples/                validated reference artifacts (a battery via both doors + a textile UNTP credential + the EU-registry pointer + the JSON-LD passport + its CIRPASS-2 renderer expansion)
 │   ├── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
 │   └── gs1-digital-link.txt      GS1 Digital Link URIs / AI element strings (validated by the `gs1` door)
-├── packages/               the @opendpp/* npm client libraries (gs1 · csv · webhooks; mirror-managed, see packages/README.md)
+├── packages/               the @opendpp/* npm client libraries (gs1 · csv · webhooks · eori · aeo · testdata · vies; mirror-managed, see packages/README.md)
 └── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl · sdjwt · gs1 · epcis)
 ```
 
