@@ -43,9 +43,12 @@ export {
 export {
   generateEventChain,
   toUntpEventCredential,
+  toEpcisDocument,
+  EPCIS_CONTEXT,
   type EpcisAction,
   type EpcisEventType,
   type EpcisTestEvent,
+  type EpcisDocument,
   type GenerateEventChainOptions,
   type ToUntpEventCredentialOptions,
 } from "./events.js";

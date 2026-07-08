@@ -2,7 +2,14 @@
 // (Apache-2.0, (c) Opendpp UAB).
 import test from "node:test";
 import assert from "node:assert/strict";
-import { generateEventChain, generatePassport, sgtinEpc, toUntpEventCredential } from "../src/index.js";
+import {
+  EPCIS_CONTEXT,
+  generateEventChain,
+  generatePassport,
+  sgtinEpc,
+  toEpcisDocument,
+  toUntpEventCredential,
+} from "../src/index.js";
 
 const passport = generatePassport({ category: "batteries" });
 
@@ -61,4 +68,56 @@ test("toUntpEventCredential wraps the event UNSIGNED — never a fabricated proo
   const custom = toUntpEventCredential(event, { issuerDid: "did:web:acme.example", issuanceDate: "2026-02-01T00:00:00.000Z" }) as Record<string, any>;
   assert.equal(custom.issuer, "did:web:acme.example");
   assert.equal(custom.issuanceDate, "2026-02-01T00:00:00.000Z");
+});
+
+test("toEpcisDocument emits a conformant-shaped EPCIS 2.0 document envelope", () => {
+  const chain = generateEventChain(passport);
+  const doc = toEpcisDocument(chain) as Record<string, any>;
+  assert.deepEqual(doc["@context"], [EPCIS_CONTEXT]);
+  assert.equal(doc.type, "EPCISDocument");
+  assert.equal(doc.schemaVersion, "2.0");
+  // creationDate is derived from the LATEST eventTime (deterministic, not the wall clock).
+  const latest = Math.max(...chain.map((e) => Date.parse(e.eventTime)));
+  assert.equal(doc.creationDate, new Date(latest).toISOString());
+  assert.equal(doc.epcisBody.eventList.length, chain.length);
+});
+
+test("toEpcisDocument maps CBV URNs → short names, wraps locations, gates EPC fields by type", () => {
+  const chain = generateEventChain(passport);
+  const [commissioning, transformation, packing, shipping] = toEpcisDocument(chain).epcisBody.eventList as Record<string, any>[];
+
+  // CBV URN → official short name (schema rejects the urn:epcglobal:cbv:* form).
+  assert.equal(commissioning.bizStep, "commissioning");
+  assert.equal(commissioning.disposition, "active");
+  assert.match(commissioning.eventID, /^urn:opendpp:testdata:event:[0-9a-f]{32}$/);
+  assert.equal(commissioning.eventTimeZoneOffset, "+00:00");
+
+  // Locations become {id} URIs: a geo: read point passes through, a bare biz location is URN-wrapped.
+  assert.match(commissioning.readPoint.id, /^geo:/);
+  assert.match(commissioning.bizLocation.id, /^urn:opendpp:location:/);
+
+  // EPC-list fields are gated to their type-correct home (EPCIS 2.0 JSON casing).
+  assert.ok(Array.isArray(commissioning.epcList) && !("childEPCs" in commissioning));
+  assert.equal(transformation.type, "TransformationEvent");
+  assert.equal("action" in transformation, false, "TransformationEvent must carry no action");
+  assert.ok(Array.isArray(transformation.inputEPCList) && Array.isArray(transformation.outputEPCList));
+  assert.equal("epcList" in transformation, false);
+  assert.equal(packing.type, "AggregationEvent");
+  assert.ok(typeof packing.parentID === "string" && Array.isArray(packing.childEPCs));
+  assert.equal("epcList" in packing, false, "an epcList on an AggregationEvent fails the official schema");
+  assert.equal(shipping.action, "OBSERVE");
+});
+
+test("toEpcisDocument is deterministic and content-addresses eventID (idempotent re-capture)", () => {
+  assert.equal(
+    JSON.stringify(toEpcisDocument(generateEventChain(passport))),
+    JSON.stringify(toEpcisDocument(generateEventChain(passport))),
+  );
+  // Same event content → same eventID regardless of how chains are combined (identity, not position).
+  const other = generatePassport({ category: "electronics" });
+  const solo = toEpcisDocument(generateEventChain(passport)).epcisBody.eventList as Record<string, any>[];
+  const combined = toEpcisDocument([...generateEventChain(other), ...generateEventChain(passport)]).epcisBody.eventList as Record<string, any>[];
+  const soloIds = solo.map((e) => e.eventID);
+  const combinedIds = new Set(combined.map((e) => e.eventID));
+  for (const id of soloIds) assert.ok(combinedIds.has(id), "an event keeps its content-addressed id when combined");
 });

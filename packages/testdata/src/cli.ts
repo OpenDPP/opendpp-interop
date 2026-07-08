@@ -12,7 +12,7 @@
 import process from "node:process";
 import { ESPR_CATEGORIES, isEsprCategory, type EsprCategory, type PassportCreateInput } from "@opendpp/csv";
 import { DEFAULT_SEED, generatePassports, type GeneratePassportsOptions } from "./passports.js";
-import { generateEventChain } from "./events.js";
+import { generateEventChain, toEpcisDocument, type GenerateEventChainOptions } from "./events.js";
 import { passportsToCsv } from "./csv.js";
 import { MAX_ITEMS_PER_CATEGORY, TESTDATA_GS1_PREFIX } from "./identifiers.js";
 
@@ -26,7 +26,7 @@ Categories: ${ESPR_CATEGORIES.join(", ")} — or "all" (json format only).
 Options:
   -c, --count <n>        Samples per category (default 5, max ${MAX_ITEMS_PER_CATEGORY})
   -s, --seed <value>     Deterministic seed (default ${DEFAULT_SEED}); same seed, same output
-  -f, --format <fmt>     json | csv | events (default json)
+  -f, --format <fmt>     json | csv | events | epcis (default json)
       --prefix <digits>  10-digit GS1 company prefix for minted GTINs
       --operator-id <id> Bind samples to your workspace's economic operator
       --facility-id <id> Link your Facility id (what makes a passport vcReady)
@@ -35,14 +35,15 @@ Options:
 Examples:
   opendpp-testdata batteries --count 10                 # POST-ready passport JSON
   opendpp-testdata textiles --format csv > textiles.csv # portal-importable CSV
-  opendpp-testdata batteries --format events            # EPCIS-shaped event chains
+  opendpp-testdata batteries --format events            # canonical event chains (POST /events)
+  opendpp-testdata batteries --format epcis             # EPCIS 2.0 document (POST /events/epcis)
 `;
 
 interface CliArgs {
   category: string;
   count: number;
   seed: string | number;
-  format: "json" | "csv" | "events";
+  format: "json" | "csv" | "events" | "epcis";
   prefix?: string;
   operatorId?: string;
   facilityId?: string;
@@ -84,7 +85,7 @@ function parseArgs(argv: string[]): CliArgs {
       case "-f":
       case "--format": {
         const v = takeValue(a, i++);
-        if (v !== "json" && v !== "csv" && v !== "events") fail(`--format must be json, csv or events, got "${v}".`);
+        if (v !== "json" && v !== "csv" && v !== "events" && v !== "epcis") fail(`--format must be json, csv, events or epcis, got "${v}".`);
         args.format = v;
         break;
       }
@@ -132,12 +133,17 @@ function main(): void {
     return;
   }
   const passports = categories.flatMap(generate);
+  const chainOpts: GenerateEventChainOptions =
+    args.prefix !== undefined ? { seed: args.seed, companyPrefix: args.prefix } : { seed: args.seed };
   if (args.format === "events") {
-    const chains = passports.map((p) => ({
-      productId: p.productId,
-      events: generateEventChain(p, args.prefix !== undefined ? { seed: args.seed, companyPrefix: args.prefix } : { seed: args.seed }),
-    }));
+    const chains = passports.map((p) => ({ productId: p.productId, events: generateEventChain(p, chainOpts) }));
     process.stdout.write(JSON.stringify(chains, null, 2) + "\n");
+    return;
+  }
+  if (args.format === "epcis") {
+    // One conformant EPCIS 2.0 document over every product's chain — directly POST /events/epcis-able.
+    const events = passports.flatMap((p) => generateEventChain(p, chainOpts));
+    process.stdout.write(JSON.stringify(toEpcisDocument(events), null, 2) + "\n");
     return;
   }
   process.stdout.write(JSON.stringify(passports, null, 2) + "\n");

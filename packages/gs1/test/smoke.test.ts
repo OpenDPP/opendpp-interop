@@ -82,6 +82,34 @@ test("URI builders (suffix-asserted — resolver host is env-dependent)", () => 
   );
 });
 
+test("resolver builders honour an explicit { baseUrl } (no implicit env read)", () => {
+  const baseUrl = "https://dpp.example.test";
+  // The option pins the whole host — the builder is pure given baseUrl, independent of process.env.
+  assert.equal(
+    generateDigitalLinkUri(VALID_GTIN14, "pp_1", { baseUrl }),
+    `${baseUrl}/01/${VALID_GTIN14}`,
+  );
+  assert.equal(
+    generateDigitalLinkUri("WIDGET-1", "pp_9", { baseUrl }),
+    `${baseUrl}/passport/pp_9`,
+  );
+  assert.equal(
+    generateUnitDigitalLinkUri(VALID_GTIN14, "SER-42", { baseUrl }),
+    `${baseUrl}/01/${VALID_GTIN14}/21/SER-42`,
+  );
+  // A trailing slash on baseUrl is stripped (no `//` in the emitted path).
+  assert.equal(
+    generateUnitDigitalLinkUri(VALID_GTIN14, "SER-42", { baseUrl: `${baseUrl}/` }),
+    `${baseUrl}/01/${VALID_GTIN14}/21/SER-42`,
+  );
+  // An empty/omitted baseUrl falls back to process.env.BASE_URL then the canonical host (back-compat).
+  const fallback = process.env.BASE_URL || "https://opendpp-node.eu";
+  assert.equal(
+    generateDigitalLinkUri(VALID_GTIN14, "pp_1", { baseUrl: "" }),
+    `${fallback.replace(/\/$/, "")}/01/${VALID_GTIN14}`,
+  );
+});
+
 test("mod-10 minting (gs1CheckDigit / makeGtin / makeGln) round-trips the validators", () => {
   // Mint from a body, then validate with the SAME package — generation and validation agree by construction.
   const gtin = makeGtin("0950110154100");

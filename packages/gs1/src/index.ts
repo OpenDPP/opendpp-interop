@@ -206,6 +206,16 @@ function resolvePrimaryAi(trimId: string): string {
   return "01"; // default to GTIN AI for non-GS1 SKU strings
 }
 
+/** Options for the resolver-link builders (`generateDigitalLinkUri` / `generateUnitDigitalLinkUri`). */
+export interface DigitalLinkOptions {
+  /**
+   * Resolver host to emit the link against (e.g. `https://opendpp-node.eu`). Pass this to make the
+   * builder pure — the recommended form for an external consumer, with no implicit environment read.
+   * When omitted, falls back to `process.env.BASE_URL`, then the canonical app host (back-compat).
+   */
+  baseUrl?: string;
+}
+
 /**
  * Generates a valid GS1 Digital Link conforming URI for the SKU/type-level passport
  * based on its identifier (GTIN key '01' or GRAI key '8003') and database passport ID (serial number key '21').
@@ -213,10 +223,13 @@ function resolvePrimaryAi(trimId: string): string {
  * NOTE: this is the SKU/type-level link; AI-21 here carries the passport id, not a physical
  * unit serial. Individual serialised units (e.g. each battery, Art. 77(2)) use
  * generateUnitDigitalLinkUri, which carries the real physical serial in AI-21.
+ *
+ * `opts.baseUrl` overrides the resolver host; when omitted it falls back to `process.env.BASE_URL`
+ * then the canonical app host (back-compat).
  */
-export function generateDigitalLinkUri(productId: string, passportId: string): string {
+export function generateDigitalLinkUri(productId: string, passportId: string, opts?: DigitalLinkOptions): string {
   const trimId = productId.trim();
-  const baseUrl = (process.env.BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, "");
+  const baseUrl = (opts?.baseUrl || process.env.BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, "");
   // A GS1 Digital Link for a SKU/MODEL passport is the BARE primary key — `/01/{gtin}` or
   // `/8003/{grai}`. The passport resolves by its GTIN/GRAI (src/routes/digital-link.ts), so we MUST
   // NOT append AI-21: that AI is the per-UNIT serial (generateUnitDigitalLinkUri), and putting the
@@ -233,11 +246,14 @@ export function generateDigitalLinkUri(productId: string, passportId: string): s
  * Generates a GS1 Digital Link URI for an INDIVIDUAL serialised unit:
  * /{01|8003}/{productId}/21/{serialNumber}, where AI-21 carries the real physical serial.
  * This is what makes a battery passport "unique to each individual battery" (Art. 77(2)).
+ *
+ * `opts.baseUrl` overrides the resolver host; when omitted it falls back to `process.env.BASE_URL`
+ * then the canonical app host (back-compat).
  */
-export function generateUnitDigitalLinkUri(productId: string, serialNumber: string): string {
+export function generateUnitDigitalLinkUri(productId: string, serialNumber: string, opts?: DigitalLinkOptions): string {
   const trimId = productId.trim();
   const cleanSerial = encodeURIComponent(serialNumber.trim());
-  const baseUrl = (process.env.BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, "");
+  const baseUrl = (opts?.baseUrl || process.env.BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, "");
   const ai = resolvePrimaryAi(trimId);
   return `${baseUrl}/${ai}/${encodeURIComponent(trimId)}/21/${cleanSerial}`;
 }
