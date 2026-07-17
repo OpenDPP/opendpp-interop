@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- DELIBERATE eori<->aeo mirror (zero-dependency policy; drift-guarded by tests/guards/eos-soap-parity.test.ts)
 /**
  * @opendpp/aeo — SOAP request/response plumbing for the EU EOS aeo-retrieve service
  *
@@ -334,3 +335,4 @@ export function parseRetrieveAeoResponse(xml: string): ParsedAeoResponse {
     results,
   };
 }
+// jscpd:ignore-end

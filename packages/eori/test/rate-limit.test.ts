@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- DELIBERATE eori<->aeo mirror (zero-dependency policy; drift-guarded by tests/guards/eos-soap-parity.test.ts)
 // @opendpp/eori rate-limit test — interval-scheduling limiter (Apache-2.0, (c) Opendpp UAB).
 // Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
 import test from "node:test";
@@ -72,3 +73,4 @@ test("the shared default limit is overridable globally", () => {
     setDefaultEoriRateLimit(original); // restore — don't bleed into other tests
   }
 });
+// jscpd:ignore-end

@@ -1,3 +1,4 @@
+// jscpd:ignore-start -- DELIBERATE eori<->aeo mirror (zero-dependency policy; drift-guarded by tests/guards/eos-soap-parity.test.ts)
 /**
  * @opendpp/eori — client-side request pacing
  *
@@ -133,3 +134,4 @@ export function setDefaultEoriRateLimit(requestsPerSecond: number | null): void 
 export function getDefaultEoriRateLimit(): number | null {
   return defaultEoriRateLimiter.rate;
 }
+// jscpd:ignore-end
