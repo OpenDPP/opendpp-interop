@@ -10,8 +10,20 @@ name: Auto-close fork PRs
 #
 # SECURITY: pull_request_target runs with repo write access on the BASE repo. This workflow NEVER
 # checks out or runs any code from the PR head (the labeler-class RCE footgun) — it only closes the PR
-# and posts a comment via the API. No untrusted event field is ${{ }}-interpolated anywhere (including
-# the script: block); PR data is read only at runtime via context.payload.
+# and posts a comment via the API.
+#
+# On interpolation, precisely: no untrusted event data reaches a `run:` or the `script:` body. The two
+# `${{ }}` uses are deliberate and safe — `github.event.pull_request.number` (an integer) in the
+# concurrency group, and a `head.repo.full_name != github.repository` comparison in the job `if:`.
+# Attacker-controlled TEXT (title, body, branch name) is never templated; the script reads PR data at
+# runtime via `context.payload`, so it is data, never code.
+#
+# `permissions: pull-requests: write` is correct and deliberately NOT widened to `issues: write`:
+# a PR comment goes through the shared issues/PR comments endpoint
+# (`POST /repos/{owner}/{repo}/issues/{number}/comments`), which the `pull-requests` scope covers for
+# a pull request — `issues.createComment` is the octokit method name for that endpoint, not a claim
+# about which permission it needs. Widening the token of a `pull_request_target` workflow is the wrong
+# direction.
 
 on:
   pull_request_target:
