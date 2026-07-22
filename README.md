@@ -7,6 +7,12 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
 [![Conformance](https://img.shields.io/badge/conformance-AAS%20v3.0%2F3.1%20%2B%20UNTP%20DPP%20v0.7.0%20%2B%20GS1%20Digital%20Link-brightgreen.svg)](./CONFORMANCE.md)
 
+> **Generated mirror.** This kit and the `@opendpp/*` package sources here are authored in the
+> private `opendpp-node` backend and synced automatically — a change made here cannot flow back and is
+> overwritten on the next sync, so **pull requests here can't be accepted**. **Issues are very
+> welcome**: this repo is the door for conformance gaps, standards proposals and bug reports. See
+> [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+
 Everything an integrator needs to **consume, conform to, and validate** OpenDPP's two
 interoperability projections — *without access to the product source*: the official schemas,
 validated samples, the field mappings, a runnable conformance validator, and the public OpenAPI
