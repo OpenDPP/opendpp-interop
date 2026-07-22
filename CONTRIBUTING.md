@@ -1,7 +1,16 @@
 # Contributing to the OpenDPP interop kit
 
-Thanks for helping improve OpenDPP's public interoperability boundary. Issues and PRs are welcome —
-this short guide keeps them landing smoothly.
+Thanks for helping improve OpenDPP's public interoperability boundary. **Issues are very welcome and
+are the door that matters here** — this short guide explains why, and how to make one land.
+
+> ### 🔁 This repo is a generated mirror — pull requests are closed automatically
+>
+> Everything here is authored in the private `opendpp-node` backend and synced: the conformance kit
+> (`openapi.json`, `schemas/`, `samples/`, `validate/`, `shapes/`, and these docs) and the
+> `@opendpp/*` sources under `packages/`. A change made in a PR here cannot flow back to the source
+> of truth and would be overwritten on the next sync, so fork PRs are closed by an automated
+> responder with a pointer back to this file. **Nothing is lost by opening an issue instead** — it
+> gets fixed at the source and synced here, which is the only change that sticks.
 
 ## What this repository is (and isn't)
 
@@ -23,16 +32,24 @@ That split drives the one rule that matters most:
 > expose? That's a **product** change — open a
 > [**Conformance gap** issue](./.github/ISSUE_TEMPLATE/conformance-gap.md), not a PR here.
 
-## What PRs *are* welcome
+That rule now applies to the *whole* repository, not just the spec and samples — see the mirror note
+at the top.
 
-- **Validator** improvements — bug fixes, clearer error output, a new validation "door"
-  (`validate/validate.mjs`), or tests. It must stay **offline** and dependency-light.
-- **Docs** — fixes and clarifications to `README.md`, `CONFORMANCE.md`, `CHANGELOG.md`, or this file.
-- **Vendored schema copies** (`schemas/`) — only to re-sync with the **upstream** canonical source.
-  Bump the pinned ref and update [`NOTICE`](./NOTICE) and [`schemas/README.md`](./schemas/README.md)
-  together; don't locally diverge from upstream.
-- **Samples** — additional or refreshed artifacts, **only** when they are faithful, reproducible
-  outputs of the live service (each should be reproducible via the `curl` in its `*-VALIDATION.md`).
+## What to open an issue about
+
+These are all genuinely wanted — they were the categories that used to arrive as PRs, and they now
+arrive as issues and get fixed upstream:
+
+- **Validator** improvements — bugs, unclear error output, a missing validation "door"
+  (`validate/validate.mjs`), a gap in its tests. It must stay **offline** and dependency-light.
+- **Docs** — anything wrong or unclear in `README.md`, `CONFORMANCE.md`, `CHANGELOG.md`, or this file.
+- **Vendored schema copies** (`schemas/`) — tell us when an **upstream** canonical source has moved;
+  we re-sync the pinned ref together with [`NOTICE`](./NOTICE) and
+  [`schemas/README.md`](./schemas/README.md), and never locally diverge from upstream.
+- **Samples** — a sample that no longer reproduces against the live service, or one you think is
+  missing (each should be reproducible via the `curl` in its `*-VALIDATION.md`).
+- **Conformance gaps** — the live service emitting something non-conformant. Use the
+  [Conformance gap](./.github/ISSUE_TEMPLATE/conformance-gap.md) template.
 
 ## Keep non-normative claims honest
 
@@ -41,7 +58,9 @@ shapes (`shapes/`), the CIRPASS-2 EU-registry pointer interop, and the IDTA `sem
 check (identity ≠ structural conformance). Never describe any of it as "certified", "EU-official", or
 a CIRPASS-2/EU conformance suite. See [`CONFORMANCE.md`](./CONFORMANCE.md) and [`NOTICE`](./NOTICE).
 
-## Before you open a PR
+## Reproducing before you report
+
+Not required, but it makes an issue immediately actionable — and it is exactly what CI runs:
 
 ```bash
 cd validate
@@ -56,12 +75,11 @@ node validate.mjs sdjwt    ../samples/battery-vc.sdjwt
 # (CI runs the full set, plus the forged-SD-JWT and tampered-SHACL negative controls)
 ```
 
-- **CI must stay green** — sample validation, the negative controls, JSON sanity, and the gitleaks
-  secret scan all run on every PR.
-- **No secrets / private keys** — the samples carry only public demo data and public verification
-  keys (see [`SECURITY.md`](./SECURITY.md)); push protection will also block key material.
-- Fill in the [PR template](./.github/PULL_REQUEST_TEMPLATE.md) checklist and link any issue
-  (`Fixes #N`).
+- **CI runs the full set on every push**, plus the forged-SD-JWT and tampered-SHACL negative
+  controls, JSON sanity, and a gitleaks secret scan — so "it validates locally" and "it validates in
+  CI" should agree. If they don't, that itself is worth an issue.
+- **Never paste secrets or private keys** into an issue — the samples carry only public demo data and
+  public verification keys (see [`SECURITY.md`](./SECURITY.md)).
 
 ## Reporting security issues
 
