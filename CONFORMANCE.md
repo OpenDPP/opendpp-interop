@@ -49,12 +49,14 @@ conformance-tested **Barcode Syntax Engine** (the official `gs1encoder`) — nev
 | Scan-data / element-string decode | ✅ | `POST /api/v1/gs1/decode` decodes AIM-prefixed scan data, bracketed element strings, and Digital Links into structured AIs + the Human-Readable Interpretation + a resolvable link, via GS1's engine. |
 | Human-Readable Interpretation (HRI) labels | ✅ | `GET /api/v1/passports/{id}/qr?hri=1&format=svg` renders the print-grade GS1 label — the QR plus the engine's HRI text beneath it. |
 
-## CIRPASS-2 reference ecosystem (non-normative)
+## CIRPASS-2 reference-precursor ecosystem (non-normative)
 
 The EU ESPR Art. 13 registry is a **decentralised pointer index**: it holds a thin pointer per
-product (identifiers + retrieval URLs), not the passport. OpenDPP projects each passport / unit into
-that pointer and exercises the **CIRPASS-2 reference** implementation of the ecosystem (registry,
-extractor, viewer). **CIRPASS-2 is non-normative** — see the caveat below.
+product (identifiers + retrieval URLs), not the passport. The Commission's production registry is now
+**live** (battery registration pending its semantic catalogue); **CIRPASS-2 is the non-normative
+reference *precursor*** of that ecosystem (registry, extractor, viewer). OpenDPP projects each
+passport / unit into the pointer and exercises the CIRPASS-2 reference implementation until the
+projection re-pins to the official record shape. See the caveat below.
 
 | Capability | Status | Evidence |
 | --- | --- | --- |
@@ -65,7 +67,8 @@ extractor, viewer). **CIRPASS-2 is non-normative** — see the caveat below.
 | OpenDPP JSON-LD validates against OpenDPP's authoritative SHACL shapes (non-normative, starter) | ✅ | `node validate/validate.mjs shacl samples/battery-passport.jsonld` validates the public `application/ld+json` passport against OpenDPP's OWN SHACL shapes ([`shapes/opendpp-dpp-shapes.ttl`](./shapes/opendpp-dpp-shapes.ttl)). **OpenDPP-authored, NON-NORMATIVE** — a starter set offered to CIRPASS-2 (filling the `dpp-validator`'s placeholder `example.org` shapes), **NOT** a CIRPASS-2 / EU conformance oracle. CIRPASS-2's own `dpp-validator` is not used as an oracle. |
 
 > **Non-normative caveat.** Every CIRPASS-2 repository is "for exploration … not complete,
-> exhaustive, or normative … does not reflect CEN-CENELEC JTC 24." OpenDPP claims its pointer is
+> exhaustive, or normative … does not reflect CEN-CENELEC JTC 24." CIRPASS-2 is a **precursor** of the
+> live Commission registry, not that registry. OpenDPP claims its pointer is
 > **validated against the reference** registry and extractor — **never** *certified*, *compliant*, or
 > *EU-official*. The Proof-of-Registration is issued by the *reference* `mock-eu-registry`, not by the
 > EU and not by OpenDPP.
