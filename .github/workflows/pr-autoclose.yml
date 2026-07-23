@@ -1,0 +1,87 @@
+name: Auto-close fork PRs
+
+# This repository is a GENERATED MIRROR. The conformance kit (openapi.json, schemas/, samples/,
+# validate/, shapes/, README/CONFORMANCE/CHANGELOG) and the `@opendpp/*` package sources under
+# packages/ are all authored in the private opendpp-node backend and synced here automatically — an
+# edit made here is overwritten on the next sync. Pull requests therefore cannot flow back into the
+# source of truth, so a fork PR is politely closed with a pointer to the doors that ARE open —
+# issues stay ON, and are this repo's whole point: it is the public's door for conformance gaps and
+# standards proposals (epic #831 D6).
+#
+# SECURITY: pull_request_target runs with repo write access on the BASE repo. This workflow NEVER
+# checks out or runs any code from the PR head (the labeler-class RCE footgun) — it only closes the PR
+# and posts a comment via the API.
+#
+# On interpolation, precisely: no untrusted event data reaches a `run:` or the `script:` body. The two
+# `${{ }}` uses are deliberate and safe — `github.event.pull_request.number` (an integer) in the
+# concurrency group, and a `head.repo.full_name != github.repository` comparison in the job `if:`.
+# Attacker-controlled TEXT (title, body, branch name) is never templated; the script reads PR data at
+# runtime via `context.payload`, so it is data, never code.
+#
+# `permissions: pull-requests: write` is correct and deliberately NOT widened to `issues: write`:
+# a PR comment goes through the shared issues/PR comments endpoint
+# (`POST /repos/{owner}/{repo}/issues/{number}/comments`), which the `pull-requests` scope covers for
+# a pull request — `issues.createComment` is the octokit method name for that endpoint, not a claim
+# about which permission it needs. Widening the token of a `pull_request_target` workflow is the wrong
+# direction.
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+concurrency:
+  group: pr-autoclose-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  autoclose:
+    name: Politely close fork PRs
+    # Fork PRs only. Same-repo PRs (Dependabot's weekly npm/github-actions bumps, which land via an
+    # App merge — Runbook 12) are legitimate and left untouched.
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Close and comment a pointer
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            // Close FIRST: the close is the policy, the comment is courtesy — a comment failure
+            // (rate limit, spam heuristics) must not leave the wrong-door PR open.
+            // Links are ABSOLUTE: GitHub does not rewrite relative links in PR comments, so a
+            // relative href would resolve against the /pull/N page URL and 404.
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              state: "closed",
+            });
+            const body = [
+              "Thanks for your interest in OpenDPP! 🙏",
+              "",
+              "**This repository is a generated mirror.** The conformance kit and the `@opendpp/*`",
+              "package sources here are authored in the private `opendpp-node` backend and synced",
+              "automatically — so a change made in a pull request here can't flow back, and would be",
+              "overwritten on the next sync. That's why fork PRs are closed automatically.",
+              "",
+              "The doors that **are** open — and issues here are genuinely the main one:",
+              "",
+              "- **Found a conformance gap, or want to propose a standards change?** Please",
+              "  [open an issue](https://github.com/OpenDPP/opendpp-interop/issues) — this repo is the",
+              "  public door for exactly that, and there are templates for conformance gaps and kit bugs.",
+              "- **Spotted something wrong in a sample, a schema, or the spec?** That's a *product*",
+              "  change: open an issue here and it gets fixed at the source, then synced.",
+              "- **Docs & API reference:** <https://opendpp-node.eu>.",
+              "",
+              "See [`CONTRIBUTING.md`](https://github.com/OpenDPP/opendpp-interop/blob/main/CONTRIBUTING.md)",
+              "for the full explanation. This PR has been closed automatically — no action needed on your side.",
+            ].join("\n");
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body,
+            });
