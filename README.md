@@ -252,7 +252,7 @@ placeholder for any required field it cannot honestly source:
 
 | Pointer field | OpenDPP source | Encoding / notes |
 | --- | --- | --- |
-| `upi` | canonical GS1 Digital Link product key | `https://id.gs1.org/01/<gtin>` for a GTIN-keyed product (or `/8003/<grai>` for a GRAI); the ITEM form appends the real GS1 **AI-21** serial: `…/21/<BatteryUnit.serialNumber>`. |
+| `upi` | MODEL: canonical GS1 Digital Link product key. ITEM: the **compact resolvable unit URL** | MODEL: `https://id.gs1.org/01/<gtin>` for a GTIN-keyed product (or `/8003/<grai>` for a GRAI). ITEM (#932): `${BASE_URL}/u/<22-char base64url of the unit id>` — the live EU DPP Registry caps a registered UPI at **50 characters** and dereferences it, which the 40-fixed-char `id.gs1.org` unit form cannot satisfy for real AI-21 serials; the unit's GS1 identity stays in `modelUpi`/`batchUpi` and its Digital Link. Gated fail-closed at build time (`registryUpiError`, `@opendpp/gs1`). |
 | `reoId` | `EconomicOperator.regId` namespaced by `regIdScheme` | `<SCHEME>-<regId>`, e.g. `EORI-IT12345678`. Recognised schemes `EORI \| VAT \| DUNS \| LEI \| GLN`; max 50 chars. **Refuses if no `regId`.** |
 | `liveURL` | the public resolver | `${BASE_URL}/passport/<id>` (MODEL) or `/unit/<id>` (ITEM) — the same URL the `vc+jwt` / AAS content-negotiation serve. |
 | `backupURL` | a **distinct** retrieval URL | the stored GS1 Digital Link (`Passport.digitalLinkUri` / `BatteryUnit.digitalLinkUri`), or `${backupBaseUrl}/…` if configured. **Must differ from `liveURL`.** |
