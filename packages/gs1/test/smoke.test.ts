@@ -19,6 +19,8 @@ import {
   canonicalProductUpi,
   canonicalUnitUpi,
   toNdefUriRecord,
+  registryUpiError,
+  REGISTRY_UPI_MAX_LENGTH,
 } from "../src/index.ts";
 
 const VALID_GTIN14 = "09501101531000"; // valid GTIN-14 (mod-10 check digit = 0)
@@ -80,6 +82,23 @@ test("URI builders (suffix-asserted — resolver host is env-dependent)", () => 
     canonicalUnitUpi(VALID_GTIN14, "SER-42"),
     `https://id.gs1.org/01/${VALID_GTIN14}/21/SER-42`,
   );
+});
+
+test("registryUpiError enforces the live EU DPP Registry UPI constraints (#932)", () => {
+  assert.equal(REGISTRY_UPI_MAX_LENGTH, 50);
+  // A compact node-hosted unit URL fits: 26 fixed chars + 22-char base64url id = 48.
+  assert.equal(registryUpiError("https://opendpp-node.eu/u/AZBy3q0rQkKcO9KXO_kBvw"), null);
+  // Exactly at the cap is accepted; one over is rejected with the length named.
+  assert.equal(registryUpiError(`https://x.eu/${"a".repeat(37)}`), null); // 50 chars
+  assert.match(registryUpiError(`https://x.eu/${"a".repeat(38)}`) ?? "", /51 characters.*caps the UPI at 50/);
+  // The canonical GS1 unit form with a full-length AI-21 serial (20 chars) exceeds the cap …
+  assert.match(registryUpiError(canonicalUnitUpi(VALID_GTIN14, "X".repeat(20))) ?? "", /caps the UPI at 50/);
+  // … while the model-level canonical form (36 chars) fits.
+  assert.equal(registryUpiError(canonicalProductUpi(VALID_GTIN14)), null);
+  // Scheme + shape guards: https only, well-formed URL required.
+  assert.match(registryUpiError(`http://x.eu/a`) ?? "", /https:\/\//);
+  assert.match(registryUpiError("urn:epc:id:sgtin:0614141.107346.2017") ?? "", /https:\/\//);
+  assert.match(registryUpiError("https://") ?? "", /not a well-formed URL/);
 });
 
 test("resolver builders honour an explicit { baseUrl } (no implicit env read)", () => {

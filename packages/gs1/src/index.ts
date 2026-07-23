@@ -267,9 +267,12 @@ const GS1_CANONICAL_HOST = "https://id.gs1.org";
 
 /**
  * Canonical GS1 Digital Link for a PRODUCT/MODEL key, on the host-independent GS1 identity host
- * (`https://id.gs1.org/{01|8003}/{productId}`) — i.e. a stable Unique Product Identifier (UPI),
- * NOT a resolver URL. Use this as the registry `upi`/`modelUpi` (#171), where the value must
- * identify the product class independently of which node currently hosts the passport.
+ * (`https://id.gs1.org/{01|8003}/{productId}`) — i.e. a stable GS1 identity URI, NOT a resolver URL.
+ * Used as the registry `modelUpi` identity reference (#171). NOTE (#932): the live EU DPP Registry
+ * requires a *registered* UPI to be a resolvable `https://` URL of at most
+ * {@link REGISTRY_UPI_MAX_LENGTH} characters — `id.gs1.org` URIs only resolve for links registered
+ * with GS1's resolver, so prefer a node-hosted resolvable URL (validated with
+ * {@link registryUpiError}) as the UPI you actually register.
  */
 export function canonicalProductUpi(productId: string): string {
   const trimId = productId.trim();
@@ -279,13 +282,51 @@ export function canonicalProductUpi(productId: string): string {
 
 /**
  * Canonical GS1 Digital Link for an INDIVIDUAL serialised unit on the GS1 identity host
- * (`https://id.gs1.org/{01|8003}/{productId}/21/{serialNumber}`) — the item-level UPI (#171).
+ * (`https://id.gs1.org/{01|8003}/{productId}/21/{serialNumber}`) — the item-level GS1 identity URI
+ * (#171). NOTE (#932): this form spends 40 fixed characters before the serial, so with a full-length
+ * AI-21 serial (20 chars) it EXCEEDS the live EU DPP Registry's {@link REGISTRY_UPI_MAX_LENGTH}-char
+ * UPI cap, and it does not resolve unless the link is registered with GS1's resolver. It remains the
+ * unit's GS1 identity; the *registered* UPI should be a compact node-hosted URL that passes
+ * {@link registryUpiError}.
  */
 export function canonicalUnitUpi(productId: string, serialNumber: string): string {
   const trimId = productId.trim();
   const cleanSerial = encodeURIComponent(serialNumber.trim());
   const ai = resolvePrimaryAi(trimId);
   return `${GS1_CANONICAL_HOST}/${ai}/${encodeURIComponent(trimId)}/21/${cleanSerial}`;
+}
+
+/**
+ * Maximum length of a Unique Product Identifier (UPI) accepted by the live EU DPP Registry
+ * (DPP Registry User Guide for Economic Operators v1.0, 2026-07-17: the UPI is a mandatory value
+ * "conforming to a URL format compliant with JTC 24 standards. Max length is 50 chars").
+ * NOTE (#932): the cap is documented for the online registration form; whether the XML/JSON batch
+ * path enforces the same bound is unverified (the sandbox schema sits behind a verified-organisation
+ * login), so this constant treats the stricter documented bound as binding.
+ */
+export const REGISTRY_UPI_MAX_LENGTH = 50;
+
+/**
+ * #932: validates a candidate *registered* UPI against the live EU DPP Registry's documented
+ * constraints — an `https://` URL (the registry rejects other schemes), well-formed, and at most
+ * {@link REGISTRY_UPI_MAX_LENGTH} characters. Returns a clear error string, or null when acceptable.
+ * Resolvability (the registry's `NOT_RESOLVABLE_UPI` check) is a live property this pure helper
+ * cannot assert — callers must register a URL their resolver actually serves.
+ */
+export function registryUpiError(upi: string): string | null {
+  const t = upi.trim();
+  if (!t.startsWith("https://")) {
+    return "registry UPI must be an https:// URL (the EU DPP Registry rejects non-https UPIs)";
+  }
+  try {
+    new URL(t);
+  } catch {
+    return "registry UPI is not a well-formed URL";
+  }
+  if (t.length > REGISTRY_UPI_MAX_LENGTH) {
+    return `registry UPI is ${t.length} characters — the EU DPP Registry caps the UPI at ${REGISTRY_UPI_MAX_LENGTH}`;
+  }
+  return null;
 }
 
 // NFC Forum URI Record Type Definition (RTD) — well-known prefix abbreviation codes (subset). The first
