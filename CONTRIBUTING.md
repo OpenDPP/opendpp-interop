@@ -91,3 +91,5 @@ This kit's own content is [Apache-2.0](./LICENSE); vendored third-party schemas 
 terms ([`NOTICE`](./NOTICE)). By submitting a contribution you agree it is licensed under the same
 terms as the file(s) it touches (inbound = outbound). Please also follow our
 [Code of Conduct](./CODE_OF_CONDUCT.md).
+
+<!-- c6b verification probe: this PR is expected to be auto-closed. -->
