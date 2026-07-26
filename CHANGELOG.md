@@ -5,6 +5,48 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.12.0] — API contract 1.12.0 (close the anonymous compute surface)
+
+Carries OpenDPP public API contract **1.12.0** (`openapi.json`). A **MINOR** by the structural diff —
+an added security requirement and a `401` response read as additions — but note the real effect: an
+**anonymous** caller of `POST /api/v1/passports/validate-only-public` is now rejected. No vendored
+standard, schema, sample or validator is touched.
+
+### Changed
+
+- `POST /api/v1/passports/validate-only-public` now **requires authentication**. Any valid API key or
+  Console session works and **no permission is required**, so every plan including the free tier can
+  call it; an anonymous call returns **401**. The endpoint runs the full ESPR validation engine, which
+  made it usable as free unauthenticated compute. The credential is checked before the request body is
+  parsed, so an anonymous oversized body returns `401` rather than `413`.
+- The GS1 helpers — `POST /api/v1/gs1/decode`, `/decode/batch` and `/gtin` — remain anonymously
+  callable but meter an anonymous caller to **2 requests/min per IP**, a per-route limit replacing the
+  global ceiling. Sending an `Authorization` header restores the normal ladder, so a credentialed
+  integration is unaffected. `/decode/batch` previously had no per-route cap at all while expanding one
+  request into as many as 200 engine parses.
+
+## [1.11.2] — API contract 1.11.2 (rate-limit + versioning documentation)
+
+Carries OpenDPP public API contract **1.11.2** (`openapi.json`). A **PATCH** — documentation only. No
+request or response shape changed, and no vendored standard, schema, sample or validator is touched.
+
+### Changed
+
+- `GET /api/v1/version` — the rate-limit note is now accurate. Root-registered routes were not covered
+  by the global limiter (they were declared before the limiter's hook was installed); they are now, so
+  the endpoint is accounted and returns `x-ratelimit-*` headers like every other route.
+- `GET /health` — corrected in the other direction: it is **exempt** from the platform limit and carries
+  no `x-ratelimit-*` headers, so a monitor can poll it freely. The previous text claimed both a limit
+  and the headers.
+- The API overview's **Rate limits** section now describes the per-key tier ladder and the workspace
+  ceiling alongside the per-IP limit, and distinguishes a `429` (back off) from a `401` (bad credential).
+
+### Added
+
+- A **Versioning & compatibility** section in the API overview: what the `1.x` line guarantees, how the
+  tier is derived structurally rather than asserted, and disclosure of the pre-GA `API_CONTRACT_RESET`
+  waiver under which a breaking change may exceptionally ship on an existing major line.
+
 ## [1.11.0] — API contract 1.11.0 (client idempotency)
 
 Carries OpenDPP public API contract **1.11.0** (`openapi.json`). A backward-compatible MINOR — no
