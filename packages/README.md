@@ -15,6 +15,10 @@ the OpenDPP backend (`OpenDPP/opendpp-node`, `packages/*`).
 | [`gs1`](./gs1) — `@opendpp/gs1` | `opendpp-node/packages/gs1` | [`publish-gs1.yml`](../.github/workflows/publish-gs1.yml) on a `gs1-<semver>` tag |
 | [`csv`](./csv) — `@opendpp/csv` | `opendpp-node/packages/csv` | [`publish-csv.yml`](../.github/workflows/publish-csv.yml) on a `csv-<semver>` tag |
 | [`webhooks`](./webhooks) — `@opendpp/webhooks` | `opendpp-node/packages/webhooks` | [`publish-webhooks.yml`](../.github/workflows/publish-webhooks.yml) on a `webhooks-<semver>` tag |
+| [`eori`](./eori) — `@opendpp/eori` | `opendpp-node/packages/eori` | [`publish-eori.yml`](../.github/workflows/publish-eori.yml) on a `eori-<semver>` tag |
+| [`aeo`](./aeo) — `@opendpp/aeo` | `opendpp-node/packages/aeo` | [`publish-aeo.yml`](../.github/workflows/publish-aeo.yml) on a `aeo-<semver>` tag |
+| [`testdata`](./testdata) — `@opendpp/testdata` | `opendpp-node/packages/testdata` | [`publish-testdata.yml`](../.github/workflows/publish-testdata.yml) on a `testdata-<semver>` tag |
+| [`vies`](./vies) — `@opendpp/vies` | `opendpp-node/packages/vies` | [`publish-vies.yml`](../.github/workflows/publish-vies.yml) on a `vies-<semver>` tag |
 
 Each `publish-<pkg>.yml` is keyless (OIDC trusted publishing) and fires on its own `<pkg>-<semver>` tag;
 the tag must match that package's `package.json` version. Release + one-time setup runbook:
