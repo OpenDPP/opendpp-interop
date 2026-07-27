@@ -4,8 +4,25 @@
 
 # OpenDPP Interop Boundary Kit
 
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
-[![Conformance](https://img.shields.io/badge/conformance-AAS%20v3.0%2F3.1%20%2B%20UNTP%20DPP%20v0.7.0%20%2B%20GS1%20Digital%20Link-brightgreen.svg)](./CONFORMANCE.md)
+<p align="center">
+  <a href="./LICENSE"><img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-2F80ED?style=flat-square&logo=apache&logoColor=white"></a>
+  <a href="https://github.com/OpenDPP/opendpp-interop/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/OpenDPP/opendpp-interop/ci.yml?branch=main&style=flat-square&logo=githubactions&logoColor=white&label=CI"></a>
+  <a href="https://opendpp-node.eu/openapi.json"><img alt="Live API contract version" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fopendpp-node.eu%2Fopenapi.json&query=%24.info.version&prefix=v&style=flat-square&logo=openapiinitiative&logoColor=white&label=API%20contract&color=1FA97A"></a>
+  <a href="https://www.npmjs.com/search?q=%40opendpp"><img alt="@opendpp packages on npm" src="https://img.shields.io/badge/npm-%40opendpp%2F%2A-CB3837?style=flat-square&logo=npm&logoColor=white"></a>
+</p>
+
+<p align="center">
+  <a href="./CONFORMANCE.md"><img alt="IDTA AAS v3.0 / v3.1" src="https://img.shields.io/badge/IDTA%20AAS-v3.0%20%2F%20v3.1-0A6EBD?style=flat-square"></a>
+  <a href="./CONFORMANCE.md"><img alt="UNTP DPP v0.7.0" src="https://img.shields.io/badge/UNTP%20DPP-v0.7.0-1FA97A?style=flat-square"></a>
+  <a href="./CONFORMANCE.md"><img alt="GS1 Digital Link" src="https://img.shields.io/badge/GS1-Digital%20Link-F26334?style=flat-square"></a>
+  <a href="./CONFORMANCE.md"><img alt="W3C Verifiable Credentials" src="https://img.shields.io/badge/W3C-Verifiable%20Credentials-005A9C?style=flat-square"></a>
+</p>
+
+<p align="center">
+  <sub>Every version, download and status badge in this README is read <b>live</b> — from npm, from
+  Maven Central, and (the API contract) from the running node's own <code>openapi.json</code>.
+  Nothing here is hand-maintained.</sub>
+</p>
 
 > **Generated mirror.** This kit and the `@opendpp/*` package sources here are authored in the
 > private `opendpp-node` backend and synced automatically — a change made here cannot flow back and is
@@ -66,19 +83,22 @@ Exit `0` = conformant · `1` = schema errors (printed) · `2` = usage error. See
 
 ## Client libraries — `@opendpp/*` on npm
 
-Small, Apache-2.0, **zero-dependency** packages that make integrating *with* the hosted node easier.
-Developed in the (private) product backend, published from **this** repo so npm provenance attestations
-work, and [mirror-managed](./packages/) here.
+Small, Apache-2.0 packages with **no third-party dependencies** that make integrating *with* the hosted
+node easier. Developed in the (private) product backend, published from **this** repo so npm provenance
+attestations work, and [mirror-managed](./packages/) here.
 
-| Package | What it does | npm |
-|---|---|---|
-| **`@opendpp/gs1`** | GS1 Digital Link builders + mod-10 / GLN check-digit helpers | [![npm](https://img.shields.io/npm/v/@opendpp/gs1.svg)](https://www.npmjs.com/package/@opendpp/gs1) |
-| **`@opendpp/csv`** | CSV → passport mapper to the public ingest shape (bulk import) | [![npm](https://img.shields.io/npm/v/@opendpp/csv.svg)](https://www.npmjs.com/package/@opendpp/csv) |
-| **`@opendpp/webhooks`** | Webhook event types + a constant-time HMAC-SHA256 signature verifier | [![npm](https://img.shields.io/npm/v/@opendpp/webhooks.svg)](https://www.npmjs.com/package/@opendpp/webhooks) |
-| **`@opendpp/eori`** | EORI validation vs the EU Commission EOS authoritative service + offline syntax/parse helpers | [![npm](https://img.shields.io/npm/v/@opendpp/eori.svg)](https://www.npmjs.com/package/@opendpp/eori) |
-| **`@opendpp/aeo`** | Authorised Economic Operator (trusted-trader) lookup vs the EU Commission EOS service | [![npm](https://img.shields.io/npm/v/@opendpp/aeo.svg)](https://www.npmjs.com/package/@opendpp/aeo) |
-| **`@opendpp/testdata`** | Deterministic synthetic sample passports for every ESPR category + EPCIS-shaped supply-chain event chains (CLI + API) | [![npm](https://img.shields.io/npm/v/@opendpp/testdata.svg)](https://www.npmjs.com/package/@opendpp/testdata) |
-| **`@opendpp/vies`** | EU VAT-number validation against the EU Commission's authoritative VIES service + offline VAT-ID syntax/parse helpers | [![npm](https://img.shields.io/npm/v/@opendpp/vies.svg)](https://www.npmjs.com/package/@opendpp/vies) |
+| Package | Latest | Downloads | Unpacked | What it does |
+|---|---|---|---|---|
+| **[`@opendpp/gs1`](https://www.npmjs.com/package/@opendpp/gs1)** | [![@opendpp/gs1 version on npm](https://img.shields.io/npm/v/%40opendpp%2Fgs1?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/gs1) | ![@opendpp/gs1 monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Fgs1?style=flat-square&label=&color=1FA97A) | ![@opendpp/gs1 unpacked size](https://img.shields.io/npm/unpacked-size/%40opendpp%2Fgs1?style=flat-square&label=&color=6E56CF) | GS1 Digital Link builders + mod-10 / GLN check-digit helpers |
+| **[`@opendpp/csv`](https://www.npmjs.com/package/@opendpp/csv)** | [![@opendpp/csv version on npm](https://img.shields.io/npm/v/%40opendpp%2Fcsv?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/csv) | ![@opendpp/csv monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Fcsv?style=flat-square&label=&color=1FA97A) | ![@opendpp/csv unpacked size](https://img.shields.io/npm/unpacked-size/%40opendpp%2Fcsv?style=flat-square&label=&color=6E56CF) | CSV → passport mapper to the public ingest shape (bulk import) |
+| **[`@opendpp/webhooks`](https://www.npmjs.com/package/@opendpp/webhooks)** | [![@opendpp/webhooks version on npm](https://img.shields.io/npm/v/%40opendpp%2Fwebhooks?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/webhooks) | ![@opendpp/webhooks monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Fwebhooks?style=flat-square&label=&color=1FA97A) | ![@opendpp/webhooks unpacked size](https://img.shields.io/npm/unpacked-size/%40opendpp%2Fwebhooks?style=flat-square&label=&color=6E56CF) | Webhook event types + a constant-time HMAC-SHA256 signature verifier |
+| **[`@opendpp/eori`](https://www.npmjs.com/package/@opendpp/eori)** | [![@opendpp/eori version on npm](https://img.shields.io/npm/v/%40opendpp%2Feori?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/eori) | ![@opendpp/eori monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Feori?style=flat-square&label=&color=1FA97A) | ![@opendpp/eori unpacked size](https://img.shields.io/npm/unpacked-size/%40opendpp%2Feori?style=flat-square&label=&color=6E56CF) | EORI validation vs the EU Commission EOS authoritative service + offline syntax/parse helpers |
+| **[`@opendpp/aeo`](https://www.npmjs.com/package/@opendpp/aeo)** | [![@opendpp/aeo version on npm](https://img.shields.io/npm/v/%40opendpp%2Faeo?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/aeo) | ![@opendpp/aeo monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Faeo?style=flat-square&label=&color=1FA97A) | ![@opendpp/aeo unpacked size](https://img.shields.io/npm/unpacked-size/%40opendpp%2Faeo?style=flat-square&label=&color=6E56CF) | Authorised Economic Operator (trusted-trader) lookup vs the EU Commission EOS service |
+| **[`@opendpp/testdata`](https://www.npmjs.com/package/@opendpp/testdata)** | [![@opendpp/testdata version on npm](https://img.shields.io/npm/v/%40opendpp%2Ftestdata?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/testdata) | ![@opendpp/testdata monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Ftestdata?style=flat-square&label=&color=1FA97A) | ![@opendpp/testdata unpacked size](https://img.shields.io/npm/unpacked-size/%40opendpp%2Ftestdata?style=flat-square&label=&color=6E56CF) | Deterministic synthetic sample passports for every ESPR category + EPCIS-shaped supply-chain event chains (CLI + API) |
+| **[`@opendpp/vies`](https://www.npmjs.com/package/@opendpp/vies)** | [![@opendpp/vies version on npm](https://img.shields.io/npm/v/%40opendpp%2Fvies?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/vies) | ![@opendpp/vies monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Fvies?style=flat-square&label=&color=1FA97A) | ![@opendpp/vies unpacked size](https://img.shields.io/npm/unpacked-size/%40opendpp%2Fvies?style=flat-square&label=&color=6E56CF) | EU VAT-number validation against the EU Commission's authoritative VIES service + offline VAT-ID syntax/parse helpers |
+
+Only `@opendpp/testdata` depends on anything at all — its two siblings, `@opendpp/csv` and
+`@opendpp/gs1`. Every badge above is live from the npm registry, so the table can never go stale.
 
 ```sh
 npm install @opendpp/gs1          # or @opendpp/csv, @opendpp/webhooks, @opendpp/eori, @opendpp/aeo, @opendpp/testdata, @opendpp/vies
@@ -308,7 +328,24 @@ node validate/validate.mjs registry samples/battery-registry-pointer-model.json
 node validate/validate.mjs registry samples/battery-registry-pointer-item.json
 ```
 
-## Generate a typed SDK
+## Typed SDKs
+
+### Official clients — npm + Maven Central
+
+Generated from this same public OpenAPI contract and **version-locked** to it — an SDK's MAJOR.MINOR
+*is* the contract version it targets, so it can never drift from the surface it calls. Maintained in
+[`OpenDPP/opendpp-sdk`](https://github.com/OpenDPP/opendpp-sdk):
+
+| SDK | Coordinates | Latest | Install |
+| --- | --- | --- | --- |
+| **TypeScript** | [`@opendpp/sdk`](https://www.npmjs.com/package/@opendpp/sdk) | [![@opendpp/sdk version on npm](https://img.shields.io/npm/v/%40opendpp%2Fsdk?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/sdk) ![@opendpp/sdk monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Fsdk?style=flat-square&label=&color=1FA97A) | `npm install @opendpp/sdk` |
+| **Java / Kotlin** | [`eu.opendpp-node:opendpp-sdk`](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) | [![opendpp-sdk version on Maven Central](https://img.shields.io/maven-central/v/eu.opendpp-node/opendpp-sdk?style=flat-square&logo=apachemaven&logoColor=white&label=&labelColor=C71A36&color=2F80ED)](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) ![Java 17+](https://img.shields.io/badge/Java-17%2B-437291?style=flat-square&logo=openjdk&logoColor=white) | `implementation("eu.opendpp-node:opendpp-sdk:1.12.0")` |
+
+The Java artifact is built on the JDK `HttpClient` with Jackson; **Kotlin** consumes the very same
+coordinates idiomatically — there is no separate Kotlin package. A **Python** client (`opendpp` on
+PyPI) is planned from the same pipeline.
+
+### Or generate your own
 
 Both projections and the API surface are anchored to the public OpenAPI spec, so any OpenAPI
 generator works — no OpenDPP-specific tooling:
@@ -328,7 +365,7 @@ npx @openapitools/openapi-generator-cli generate \
 | --- | --- |
 | **This repo** (`OpenDPP/opendpp-interop`) | the **public** interop boundary — schemas, samples, validator, OpenAPI contract, mappings. Apache-2.0. |
 | **Live service** | <https://opendpp-node.eu> — the running passports, resolvers, and `did:web` / status-list endpoints. |
-| **Client SDKs** | [`OpenDPP/opendpp-sdk`](https://github.com/OpenDPP/opendpp-sdk) — `@opendpp/sdk` (TypeScript) + Python, generated from this OpenAPI contract. |
+| **Client SDKs** | [`OpenDPP/opendpp-sdk`](https://github.com/OpenDPP/opendpp-sdk) — `@opendpp/sdk` (TypeScript, npm) and `eu.opendpp-node:opendpp-sdk` (Java / Kotlin, Maven Central), generated from this OpenAPI contract; Python planned. See [Typed SDKs](#typed-sdks). |
 | **Knowledge bundle** | [`OpenDPP/opendpp-knowledge`](https://github.com/OpenDPP/opendpp-knowledge) — the API as an OKF bundle for AI agents. |
 | **Product backend** | a **separate, private** repository. Not required to integrate. |
 
