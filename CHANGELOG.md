@@ -5,7 +5,20 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
-## [1.12.0] — API contract 1.12.0 (close the anonymous compute surface)
+## [1.12.1] — API contract 1.12.1 (say what a key actually buys)
+
+Carries OpenDPP public API contract **1.12.1** (`openapi.json`). A **PATCH** — documentation only. No
+request or response shape changed, no endpoint added or removed, no vendored standard moved.
+
+Forty-eight authenticated operations described their rate limit as the flat anonymous per-IP ceiling
+("global limiter, 100 requests/min per IP"), understating the per-key plan budget a Growth (120/min)
+or Scale (600/min) key actually gets. Each now states the plan ladder, the 3x workspace ceiling above
+it, and that `429` carries `Retry-After`. The shared `429` response description no longer attributes
+the limit solely to the per-IP ceiling.
+
+Thirty-three component schemas gained a `description` — request and response envelopes across
+accounts, battery units, facilities, operators, passports, traceability and webhooks — so a generated
+client or an agent reading the contract sees what each type is for.
 
 Carries OpenDPP public API contract **1.12.0** (`openapi.json`). A **MINOR** by the structural diff —
 an added security requirement and a `401` response read as additions — but note the real effect: an
