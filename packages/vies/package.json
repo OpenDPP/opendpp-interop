@@ -1,6 +1,6 @@
 {
   "name": "@opendpp/vies",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "EU VAT-ID validation against the European Commission's official VIES service, plus pure offline VAT-number syntax/parse helpers (ESM, Node >=26). From the OpenDPP Digital Product Passport service.",
   "keywords": [
     "vat",
