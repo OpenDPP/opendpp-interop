@@ -5,6 +5,20 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.12.2] — API contract 1.12.2 (say what the QR PNG size actually returns)
+
+Carries OpenDPP public API contract **1.12.2** (`openapi.json`). A **PATCH**: no request shape
+changed, no endpoint added or removed, no vendored standard moved. One served value did — the
+`GET /context/v1` JSON-LD context now maps `createdAt`/`updatedAt` to `https://schema.org/…`.
+
+The QR exports described their PNG as "`size` px wide" without qualification. That holds for every
+size a real Digital Link can ask for, but not for the one case a raster cannot honour: a symbol whose
+own module grid (its modules plus both 4-module quiet zones) is wider than the requested `size`. A
+pixel cannot hold more than one module, so the image renders at that grid width instead — at most
+185 px, and reachable only by a Digital Link long enough to need QR version 26+. Both 200 responses,
+the shared `size` query parameter and the bulk-label `size` field now state it; SVG has no pixel floor
+and still carries the requested width verbatim.
+
 ## [1.12.1] — API contract 1.12.1 (say what a key actually buys)
 
 Carries OpenDPP public API contract **1.12.1** (`openapi.json`). A **PATCH** — documentation only. No
