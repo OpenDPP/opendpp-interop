@@ -5,6 +5,29 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.13.0] — API contract 1.13.0 (telemetry at fleet scale; two honesty removals)
+
+Carries OpenDPP public API contract **1.13.0** (`openapi.json`). Folds in the unreleased 1.12.3
+(the 1.12.x line closed unpublished): the published prose describes the contract, not the node
+serving it. No vendored standard, schema fixture or validator moved.
+
+**Added:** `POST /api/v1/units/{id}/events/bulk` (batch telemetry, ≤500 records, partial-failure
+report) with the `BulkBatteryUnitEventsRequest`/`BulkBatteryUnitEventsResponse` schemas;
+`limit`/`cursor` parameters and a `nextCursor` response field on `GET /api/v1/units/{id}/events`
+(deterministic keyset paging — the full history is retrievable); optional `Idempotency-Key` on both
+per-unit event writes, scoped per unit.
+
+**Removed (breaking, shipped under the pre-adoption `API_CONTRACT_RESET` waiver — no external
+consumers):** the demonstration-grade screening operation `POST /api/v1/events/{id}/audit` with its
+`TraceComplianceAuditResponse`/`TraceComplianceCertificate` schemas (the feature is retired;
+lineage retrieval and EPCIS capture are unchanged), and `deleteBatteryUnit`'s fictional `200`
+hard-delete response with its `BatteryUnitDeleteResponse` schema — the operation now documents the
+`409` refusal the route has always returned.
+
+**Corrected:** a recycled unit accepts no further events (three descriptions had claimed `status`
+stays writable after `ceasedAt`); a unit created as `RECYCLED` is ceased from birth; the
+battery-unit reads return exactly the documented row fields.
+
 ## [1.12.2] — API contract 1.12.2 (say what the QR PNG size actually returns)
 
 Carries OpenDPP public API contract **1.12.2** (`openapi.json`). A **PATCH**: no request shape
