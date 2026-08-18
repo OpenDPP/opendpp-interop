@@ -22,9 +22,5 @@
     "gs1encoder": "^1.4.1",
     "jsonld": "^9.0.0",
     "rdf-validate-shacl": "^0.6.5"
-  },
-  "overrides": {
-    "fast-uri": "^3.1.5",
-    "undici": "^6.28.0"
   }
 }
