@@ -339,11 +339,12 @@ Generated from this same public OpenAPI contract and **version-locked** to it �
 | SDK | Coordinates | Latest | Install |
 | --- | --- | --- | --- |
 | **TypeScript** | [`@opendpp/sdk`](https://www.npmjs.com/package/@opendpp/sdk) | [![@opendpp/sdk version on npm](https://img.shields.io/npm/v/%40opendpp%2Fsdk?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/sdk) ![@opendpp/sdk monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Fsdk?style=flat-square&label=&color=1FA97A) | `npm install @opendpp/sdk` |
-| **Java / Kotlin** | [`eu.opendpp-node:opendpp-sdk`](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) | [![opendpp-sdk version on Maven Central](https://img.shields.io/maven-central/v/eu.opendpp-node/opendpp-sdk?style=flat-square&logo=apachemaven&logoColor=white&label=&labelColor=C71A36&color=2F80ED)](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) ![Java 17+](https://img.shields.io/badge/Java-17%2B-437291?style=flat-square&logo=openjdk&logoColor=white) | `implementation("eu.opendpp-node:opendpp-sdk:1.13.0")` |
+| **Java / Kotlin** | [`eu.opendpp-node:opendpp-sdk`](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) | [![opendpp-sdk version on Maven Central](https://img.shields.io/maven-central/v/eu.opendpp-node/opendpp-sdk?style=flat-square&logo=apachemaven&logoColor=white&label=&labelColor=C71A36&color=2F80ED)](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) ![Java 17+](https://img.shields.io/badge/Java-17%2B-437291?style=flat-square&logo=openjdk&logoColor=white) | `implementation("eu.opendpp-node:opendpp-sdk:1.14.0")` |
+| **Python** | [`opendpp-sdk`](https://pypi.org/project/opendpp-sdk/) | [![opendpp-sdk version on PyPI](https://img.shields.io/pypi/v/opendpp-sdk?style=flat-square&logo=pypi&logoColor=white&label=&labelColor=3775A9&color=2F80ED)](https://pypi.org/project/opendpp-sdk/) ![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white) | `pip install opendpp-sdk` |
 
 The Java artifact is built on the JDK `HttpClient` with Jackson; **Kotlin** consumes the very same
-coordinates idiomatically — there is no separate Kotlin package. A **Python** client (`opendpp` on
-PyPI) is planned from the same pipeline.
+coordinates idiomatically — there is no separate Kotlin package. The **Python** client is pydantic v2 +
+urllib3, generated from the same pipeline.
 
 ### Or generate your own
 
@@ -365,7 +366,7 @@ npx @openapitools/openapi-generator-cli generate \
 | --- | --- |
 | **This repo** (`OpenDPP/opendpp-interop`) | the **public** interop boundary — schemas, samples, validator, OpenAPI contract, mappings. Apache-2.0. |
 | **Live service** | <https://opendpp-node.eu> — the running passports, resolvers, and `did:web` / status-list endpoints. |
-| **Client SDKs** | [`OpenDPP/opendpp-sdk`](https://github.com/OpenDPP/opendpp-sdk) — `@opendpp/sdk` (TypeScript, npm) and `eu.opendpp-node:opendpp-sdk` (Java / Kotlin, Maven Central), generated from this OpenAPI contract; Python planned. See [Typed SDKs](#typed-sdks). |
+| **Client SDKs** | [`OpenDPP/opendpp-sdk`](https://github.com/OpenDPP/opendpp-sdk) — `@opendpp/sdk` (TypeScript, npm) and `eu.opendpp-node:opendpp-sdk` (Java / Kotlin, Maven Central) and `opendpp-sdk` (Python, PyPI), generated from this OpenAPI contract. See [Typed SDKs](#typed-sdks). |
 | **Knowledge bundle** | [`OpenDPP/opendpp-knowledge`](https://github.com/OpenDPP/opendpp-knowledge) — the API as an OKF bundle for AI agents. |
 | **Product backend** | a **separate, private** repository. Not required to integrate. |
 

@@ -5,6 +5,29 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.14.0] — API contract 1.14.0 (contract hygiene for the SDK lanes)
+
+Carries OpenDPP public API contract **1.14.0** (`openapi.json`). No endpoint, field or behaviour
+changed — every diff is in how the same wire shapes are declared, so generated clients in every
+language get better types. No vendored standard, schema fixture or validator moved. Ships under the
+pre-adoption `API_CONTRACT_RESET` waiver (no external consumers): a structural-diff tool reads a
+modified anonymous `oneOf` member as a replaced one; semantically this release only widens responses.
+
+**Changed:** the error/result unions previously declared inline are hoisted into named
+`components.schemas` (`PassportCreateBadRequest`, `PassportBulkBadRequest`, `AasIngestBadRequest`,
+`PassportGetNotFound`, `PassportGetTooManyRequests`, `PassportUpdateBadRequest`,
+`BatteryUnitSerialiseBadRequest`, `BatteryUnitEventBadRequest`, `GrantRevokeForbidden`,
+`OperatorMinimalErrorResponse`, `Gs1BatchDecodeResult`/`Gs1BatchDecodeOk`/`Gs1BatchDecodeError`,
+plus the previously-anonymous branch shapes, and `FastifyDefaultBadRequest` consolidates into the shape-identical `DefaultRequestRejectionError`) — the resolved contract is identical; the gs1-batch
+`ok` discriminant is spelled `const` (the idiomatic 3.1 form of the same single-value constraint);
+and RESPONSE schemas stop declaring `additionalProperties: false`, so a future additive response
+field cannot crash a strictly-validating client. Request bodies keep their constraints.
+
+**Also carried:** the terminal-unit refusal on `POST /api/v1/units/{id}/events` no longer documents a
+remedy the API refuses — a recycled unit cannot be named as a `predecessorUnitId`, so a second life must
+be linked before recycling (#1080). Released here rather than as 1.13.1: the window ships one contract
+version, and 1.14.0 subsumes it.
+
 ## [1.13.0] — API contract 1.13.0 (telemetry at fleet scale; two honesty removals)
 
 Carries OpenDPP public API contract **1.13.0** (`openapi.json`). Folds in the unreleased 1.12.3
