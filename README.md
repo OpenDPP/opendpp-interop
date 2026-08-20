@@ -20,7 +20,7 @@
 
 <p align="center">
   <sub>Every version, download and status badge in this README is read <b>live</b> — from npm, from
-  Maven Central, and (the API contract) from the running node's own <code>openapi.json</code>.
+  Maven Central, from PyPI, and (the API contract) from the running node's own <code>openapi.json</code>.
   Nothing here is hand-maintained.</sub>
 </p>
 
@@ -126,11 +126,13 @@ opendpp-interop/
 ├── schemas/                the official / reference JSON Schemas OpenDPP's CI validates against (vendored)
 │   ├── aas-v3.schema.json
 │   ├── untp-dpp-v0.7.0.schema.json
-│   └── cirpass2-eu-registry-pointer.schema.json   (CIRPASS-2, NON-NORMATIVE)
+│   ├── cirpass2-eu-registry-pointer.schema.json   (CIRPASS-2, NON-NORMATIVE)
+│   └── epcis-2.0.1.schema.json                    (official GS1 EPCIS 2.0.1)
 ├── shapes/                 OpenDPP-authored SHACL shapes (NON-NORMATIVE) for the DPP / battery vertical
 │   └── opendpp-dpp-shapes.ttl
 ├── samples/                validated reference artifacts (a battery via both doors + a textile UNTP credential + the EU-registry pointer + the JSON-LD passport + its CIRPASS-2 renderer expansion)
 │   ├── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
+│   ├── epcis-document.json       a GS1 EPCIS 2.0 traceability document (validated by the `epcis` door)
 │   └── gs1-digital-link.txt      GS1 Digital Link URIs / AI element strings (validated by the `gs1` door)
 ├── packages/               the @opendpp/* npm client libraries (gs1 · csv · webhooks · eori · aeo · testdata · vies; mirror-managed, see packages/README.md)
 └── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl · sdjwt · gs1 · epcis)
@@ -148,6 +150,9 @@ see [`schemas/README.md`](./schemas/README.md) and [`NOTICE`](./NOTICE)):
 - **CIRPASS-2 EU-registry pointer** *(NON-NORMATIVE)* —
   [`schemas/cirpass2-eu-registry-pointer.schema.json`](./schemas/cirpass2-eu-registry-pointer.schema.json)
   (the CIRPASS-2 `mock-eu-registry` `default-schema.json`, draft-2020-12, pinned commit `b383c4d`).
+- **the official GS1 EPCIS 2.0.1 JSON Schema** —
+  [`schemas/epcis-2.0.1.schema.json`](./schemas/epcis-2.0.1.schema.json) (draft-07) — what the node's
+  native EPCIS capture (`POST /api/v1/events/epcis`) and its lineage projection validate against.
 
 ## SHACL shapes (battery/ESPR)
 
@@ -200,8 +205,9 @@ the `curl`). Synthetic demo data — see [`NOTICE`](./NOTICE):
 - `battery-vc.sdjwt`, `battery-vc-presented.sdjwt` — the credential as a conformant **SD-JWT-VC**
   (cryptographic selective disclosure) and a 2-of-4 **holder presentation** (`node validate/validate.mjs
   sdjwt …` reconstructs the disclosures + verifies the ES256 signature against `did.json`).
-- `battery-unit-vc-credential.json`, `battery-unit-vc.jwt`, `battery-unit-vc-di.jsonld` — a **per-unit**
-  credential for one serialised battery (item granularity, the real GS1 AI-21 serial as `itemNumber`).
+- `battery-unit-vc-credential.json`, `battery-unit-vc.jwt`, `battery-unit-vc-di.jsonld`,
+  `battery-unit-vc.sdjwt` — a **per-unit** credential for one serialised battery (item granularity, the
+  real GS1 AI-21 serial as `itemNumber`), in the same four forms as the type credential above.
 - `battery-issuer-did.json` — the issuer `did:web` document (the verification key; the textile credential
   shares it — same demo tenant).
 - `textile-vc-credential.json`, `textile-vc.jwt` — a **non-battery (textiles)** UNTP credential, proving
@@ -217,6 +223,9 @@ the `curl`). Synthetic demo data — see [`NOTICE`](./NOTICE):
   RDF (30 nodes, every IRI under `opendpp-node.eu`). Captured by running the renderer (reproduction in
   OpenDPP's `CIRPASS2-Harness.md`), not via `validate.mjs`. NON-NORMATIVE — *reference renderer*, never
   *certified*.
+- `epcis-document.json` — a GS1 **EPCIS 2.0** traceability document (four events: two commissionings, a
+  packing aggregation, a shipping) in the shape `POST /api/v1/events/epcis` captures and the lineage walk
+  emits; authored here rather than fetched, and validated by `node validate/validate.mjs epcis …`.
 - `AAS-VALIDATION.md`, `VC-VALIDATION.md` — how each artifact was validated.
 
 ## Verify a signature
@@ -330,7 +339,7 @@ node validate/validate.mjs registry samples/battery-registry-pointer-item.json
 
 ## Typed SDKs
 
-### Official clients — npm + Maven Central
+### Official clients — npm · Maven Central · PyPI
 
 Generated from this same public OpenAPI contract and **version-locked** to it — an SDK's MAJOR.MINOR
 *is* the contract version it targets, so it can never drift from the surface it calls. Maintained in
