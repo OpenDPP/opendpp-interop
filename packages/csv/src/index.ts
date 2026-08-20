@@ -341,7 +341,10 @@ function rowToMetadata(row: PassportCsvRow): Record<string, unknown> {
     m.presenceOfSVHC = bool(row.presenceOfSVHC);
   } else if (cat === "construction") {
     set(m, "declarationOfPerformanceNumber", str(row.declarationOfPerformanceNumber));
-    set(m, "declarationOfConformityUrl", str(row.declarationOfConformityUrl));
+    // The CPR Declaration of Performance — its OWN column. It used to be fed from the
+    // declarationOfConformityUrl cell, which made a construction row carry the same URL as both its
+    // DoP and its Declaration of Conformity; they are different documents.
+    set(m, "declarationOfPerformanceUrl", str(row.declarationOfPerformanceUrl));
   } else if (cat === "cosmetics") {
     set(m, "ingredientList", pipeList(row.ingredientList));
     const pr = str(row.packagingRecyclability);
@@ -417,6 +420,7 @@ const SHARED_COLUMNS: CsvColumn[] = [
   { name: "facilities", required: true, description: "facilityDetails as name:location:activity:eori, multiple joined by ||." },
   { name: "regulatoryCertificates", required: false, description: "certificates as name:reference:issuer:validUntil, joined by |." },
   { name: "declarationOfConformityUrl", required: false, description: "URL of the declaration of conformity." },
+  { name: "declarationOfPerformanceUrl", required: false, description: "Construction only: URL of the CPR Declaration of Performance (a different document from the declaration of conformity)." },
   { name: "ceMarking", required: false, description: "true / false." },
   { name: "carbonFootprint", required: false, description: "Total product carbon footprint in kg CO2e." },
   { name: "scope1", required: false, description: "GHG scope 1 emissions (kg CO2e)." },
@@ -471,7 +475,7 @@ const CATEGORY_COLUMNS: Record<EsprCategory, CsvColumn[]> = {
   ],
   construction: [
     col("declarationOfPerformanceNumber", "Declaration of Performance (DoP) number."),
-    col("declarationOfConformityUrl", "Declaration of conformity URL."),
+    col("declarationOfPerformanceUrl", "Declaration of Performance (DoP) URL."),
   ],
   cosmetics: [
     col("ingredientList", "INCI ingredients joined by |."),

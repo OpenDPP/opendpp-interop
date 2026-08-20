@@ -116,7 +116,7 @@ export function passportToCsvRow(passport: PassportCreateInput): Record<string, 
       break;
     case "construction":
       setCell(row, "declarationOfPerformanceNumber", m.declarationOfPerformanceNumber);
-      // The shared declarationOfConformityUrl cell above already carries the (equal) top-level value.
+      setCell(row, "declarationOfPerformanceUrl", m.declarationOfPerformanceUrl);
       break;
     case "cosmetics":
       setCell(row, "ingredientList", joinList(m.ingredientList));

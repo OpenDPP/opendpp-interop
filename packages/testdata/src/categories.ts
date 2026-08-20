@@ -203,9 +203,10 @@ export function buildMetadata(category: EsprCategory, rng: Rng): Record<string, 
       break;
     case "construction": {
       m.declarationOfPerformanceNumber = `DoP-SAMPLE-${rng.int(10000, 99999)}`;
-      // The public CSV template carries ONE declarationOfConformityUrl column, which the mapper
-      // feeds to BOTH the regulatory block and this top-level construction field — keep them equal.
-      m.declarationOfConformityUrl = (m.regulatoryCompliance as Record<string, unknown>).declarationOfConformityUrl;
+      // The CPR Declaration of Performance is its OWN document, distinct from the Declaration of
+      // Conformity in the regulatory block — this used to copy that URL, which made every generated
+      // construction sample claim one document was both.
+      m.declarationOfPerformanceUrl = docUrl(rng, "dop");
       break;
     }
     case "electronics":

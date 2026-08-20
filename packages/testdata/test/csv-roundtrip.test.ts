@@ -46,7 +46,7 @@ test("row cells never contain the ':' / '|' micro-format separators unescaped", 
   for (const category of ESPR_CATEGORIES) {
     const row = passportToCsvRow(generatePassport({ category }));
     for (const [cell, value] of Object.entries(row)) {
-      if (MICROFORMAT_CELLS.has(cell) || cell === "declarationOfConformityUrl" || cell === "dueDiligenceReportUrl" || cell === "safetyDatasheetUrl") continue;
+      if (MICROFORMAT_CELLS.has(cell) || cell === "declarationOfConformityUrl" || cell === "declarationOfPerformanceUrl" || cell === "dueDiligenceReportUrl" || cell === "safetyDatasheetUrl") continue;
       assert.doesNotMatch(value, /[:|]/, `${category}.${cell} leaked a separator: "${value}"`);
     }
   }
