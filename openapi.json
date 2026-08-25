@@ -12,8 +12,8 @@
       "email": "support@opendpp-node.eu"
     },
     "license": {
-      "name": "Proprietary — © OpenDPP UAB. The specification may be used to build integrations and generate clients against the OpenDPP service.",
-      "url": "https://opendpp-node.eu/security"
+      "name": "Proprietary — © Opendpp UAB. The specification may be used to build integrations and generate clients against the OpenDPP service.",
+      "identifier": "LicenseRef-OpenDPP-Proprietary"
     }
   },
   "externalDocs": {

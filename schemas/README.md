@@ -1,3 +1,5 @@
+<!-- Copyright (c) Opendpp UAB. SPDX-License-Identifier: Apache-2.0 -->
+
 # `schemas/` — official validation schemas (vendored)
 
 These are **verbatim copies** of third-party open-standard JSON Schemas, vendored here so the

@@ -14,6 +14,9 @@
  *
  * Exit/return: returns `true` when everything conforms + the signature verifies, else prints the reasons
  * and returns `false`.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
  */
 import { readFileSync } from "node:fs";
 import { dirname, join, basename } from "node:path";

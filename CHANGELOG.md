@@ -1,3 +1,5 @@
+<!-- Copyright (c) Opendpp UAB. SPDX-License-Identifier: Apache-2.0 -->
+
 # Changelog
 
 This kit's version **tracks the OpenDPP API contract version it carries** (`openapi.json`'s

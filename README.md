@@ -1,3 +1,5 @@
+<!-- Copyright (c) Opendpp UAB. SPDX-License-Identifier: Apache-2.0 -->
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/OpenDPP/opendpp-interop/main/assets/opendpp-mark.png" alt="OpenDPP" width="96" height="96">
 </p>

@@ -10,6 +10,9 @@
  *
  * Input: one identifier per line. A line beginning with `http(s)://` is parsed as a Digital Link URI;
  * a line beginning with `(` is parsed as a bracketed AI element string. `#` lines and blanks are ignored.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
  */
 import { readFileSync } from "node:fs";
 import { GS1encoder } from "gs1encoder";

@@ -17,6 +17,9 @@
  * {} }` for ANY `opendpp-node.eu` URL, so JSON-LD expansion uses the INLINE context only — no network.
  *
  * Apache-2.0 © OpenDPP UAB.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
  */
 import { readFileSync } from "node:fs";
 import { Readable } from "node:stream";

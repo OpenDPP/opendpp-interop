@@ -1,3 +1,5 @@
+<!-- Copyright (c) Opendpp UAB. SPDX-License-Identifier: Apache-2.0 -->
+
 # `validate/` — offline conformance validator
 
 A tiny, dependency-light CLI with **seven modes**: it validates an **AAS Environment** (`aas`), a **UNTP

@@ -1,3 +1,5 @@
+<!-- Copyright (c) Opendpp UAB. SPDX-License-Identifier: Apache-2.0 -->
+
 # AAS v3.0/3.1 — sample Asset Administration Shell
 
 Real, live outputs of the OpenDPP demo service, for the same fictional battery as the VC samples

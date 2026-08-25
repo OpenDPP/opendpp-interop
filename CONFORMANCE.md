@@ -1,3 +1,5 @@
+<!-- Copyright (c) Opendpp UAB. SPDX-License-Identifier: Apache-2.0 -->
+
 # Conformance
 
 What OpenDPP's interoperability output conforms to, how to verify each claim yourself, and — just as

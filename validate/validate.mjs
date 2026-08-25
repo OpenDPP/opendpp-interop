@@ -27,6 +27,9 @@
  * standard WebCrypto / JOSE, no OpenDPP code.
  *
  * Apache-2.0 © OpenDPP UAB. The vendored schemas in ../schemas/ retain their upstream terms (see NOTICE).
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";

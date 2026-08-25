@@ -25,6 +25,9 @@
  * machine-checked `published`/`deprecated` against admin-shell-io/submodel-templates (CC-BY-4.0).
  *
  * Apache-2.0 © OpenDPP UAB. The IDTA-derived allowlist retains its CC-BY-4.0 terms (see ../NOTICE).
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
  */
 import { readFileSync } from "node:fs";
 
