@@ -1,5 +1,21 @@
-// @opendpp/eori format test — offline syntax/parse helpers (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+/**
+ * @opendpp/eori format test — offline syntax and parsing
+ *
+ * Pins the SHAPE rules only: a country code followed by 1–15 alphanumerics, normalisation that
+ * strips whitespace and upper-cases while leaving punctuation visible (so a malformed value stays
+ * visibly malformed rather than being silently repaired), and the split of a number into prefix and
+ * identifier. `validateOperatorRegId` is pinned here too, including its rejection of fabricated ids —
+ * the node consumes these helpers as its single source for operator registration identifiers, so a
+ * loosened rule here widens what the hosted service accepts at ingest.
+ *
+ * NOT asserted here: existence. A syntactically perfect EORI that no register has ever issued passes
+ * every assertion in this file; that question belongs to validate.test.ts.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

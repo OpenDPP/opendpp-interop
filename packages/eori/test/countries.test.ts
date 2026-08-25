@@ -1,5 +1,21 @@
-// @opendpp/eori countries test — prefix classification (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+/**
+ * @opendpp/eori countries test — which register answers for a given prefix
+ *
+ * Classification decides WHERE an EORI is verifiable, and getting it wrong sends a caller to a
+ * register that will never know the number. The four cases that are easy to collapse and must stay
+ * distinct are pinned here: the 27 EU member states, GB (HMRC, not the EU register), XI (Northern
+ * Ireland, which is in the EU register despite the UK prefix), and EL as the alias Greece actually
+ * issues under. Unknown and empty inputs are pinned too, and the classifier accepts a bare 2-letter
+ * code case-insensitively as well as a full number.
+ *
+ * NOT asserted here: whether the number EXISTS in whichever register it routes to — that is
+ * validate.test.ts against a mock transport.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { EU_EORI_COUNTRIES, classifyEoriCountry } from "../src/index.ts";

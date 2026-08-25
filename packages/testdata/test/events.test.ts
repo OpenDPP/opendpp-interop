@@ -1,5 +1,25 @@
-// @opendpp/testdata event-chain tests — EPCIS 2.0 shape rules + the unsigned UNTP envelope
-// (Apache-2.0, (c) Opendpp UAB).
+/**
+ * @opendpp/testdata event-chain test — EPCIS 2.0 shape rules and the UNSIGNED UNTP envelope
+ *
+ * Pins that a generated chain obeys the same EPCIS 2.0 rules the node enforces at ingest, so sample
+ * data an integrator generates is data the hosted service will actually accept — a generator that
+ * drifts from the ingest rules produces samples that fail on first use, which is worse than no
+ * samples. Determinism is pinned alongside it, including that component EPCs stay inside the
+ * reserved 900+ block so a sample can never collide with a real product identifier.
+ *
+ * The load-bearing assertion is that `toUntpEventCredential` wraps the event UNSIGNED and NEVER
+ * fabricates a proof. Sample data that carried a proof-shaped object would be a forged credential the
+ * moment someone published it; the absence of the proof is the honest signal that this is a sample.
+ *
+ * `toEpcisDocument` is pinned for its envelope shape, CBV URN → short-name mapping, location
+ * wrapping, type-gated EPC fields, and content-addressed eventID — the last so re-capturing the same
+ * event is idempotent rather than minting a duplicate.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

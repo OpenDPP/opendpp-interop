@@ -15,6 +15,8 @@
  * scaled service (multiple instances) a shared/server-side limiter is still needed;
  * this protects a single process from bursting past the cap.
  *
+ * @mirrors packages/aeo/src/rate-limit.ts
+ *
  * Copyright (c) Opendpp UAB.
  * SPDX-License-Identifier: Apache-2.0
  *

@@ -1,6 +1,28 @@
-// @opendpp/eori validate test — SOAP plumbing + authoritative validation, fully offline (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
-// NO NETWORK: every service call goes through an injected mock transport.
+/**
+ * @opendpp/eori validate test — the authoritative EU check, driven entirely offline
+ *
+ * Pins the full contract of `validateEori` and `validateEoriBatch`: the envelope built (namespaced
+ * wrapper, unqualified children, escaped), namespace-tolerant parsing, and the three answers a
+ * caller must be able to tell apart — valid with name/address, a service verdict of not-valid, and a
+ * transport or fault failure surfaced as EoriServiceError with the faultstring intact.
+ *
+ * Three behaviours here are the load-bearing ones. A syntactically invalid input is NEVER sent to the
+ * service — it is answered offline, so a typo cannot burn a rate-limit slot. A GB number carries an
+ * HMRC caveat EVEN WHEN the EU service says not-valid, because the EU register is not authoritative
+ * for GB and reporting its "no" as the answer would be wrong. And the batch path chunks to ≤10 per
+ * request while preserving input order and de-duplicating repeats into one slot — the service's own
+ * limit, where a silent reorder would attach one company's verdict to another's number.
+ *
+ * NO NETWORK: every service call goes through an injected mock transport.
+ *
+ * NOT asserted here: prefix classification (countries.test.ts), offline shape rules
+ * (format.test.ts), and the parser's linear-time guarantee (soap-redos.test.ts).
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

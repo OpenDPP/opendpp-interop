@@ -1,6 +1,22 @@
-// @opendpp/testdata generation tests — determinism + GS1 validity + option handling
-// (Apache-2.0, (c) Opendpp UAB). Runs via tsx against ../src; lives outside src/ so it
-// is not compiled into the published dist.
+/**
+ * @opendpp/testdata generation test — determinism, GS1 validity, option handling
+ *
+ * The package's whole promise is that the SAME (seed, category, index) yields the SAME sample, so a
+ * fixture in a test suite or a bug report reproduces months later. That is pinned here — including
+ * independence from generation ORDER, which is the failure a naive sequential counter would pass a
+ * simpler test with and still break the promise.
+ *
+ * Also pins that every ESPR category produces a structurally coherent sample, that GTIN slots never
+ * collide across categories or with the event-chain 900+ block (a collision would make two different
+ * samples resolve as the same product), that the operatorId / facilityId / companyPrefix options pass
+ * through, and that bad category / count / index / prefix inputs THROW rather than degrading to a
+ * default — a silently substituted category is a sample that claims to be something it is not.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { isGTINVal } from "@opendpp/gs1";

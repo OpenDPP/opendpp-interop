@@ -1,13 +1,19 @@
-import { test } from "node:test";
-import assert from "node:assert/strict";
-import { parseValidateEoriResponse, MAX_RESPONSE_BYTES } from "../src/soap.js";
-
 /**
+ * @opendpp/eori SOAP ReDoS regression test — linear-time parsing, behaviour unchanged
+ *
  * Regression guard for js/polynomial-redos (CodeQL). The old parser used lazy `[\s\S]*?` regexes whose
  * backtracking was O(n²): a ~1 MB crafted body stalled the event loop for tens of seconds. The readers
  * are now linear (indexOf) with a coarse size cap. These tests pin BOTH the DoS fix (a 2 MB adversarial
  * body parses in milliseconds, not seconds) AND behaviour preservation on the tricky shapes.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
  */
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { parseValidateEoriResponse, MAX_RESPONSE_BYTES } from "../src/soap.js";
 
 test("a 2 MB adversarial body parses in well under a second (was O(n²) seconds)", () => {
   // Each of these shapes drove one of the three vulnerable patterns to end-of-string re-scanning.

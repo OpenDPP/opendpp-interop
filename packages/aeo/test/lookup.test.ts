@@ -1,7 +1,24 @@
-// @opendpp/aeo lookup test — authoritative lookup, fully offline (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
-// NO NETWORK: every service call goes through an injected mock transport.
-// Fixtures are VERBATIM captures from the live EU EOS aeo-retrieve service.
+/**
+ * @opendpp/aeo lookup test — the authoritative EOS lookup, driven entirely offline
+ *
+ * Pins the whole request/response contract of `lookupAeo`: the envelope actually sent (holder,
+ * country, the chosen authorisation types, and the default of all three), the typed shape of a
+ * match, a clean no-match, batch ordering, rate-limit slot acquisition, and the three failure modes
+ * that must stay distinguishable — a non-2xx with no fault, an HTTP 500 carrying a SOAP fault whose
+ * faultstring has to survive, and a transport error wrapped as AeoServiceError.
+ *
+ * NO NETWORK: every service call goes through an injected mock transport, and the fixtures are
+ * VERBATIM captures from the live EU EOS aeo-retrieve service — so this file pins OUR handling of
+ * the real payloads without depending on the service being up, or on it not having changed.
+ *
+ * NOT asserted here: the ReDoS hardening of the parser (soap-redos.test.ts) and the offline shape
+ * helpers (format.test.ts).
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

@@ -1,5 +1,21 @@
-// @opendpp/csv smoke test — proves the package works standalone (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+/**
+ * @opendpp/csv smoke test — the row→passport mapping, proven standalone
+ *
+ * Proves the package works with nothing else installed, and pins the one behaviour that makes it
+ * safe to point at regulated data: a BLANK CELL YIELDS AN ABSENT FIELD. Defaulting a missing cell to
+ * an empty string or a plausible value would let a row pass ESPR validation carrying a fact nobody
+ * supplied — so the absence has to survive the mapper, and that is asserted here rather than left to
+ * the portal importer that consumes it. Also pins the category templates' canonical columns and the
+ * two row-level failure modes (an empty row is skipped; a non-empty row without a productId throws).
+ *
+ * NOT asserted here: papaparse/RFC-4180 tokenisation and the per-line importer UX, which stay in the
+ * portal; and the schema the mapped payload is later validated against, which lives in the node.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

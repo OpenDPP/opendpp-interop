@@ -1,5 +1,26 @@
-// @opendpp/gs1 smoke test — proves the package works standalone (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+/**
+ * @opendpp/gs1 smoke test — the helpers the hosted node consumes, proven standalone
+ *
+ * This package is the SINGLE source for GS1 identity in OpenDPP — the node imports it rather than
+ * keeping its own copy — so every assertion here is simultaneously a check on what the hosted
+ * service accepts at ingest and prints on a label. Covers mod-10 validation across GTIN/GLN/GRAI and
+ * its minting round-trip, the full CSET-82 charset a GRAI serial may carry, GS1-keyed detection and
+ * the ingest guard, Digital Link path parsing, the EU DPP Registry UPI constraints, and the NFC URI
+ * record wrapper.
+ *
+ * Two assertions are deliberately narrow. The URI builders are suffix-asserted because the resolver
+ * host is environment-dependent, and the `{ baseUrl }` case pins that an explicit base is honoured
+ * with NO implicit environment read — a builder that quietly consulted the environment would emit a
+ * different link in a test run than in production.
+ *
+ * NOT asserted here: check-digit arithmetic against an independent oracle, which is the vendored GS1
+ * Barcode Syntax Engine's job in the node's own conformance suite.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

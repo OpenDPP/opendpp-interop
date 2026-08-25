@@ -1,8 +1,22 @@
-// @opendpp/webhooks smoke test — proves the package works standalone (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
-// The fixture signature is computed with node:crypto using the SAME recipe the OpenDPP server uses
-// (src/utils/webhook.ts), so this is a true parity check of the verifier — not a self-round-trip of
-// the package's own signing (the package has no signer; the hosted node holds the key).
+/**
+ * @opendpp/webhooks smoke test — the verifier, checked against the server's own recipe
+ *
+ * The fixture signature is computed with node:crypto using the SAME recipe the OpenDPP server uses
+ * (src/utils/webhook.ts), so this is a true parity check of the verifier — not a self-round-trip of
+ * the package's own signing (the package has no signer; the hosted node holds the key). A
+ * self-round-trip would stay green through a recipe change on the server and hand every integrator a
+ * verifier that rejects genuine deliveries.
+ *
+ * Pins acceptance of a genuine signature and rejection of the three forgeries that matter — tampered
+ * body, tampered signature, wrong secret — plus replay defence: a stale timestamp is rejected, and
+ * `toleranceSeconds: 0` is honoured rather than silently treated as "use the default", which would
+ * turn an explicit opt-out of tolerance into a window an attacker can use.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";

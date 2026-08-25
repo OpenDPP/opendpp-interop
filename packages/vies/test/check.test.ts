@@ -1,6 +1,31 @@
-// @opendpp/vies check test — online VIES existence check, fully offline (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
-// NO NETWORK: every service call goes through an injected mock transport.
+/**
+ * @opendpp/vies check test — the EU VAT existence check, driven entirely offline
+ *
+ * Pins what `checkVatId` sends and what it makes of every answer: the {countryCode, vatNumber} JSON
+ * built from the NORMALISED id, a registered result surfaced with name and address, a not-registered
+ * result as valid:false, and batch behaviour that returns one result per input, in order,
+ * de-duplicating repeats.
+ *
+ * Two behaviours carry the weight. A syntactically invalid id short-circuits offline and NEVER calls
+ * the transport, so a typo cannot spend a request against a service that rate-limits. And every
+ * malformed answer is an ERROR, not a verdict — a non-2xx, a transport failure, an unparseable body,
+ * and a body missing a boolean `valid` all throw ViesServiceError rather than degrading to
+ * valid:false. That distinction is the whole point: "VIES says this VAT number is not registered" and
+ * "VIES did not answer" are different facts, and collapsing them would let an outage read as a
+ * customer being unregistered.
+ *
+ * VIES also returns the literal '---' placeholder for an unknown name or address; that is dropped
+ * rather than stored, so the placeholder never reaches a record as if it were a company's name.
+ *
+ * NO NETWORK: every service call goes through an injected mock transport.
+ *
+ * NOT asserted here: offline syntax rules, which are format.test.ts.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

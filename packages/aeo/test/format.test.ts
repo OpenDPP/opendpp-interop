@@ -1,5 +1,19 @@
-// @opendpp/aeo format test — offline helpers (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+/**
+ * @opendpp/aeo format test — offline shape helpers
+ *
+ * Pins the pure half of the package: the three UCC authorisation types, strict (exact upper-case)
+ * type recognition, holder-name and country-code normalisation, and the decomposition of an AEO
+ * number into country code + AEO[C/F/S] + national identifier. Nothing here touches a transport, so
+ * a failure is a helper defect and never a service or fixture problem.
+ *
+ * NOT asserted here: whether an authorisation actually EXISTS. That is the EU EOS service's answer,
+ * and it is covered in lookup.test.ts against an injected mock transport.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

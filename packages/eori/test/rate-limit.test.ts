@@ -1,6 +1,25 @@
 // jscpd:ignore-start -- DELIBERATE eori<->aeo mirror (zero-dependency policy; drift-guarded by tests/guards/eos-soap-parity.test.ts)
-// @opendpp/eori rate-limit test — interval-scheduling limiter (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+/**
+ * @opendpp/eori rate-limit test — the interval-scheduling limiter
+ *
+ * The EU EOS service caps callers at 100 requests/second, and exceeding it is answered with a block
+ * rather than a retry hint — so the limiter is a correctness component, not a nicety. This pins the
+ * default cap, that a lone acquire never pays a wait, that concurrent acquires are genuinely paced,
+ * that a disabled limiter does not pace at all, that setRate moves between those states, that an
+ * aborted caller's signal rejects instead of holding its slot, and that the shared default is
+ * overridable process-wide.
+ *
+ * This file is one half of a DELIBERATE eori↔aeo mirror kept for the zero-dependency policy; the two
+ * copies are held byte-identical (modulo the package prefix) by a drift gate, which compares code
+ * with every comment line stripped — so this header may differ from its twin's without breaking it.
+ *
+ * @mirrors packages/aeo/test/rate-limit.test.ts
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

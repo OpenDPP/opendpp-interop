@@ -1,5 +1,22 @@
-// @opendpp/testdata CLI smoke test — runs the tsx-loaded src/cli.ts as a child process
-// (Apache-2.0, (c) Opendpp UAB).
+/**
+ * @opendpp/testdata CLI smoke test — the published entry point, run as a real child process
+ *
+ * The CLI is what an integrator actually types, so it is exercised the way they run it: src/cli.ts
+ * spawned as a child process under tsx, asserted on its stdout and exit code rather than by calling
+ * the functions behind it. That is the point — a broken bin wiring, a bad flag parse or a stray
+ * stdout write would pass every in-process test in this package and still ship a CLI that does not
+ * work.
+ *
+ * Pins that JSON output is POST-ready and deterministic, that CSV output carries the official
+ * template header while the events/epcis modes emit chains and a document, and that bad input exits
+ * NON-ZERO with a pointer to --help — an exit code of 0 on bad input would make the CLI unusable in
+ * a pipeline.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";

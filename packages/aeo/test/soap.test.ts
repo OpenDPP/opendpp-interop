@@ -1,6 +1,23 @@
-// @opendpp/aeo soap test — envelope builder + response parser (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
-// Fixtures are VERBATIM captures from the live EU EOS aeo-retrieve service.
+/**
+ * @opendpp/aeo soap test — the envelope builder and the response parser, in isolation
+ *
+ * The SOAP layer is where a wire-format detail silently becomes a wrong answer, so both directions
+ * are pinned separately from the lookup flow that uses them: the built envelope is qualified,
+ * child-ordered and escaped (and omits issuingCountry when absent), and the parser reads a match
+ * including the dotted `authorisation.type` local name, treats an absent <result> as a legitimate
+ * empty result rather than an error, and throws on a SOAP Fault and on a body it does not recognise.
+ *
+ * Fixtures are VERBATIM captures from the live EU EOS aeo-retrieve service, so the shapes are the
+ * service's, not our guess at them.
+ *
+ * NOT asserted here: rate limiting, batching and error wrapping (lookup.test.ts), and the linear-time
+ * parsing guarantee (soap-redos.test.ts).
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

@@ -1,6 +1,24 @@
-// @opendpp/testdata ⇄ @opendpp/csv round-trip guard — proves generated samples serialize to the
-// public CSV templates and map back to the SAME passport payload, so the generator and the
-// mapper cannot drift apart silently (Apache-2.0, (c) Opendpp UAB).
+/**
+ * @opendpp/testdata ⇄ @opendpp/csv round-trip guard
+ *
+ * Proves generated samples serialize to the public CSV templates and map back to the SAME passport
+ * payload, so the generator and the mapper cannot drift apart silently. This is the only test that
+ * spans both packages: each is internally consistent on its own, and the failure this catches is the
+ * one where both suites stay green while a column rename on one side quietly stops arriving on the
+ * other — which an integrator meets as data loss, not as an error.
+ *
+ * Also pins the Annex XIII battery identity fields specifically (they are the regulated ones), and
+ * that no cell contains an unescaped ':' or '|' — the micro-format separators, whose leakage would
+ * split one value into two on the way back.
+ *
+ * NOT asserted here: that the round-tripped payload is VALID — schema validation lives in the node.
+ * `productName` is excluded from the lossless comparison by design; the template does not carry it.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mapCsvRowToPassport, passportCsvTemplateHeader } from "@opendpp/csv";

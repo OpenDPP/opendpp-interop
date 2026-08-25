@@ -1,5 +1,19 @@
-// @opendpp/vies format test — offline VAT-ID syntax/parse helpers (Apache-2.0, (c) Opendpp UAB).
-// Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+/**
+ * @opendpp/vies format test — offline VAT-ID syntax and parsing
+ *
+ * Pins the per-member-state SHAPE rules, normalisation (whitespace, dots and hyphens stripped,
+ * upper-cased) and the split of an id into country prefix and national number. The prefix table is
+ * pinned as the 27 member states with Greece as **EL**, not GR — Greece's ISO country code and its
+ * VAT prefix genuinely differ, and using the ISO code produces an id VIES will never recognise.
+ *
+ * NOT asserted here: registration. A well-formed id for a company that does not exist passes every
+ * assertion in this file; that question belongs to check.test.ts.
+ *
+ * Runs via tsx against ../src; lives outside src/ so it is not compiled into the published dist.
+ *
+ * Copyright (c) Opendpp UAB.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import {

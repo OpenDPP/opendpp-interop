@@ -19,6 +19,8 @@
  * and independently publishable. If a third EOS service is added, factor a shared
  * EOS core out of eori+aeo.)
  *
+ * @mirrors packages/eori/src/rate-limit.ts
+ *
  * Copyright (c) Opendpp UAB.
  * SPDX-License-Identifier: Apache-2.0
  *
