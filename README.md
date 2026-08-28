@@ -56,7 +56,10 @@ The product backend is a separate, private repository — you don't need it to i
 Both doors are addressed by **GS1 Digital Links** — a passport resolves at `/01/{gtin}` (SKU/model) or
 `/8003/{grai}`, a serialised unit at `/01/{gtin}/21/{serial}`, and `POST /api/v1/gs1/decode` turns raw
 scan-data / AI element strings into those links. Every link OpenDPP emits is validated against GS1's own
-Barcode Syntax Engine — check it yourself with the `gs1` validator door (below).
+Barcode Syntax Engine — check it yourself with the `gs1` validator door (below), decode a scan
+interactively in the [developer console](https://opendpp-node.eu/app/developers), or read where GS1
+Digital Link sits in the EU standards picture on
+[the standards page](https://opendpp-node.eu/standards#gs1).
 
 The public machine-readable contract for the whole API surface is
 [`openapi.json`](./openapi.json) (also live at <https://opendpp-node.eu/openapi.json>). Conformance
