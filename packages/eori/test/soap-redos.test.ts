@@ -59,9 +59,15 @@ test("behaviour preserved: namespace prefixes, attributes, CDATA, entities, mult
     "<statusDescr><![CDATA[Valid & <ok>]]></statusDescr>" +
     "<name>ACME &amp; Co</name></result>" +
     "<result><eori>FR000000000000</eori><status>1</status><statusDescr>Not valid</statusDescr></result>" +
+    // NUMERIC CHARACTER REFERENCES, the two unescaper branches nothing here reached. The live service
+    // returns UTF-8 directly, so no capture contains them — but XML permits them wherever a character
+    // is legal, and a conformant service may emit them at any time. Hex and decimal are separate branches.
+    "<result><eori>DE999999999999999</eori><status>0</status><statusDescr>ok</statusDescr>" +
+    "<name>B&#xFC;chner &#38; S&#246;hne</name></result>" +
     "</ns2:validateEORIResponse></soapenv:Body></soapenv:Envelope>";
   const parsed = parseValidateEoriResponse(body);
-  assert.equal(parsed.results.length, 2);
+  assert.equal(parsed.results[2]!.name, "Büchner & Söhne");
+  assert.equal(parsed.results.length, 3);
   assert.equal(parsed.results[0]!.eori, "DE123456789012345");
   assert.equal(parsed.results[0]!.status, 0);
   assert.equal(parsed.results[0]!.statusDescription, "Valid & <ok>"); // CDATA unwrapped, entities decoded

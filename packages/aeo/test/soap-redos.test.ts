@@ -59,13 +59,19 @@ test("behaviour preserved: prefixes, attributes, CDATA, entities, dotted local n
     '<result attr="x"><authorisationHolderName><![CDATA[ACME & <Co>]]></authorisationHolderName>' +
     "<issuingCountry>Germany</issuingCountry><ns3:authorisation.type>AEOF</ns3:authorisation.type></result>" +
     "<result><authorisationHolderName>Globex &amp; Sons</authorisationHolderName></result>" +
+    // NUMERIC CHARACTER REFERENCES, the two unescaper branches nothing here reached. The live service
+    // returns UTF-8 directly, so no capture contains them — but XML permits them wherever a character
+    // is legal, and a conformant service may emit them at any time. `für` in the live holder name is
+    // exactly the sort of character that arrives this way. Hex and decimal are separate branches.
+    "<result><authorisationHolderName>B&#xFC;chner &#38; S&#246;hne</authorisationHolderName></result>" +
     "</ns2:return></ns2:retrieveAEOResponse></soapenv:Body></soapenv:Envelope>";
   const parsed = parseRetrieveAeoResponse(body);
-  assert.equal(parsed.results.length, 2);
+  assert.equal(parsed.results.length, 3);
   assert.equal(parsed.results[0]!.authorisationHolderName, "ACME & <Co>"); // CDATA unwrapped
   assert.equal(parsed.results[0]!.issuingCountry, "Germany");
   assert.equal(parsed.results[0]!.authorisationType, "AEOF"); // dotted local name via prefix
   assert.equal(parsed.results[1]!.authorisationHolderName, "Globex & Sons");
+  assert.equal(parsed.results[2]!.authorisationHolderName, "Büchner & Söhne");
 });
 
 test("behaviour preserved: a present wrapper with no <result> is a valid no-match (results: [])", () => {
