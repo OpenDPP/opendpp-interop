@@ -31,6 +31,20 @@
  */
 import { readFileSync } from "node:fs";
 
+/**
+ * Canonical string ordering — EXACTLY what a bare `.sort()` does to an array of strings (S2871).
+ * The authority is `byCodeUnit` in `src/utils/canonical-order.ts`, which records why `localeCompare`
+ * is forbidden here: it is locale- and ICU-dependent, and this order is re-derived by a machine.
+ *
+ * A local copy, like `scripts/junit-to-sonar-tests.mjs` keeps: reaching the authority from a `.mjs`
+ * under bare Node would need a `.ts` specifier, an exception held to the pre-`npm ci` chain.
+ * `tests/guards/canonical-order-copies.test.ts` pins it to the authority.
+ */
+function byCodeUnit(a, b) {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+}
+
 const ALLOWLIST = JSON.parse(readFileSync(new URL("../idta-semantic-ids.json", import.meta.url), "utf8"));
 
 const PUBLISHED = new Set(ALLOWLIST.anchors.filter((a) => a.status === "published").map((a) => a.iri));
@@ -70,7 +84,7 @@ export function collectSemanticIds(node, out = new Set()) {
 
 /** Classify every distinct semanticId in an AAS Environment. Returns counts + per-iri verdicts. */
 export function classifyAasFile(data) {
-  const iris = [...collectSemanticIds(data)].sort();
+  const iris = [...collectSemanticIds(data)].sort(byCodeUnit);
   const items = iris.map((iri) => ({ iri, verdict: classifySemanticId(iri), unverifiedIdta: isUnverifiedIdtaNamespace(iri) }));
   const counts = Object.fromEntries(VERDICTS.map((v) => [v, 0]));
   for (const it of items) counts[it.verdict] += 1;
