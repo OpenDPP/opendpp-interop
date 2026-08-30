@@ -144,7 +144,7 @@ export function passportToCsvRow(passport: PassportCreateInput): Record<string, 
 }
 
 /** RFC-4180 cell quoting: wrap when the cell contains a comma, quote, or newline. */
-const quoteCell = (cell: string): string => (/[",\r\n]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell);
+const quoteCell = (cell: string): string => (/[",\r\n]/.test(cell) ? `"${cell.replaceAll('"', '""')}"` : cell);
 
 /**
  * Renders generated passports as CSV text under the category's official template header

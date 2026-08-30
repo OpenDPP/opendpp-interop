@@ -68,7 +68,7 @@ export function validateOperatorRegId(regId: unknown, scheme?: unknown): string 
  */
 export function normalizeEori(input: unknown): string {
   return String(input ?? "")
-    .replace(/\s+/g, "")
+    .replaceAll(/\s+/g, "")
     .toUpperCase();
 }
 

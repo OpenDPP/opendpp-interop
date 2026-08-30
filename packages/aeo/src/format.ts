@@ -39,7 +39,7 @@ export function isAuthorisationType(value: unknown): value is AuthorisationType 
 
 /** Trim and collapse internal whitespace in a holder name/search term (case preserved). */
 export function normalizeHolderName(input: unknown): string {
-  return String(input ?? "").replace(/\s+/g, " ").trim();
+  return String(input ?? "").replaceAll(/\s+/g, " ").trim();
 }
 
 /**
@@ -47,7 +47,7 @@ export function normalizeHolderName(input: unknown): string {
  * expects, or "" when the input is not a 2-letter code.
  */
 export function normalizeCountryCode(input: unknown): string {
-  const code = String(input ?? "").replace(/\s+/g, "").toUpperCase();
+  const code = String(input ?? "").replaceAll(/\s+/g, "").toUpperCase();
   return /^[A-Z]{2}$/.test(code) ? code : "";
 }
 
@@ -77,7 +77,7 @@ export interface AeoNumberParts {
  */
 export function parseAeoNumber(input: unknown): AeoNumberParts {
   const raw = String(input ?? "");
-  const normalized = raw.replace(/\s+/g, "").toUpperCase();
+  const normalized = raw.replaceAll(/\s+/g, "").toUpperCase();
   const m = /^([A-Z]{2})(AEO[CFS])(.+)$/.exec(normalized);
   if (!m) {
     return { input: raw, normalized, countryCode: "", type: null, nationalNumber: "", validSyntax: false };

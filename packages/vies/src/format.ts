@@ -49,7 +49,7 @@ export function isEuVatPrefix(prefix: string): boolean {
  */
 export function normalizeVatId(vatId: string): string {
   return String(vatId ?? "")
-    .replace(/[\s.-]/g, "")
+    .replaceAll(/[\s.-]/g, "")
     .toUpperCase();
 }
 

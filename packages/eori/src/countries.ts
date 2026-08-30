@@ -58,7 +58,7 @@ export interface EoriCountryInfo {
  */
 export function classifyEoriCountry(eoriOrCode: unknown): EoriCountryInfo {
   const code = String(eoriOrCode ?? "")
-    .replace(/\s+/g, "")
+    .replaceAll(/\s+/g, "")
     .toUpperCase()
     .slice(0, 2);
 
