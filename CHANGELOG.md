@@ -7,12 +7,48 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.15.0] — API contract 1.15.0 (the verifier says what it declines; delivery records state what happened)
+
+Carries OpenDPP public API contract **1.15.0** (`openapi.json`). Two surfaces changed — the public
+seal verifier and the webhook delivery record — and one description was corrected; no vendored
+standard, schema fixture or validator moved. Ships under the disclosed pre-GA waiver; both diffs widen responses.
+
+**Changed — seal verifier:** `SealVerifyResponse.message` drops its two-member `enum` — the string
+is human-readable prose, not a stable contract value; match on `verified`, never on `message`. Both
+policy-decline messages on `POST /api/v1/audit/verify` are reworded from `Cryptographic verification
+failed: …` to `Verification declined: …, so the seal was not evaluated`: a signing key not
+registered to a tenant on the queried node (or a declared operator not bound to the signing tenant)
+is a **decline**, made before any cryptography runs — the previous wording reported it as a failed
+signature. A client switch-casing the old exact strings must migrate to `verified`.
+
+**Changed — schemas (description only):** the `category` parameter of `GET /api/v1/schemas/{category}`
+no longer states that only five categories have a published JSON Schema and that the other four return
+404 — every category in the enum has served a formal sector schema since the four gained theirs. No wire
+shape changed.
+
+**Changed — webhook deliveries:** the delivery `status` gains `NO_SUBSCRIBERS` — an event no active
+subscription filtered for, which the contract previously described as `DELIVERED` — on both the
+`?status=` filter of `GET /api/v1/webhooks/deliveries` and the delivery row it returns, and the
+retry description now states the six attempts and the ~12h final wait the node actually performs.
+Adding a response enum value reads as breaking to a structural-diff tool, while semantically it only
+widens the response.
+
+**Changed — webhook subscriptions (description only):** the create and delete operations no longer
+state that deleting and re-creating is the only way to change a subscription's address or rotate its
+secret — `PATCH /api/v1/webhooks/subscriptions/{id}` and `POST /api/v1/webhooks/subscriptions/{id}/rotate-secret`,
+documented in the same contract, do both in place. No wire shape changed.
+
+**Also carried:** the spec's top-level description and the sealing guide no longer promise an
+offline, no-account check for arbitrary passports — the endpoint verifies seals issued on the node
+you query. The seal *format* remains offline-verifiable and the redacted-leaf reconstruction rule is
+unchanged; a standalone verifier package is tracked separately.
+
 ## [1.14.0] — API contract 1.14.0 (contract hygiene for the SDK lanes)
 
 Carries OpenDPP public API contract **1.14.0** (`openapi.json`). No endpoint, field or behaviour
 changed — every diff is in how the same wire shapes are declared, so generated clients in every
 language get better types. No vendored standard, schema fixture or validator moved. Ships under the
-pre-adoption `API_CONTRACT_RESET` waiver (no external consumers): a structural-diff tool reads a
+disclosed pre-GA waiver: a structural-diff tool reads a
 modified anonymous `oneOf` member as a replaced one; semantically this release only widens responses.
 
 **Changed:** the error/result unions previously declared inline are hoisted into named
@@ -42,8 +78,7 @@ report) with the `BulkBatteryUnitEventsRequest`/`BulkBatteryUnitEventsResponse` 
 (deterministic keyset paging — the full history is retrievable); optional `Idempotency-Key` on both
 per-unit event writes, scoped per unit.
 
-**Removed (breaking, shipped under the pre-adoption `API_CONTRACT_RESET` waiver — no external
-consumers):** the demonstration-grade screening operation `POST /api/v1/events/{id}/audit` with its
+**Removed (breaking, shipped under the disclosed pre-GA waiver):** the demonstration-grade screening operation `POST /api/v1/events/{id}/audit` with its
 `TraceComplianceAuditResponse`/`TraceComplianceCertificate` schemas (the feature is retired;
 lineage retrieval and EPCIS capture are unchanged), and `deleteBatteryUnit`'s fictional `200`
 hard-delete response with its `BatteryUnitDeleteResponse` schema — the operation now documents the
@@ -119,7 +154,7 @@ request or response shape changed, and no vendored standard, schema, sample or v
 ### Added
 
 - A **Versioning & compatibility** section in the API overview: what the `1.x` line guarantees, how the
-  tier is derived structurally rather than asserted, and disclosure of the pre-GA `API_CONTRACT_RESET`
+  tier is derived structurally rather than asserted, and disclosure of the recorded pre-GA
   waiver under which a breaking change may exceptionally ship on an existing major line.
 
 ## [1.11.0] — API contract 1.11.0 (client idempotency)
