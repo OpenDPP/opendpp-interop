@@ -240,14 +240,37 @@ function stripCdata(value: string): string {
   }
 }
 
+/** Unicode's last code point. `String.fromCodePoint` throws a RangeError above it. */
+const MAX_CODE_POINT = 0x10ffff;
+
+/**
+ * Decode one numeric character reference, or leave it as the literal text it was.
+ *
+ * ROBUSTNESS: the body being decoded is a third-party SOAP response, and
+ * `String.fromCodePoint` THROWS a RangeError for a code point above U+10FFFF — so
+ * `&#x110000;` (or `&#1114112;`) used to escape this package as a RangeError, past a
+ * documented contract that promises {@link AeoServiceError}. A lenient XML reader leaves a
+ * reference it cannot represent as text rather than failing the whole document, which is
+ * what this does. Out-of-range and overflowing forms (`&#99999999999;` parses to Infinity)
+ * both take that path.
+ *
+ * Deliberately NOT widened to lone surrogates (`&#xD800;`): `fromCodePoint` accepts those
+ * without throwing, so they are a well-formedness question about the response rather than a
+ * crash in the parser, and silently rewriting them would lose data the caller may want.
+ */
+function decodeCharRef(raw: string, digits: string, radix: number): string {
+  const codePoint = Number.parseInt(digits, radix);
+  return codePoint > MAX_CODE_POINT ? raw : String.fromCodePoint(codePoint);
+}
+
 function xmlUnescape(value: string): string {
   return stripCdata(value)
     .replaceAll("&lt;", "<")
     .replaceAll("&gt;", ">")
     .replaceAll("&quot;", '"')
     .replaceAll("&apos;", "'")
-    .replaceAll(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
-    .replaceAll(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number.parseInt(dec, 10)))
+    .replaceAll(/&#x([0-9a-fA-F]+);/g, (raw, hex) => decodeCharRef(raw, hex, 16))
+    .replaceAll(/&#(\d+);/g, (raw, dec) => decodeCharRef(raw, dec, 10))
     .replaceAll("&amp;", "&");
 }
 

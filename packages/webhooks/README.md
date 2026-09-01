@@ -78,7 +78,7 @@ HMAC_SHA256( secret, `${timestamp}.${rawBody}` )   // hex, lowercase
 
 Reject a delivery whose timestamp is more than ~5 minutes from now (the verifier
 does this by default, `toleranceSeconds: 300`). Delivery is **at-least-once** with
-up to 5 delivery attempts (1 inline + 4 retries, exponential backoff
+up to 6 delivery attempts (1 inline + 5 retries, exponential backoff
 ~1m/5m/30m/2h/12h) — **dedupe on `X-OpenDPP-Delivery`** (the
 envelope `id`), which is stable across retries.
 
