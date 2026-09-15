@@ -1,0 +1,319 @@
+{
+  "@context": [
+    "https://opendpp-node.eu/contexts/dpp/v1",
+    {
+      "DigitalProductPassport": "https://opendpp-node.eu/ns/dpp#DigitalProductPassport",
+      "economicOperator": "https://opendpp-node.eu/ns/dpp#economicOperator",
+      "manufacturingFacility": "https://opendpp-node.eu/ns/dpp#manufacturingFacility",
+      "digitalSeal": "https://opendpp-node.eu/ns/dpp#digitalSeal",
+      "signingPublicKey": "https://opendpp-node.eu/ns/dpp#signingPublicKey",
+      "status": "https://opendpp-node.eu/ns/dpp#status",
+      "archivedAt": "https://opendpp-node.eu/ns/dpp#archivedAt",
+      "retentionUntil": "https://opendpp-node.eu/ns/dpp#retentionUntil",
+      "productIdScheme": "https://opendpp-node.eu/ns/dpp#productIdScheme",
+      "digitalProductPassportId": "https://opendpp-node.eu/ns/dpp#digitalProductPassportId",
+      "uniqueProductIdentifier": "https://opendpp-node.eu/ns/dpp#uniqueProductIdentifier",
+      "granularity": "https://opendpp-node.eu/ns/dpp#granularity",
+      "dppSchemaVersion": "https://opendpp-node.eu/ns/dpp#dppSchemaVersion",
+      "dppStatus": "https://opendpp-node.eu/ns/dpp#dppStatus",
+      "lastUpdated": "https://opendpp-node.eu/ns/dpp#lastUpdated",
+      "economicOperatorId": "https://opendpp-node.eu/ns/dpp#economicOperatorId",
+      "facilityId": "https://opendpp-node.eu/ns/dpp#facilityId",
+      "contentSpecificationIds": "https://opendpp-node.eu/ns/dpp#contentSpecificationIds",
+      "category": "https://opendpp-node.eu/ns/dpp#category",
+      "batteryCategory": "https://opendpp-node.eu/ns/dpp#batteryCategory",
+      "chemistry": "https://opendpp-node.eu/ns/dpp#chemistry",
+      "carbonFootprint": "https://opendpp-node.eu/ns/dpp#carbonFootprint",
+      "durability": "https://opendpp-node.eu/ns/dpp#durability",
+      "materialComposition": "https://opendpp-node.eu/ns/dpp#materialComposition",
+      "facilityDetails": "https://opendpp-node.eu/ns/dpp#facilityDetails"
+    }
+  ],
+  "@type": "DigitalProductPassport",
+  "@id": "https://id.gs1.org/01/09521234543213",
+  "id": "demo-battery-passport",
+  "productId": "09521234543213",
+  "digitalLinkUri": "https://id.gs1.org/01/09521234543213",
+  "productIdScheme": "GS1_DIGITAL_LINK",
+  "digitalProductPassportId": "https://opendpp-node.eu/passport/demo-battery-passport",
+  "uniqueProductIdentifier": "https://id.gs1.org/01/09521234543213",
+  "granularity": "model",
+  "dppSchemaVersion": "EN 18223:2026",
+  "dppStatus": "active",
+  "lastUpdated": "2026-02-18T00:00:00.000Z",
+  "economicOperatorId": "0223:IT12345678901",
+  "facilityId": "https://id.gs1.org/414/5412345000013",
+  "contentSpecificationIds": [
+    "https://opendpp-node.eu/api/v1/schemas/batteries"
+  ],
+  "digitalSeal": "MEQCIElESAMPLEdemoSealSignatureBase64DerNotARealSignatureAAAA==",
+  "signingPublicKey": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIEXAMPLEdemoPublicKeyNotReal0000000000000000\n-----END PUBLIC KEY-----",
+  "status": "ACTIVE",
+  "archivedAt": null,
+  "retentionUntil": null,
+  "proof": {
+    "@type": [
+      "MerkleTreeAttestationProof"
+    ],
+    "type": "MerkleTreeAttestationProof",
+    "signatureAlgorithm": "ECDSA-P256-SHA256-over-MerkleRoot",
+    "created": "2026-02-18T00:00:00.000Z",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "https://opendpp-node.eu/passport/demo-battery-passport#key-1",
+    "signatureValue": "MEQCIElESAMPLEdemoSealSignatureBase64DerNotARealSignatureAAAA==",
+    "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIEXAMPLEdemoPublicKeyNotReal0000000000000000\n-----END PUBLIC KEY-----",
+    "merkleRoot": "9fff6119fbf1c08fa9cf6c5c8c94ff05349563c7e5cd1b0225a46f3b9c8b7b4e",
+    "sealedKeys": [
+      "batteryCategory",
+      "carbonFootprint",
+      "category",
+      "chemistry",
+      "durability",
+      "materialComposition"
+    ],
+    "redactedLeaves": {
+      "ratedCapacity": "124d922fdf8a54157285c345fbdf021ce1c14d47798d7e32aaea3241d1ebce08"
+    }
+  },
+  "createdAt": "2026-02-18T00:00:00.000Z",
+  "updatedAt": "2026-02-18T00:00:00.000Z",
+  "elements": [
+    {
+      "elementId": "category",
+      "dictionaryReference": "https://opendpp-node.eu/ns/dpp#category",
+      "objectType": "SingleValuedDataElement",
+      "valueDataType": "xsd:string",
+      "value": "batteries"
+    },
+    {
+      "elementId": "batteryCategory",
+      "dictionaryReference": "https://opendpp-node.eu/ns/dpp#batteryCategory",
+      "objectType": "SingleValuedDataElement",
+      "valueDataType": "xsd:string",
+      "value": "ev"
+    },
+    {
+      "elementId": "chemistry",
+      "dictionaryReference": "https://opendpp-node.eu/ns/dpp#chemistry",
+      "objectType": "SingleValuedDataElement",
+      "valueDataType": "xsd:string",
+      "value": "LFP (Lithium Iron Phosphate)"
+    },
+    {
+      "elementId": "carbonFootprint",
+      "dictionaryReference": "https://opendpp-node.eu/ns/dpp#carbonFootprint",
+      "objectType": "DataElementCollection",
+      "elements": [
+        {
+          "elementId": "co2eKg",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#carbonFootprint.co2eKg",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:decimal",
+          "value": 4200.5
+        },
+        {
+          "elementId": "unit",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#carbonFootprint.unit",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "kg CO2e"
+        },
+        {
+          "elementId": "calculationMethod",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#carbonFootprint.calculationMethod",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "ISO 14067"
+        }
+      ]
+    },
+    {
+      "elementId": "durability",
+      "dictionaryReference": "https://opendpp-node.eu/ns/dpp#durability",
+      "objectType": "DataElementCollection",
+      "elements": [
+        {
+          "elementId": "cycleLife",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#durability.cycleLife",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:decimal",
+          "value": 3000
+        },
+        {
+          "elementId": "calendarLifeYears",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#durability.calendarLifeYears",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:decimal",
+          "value": 12
+        }
+      ]
+    },
+    {
+      "elementId": "materialComposition",
+      "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition",
+      "objectType": "MultiValuedDataElement",
+      "value": [
+        {
+          "elementId": "materialComposition1",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition",
+          "objectType": "DataElementCollection",
+          "elements": [
+            {
+              "elementId": "material",
+              "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition.material",
+              "objectType": "SingleValuedDataElement",
+              "valueDataType": "xsd:string",
+              "value": "Lithium"
+            },
+            {
+              "elementId": "percent",
+              "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition.percent",
+              "objectType": "SingleValuedDataElement",
+              "valueDataType": "xsd:integer",
+              "value": 7
+            }
+          ]
+        },
+        {
+          "elementId": "materialComposition2",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition",
+          "objectType": "DataElementCollection",
+          "elements": [
+            {
+              "elementId": "material",
+              "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition.material",
+              "objectType": "SingleValuedDataElement",
+              "valueDataType": "xsd:string",
+              "value": "Iron"
+            },
+            {
+              "elementId": "percent",
+              "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition.percent",
+              "objectType": "SingleValuedDataElement",
+              "valueDataType": "xsd:integer",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "elementId": "materialComposition3",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition",
+          "objectType": "DataElementCollection",
+          "elements": [
+            {
+              "elementId": "material",
+              "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition.material",
+              "objectType": "SingleValuedDataElement",
+              "valueDataType": "xsd:string",
+              "value": "Phosphate"
+            },
+            {
+              "elementId": "percent",
+              "dictionaryReference": "https://opendpp-node.eu/ns/dpp#materialComposition.percent",
+              "objectType": "SingleValuedDataElement",
+              "valueDataType": "xsd:integer",
+              "value": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "elementId": "facilityDetails",
+      "dictionaryReference": "https://opendpp-node.eu/ns/dpp#facilityDetails",
+      "objectType": "MultiValuedDataElement",
+      "redacted": true
+    },
+    {
+      "elementId": "economicOperator",
+      "dictionaryReference": "https://opendpp-node.eu/ns/dpp#economicOperator",
+      "objectType": "DataElementCollection",
+      "elements": [
+        {
+          "elementId": "@type",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#economicOperator.@type",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "EconomicOperator"
+        },
+        {
+          "elementId": "id",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#economicOperator.id",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "op-eu-default"
+        },
+        {
+          "elementId": "name",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#economicOperator.name",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "OpenDPP Demo Manufacturing — NOT A REAL COMPANY"
+        },
+        {
+          "elementId": "regId",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#economicOperator.regId",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "IT12345678901"
+        },
+        {
+          "elementId": "regIdScheme",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#economicOperator.regIdScheme",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "VAT"
+        },
+        {
+          "elementId": "role",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#economicOperator.role",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "manufacturer"
+        }
+      ]
+    },
+    {
+      "elementId": "manufacturingFacility",
+      "dictionaryReference": "https://opendpp-node.eu/ns/dpp#manufacturingFacility",
+      "objectType": "DataElementCollection",
+      "elements": [
+        {
+          "elementId": "@type",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#manufacturingFacility.@type",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "Facility"
+        },
+        {
+          "elementId": "id",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#manufacturingFacility.id",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "fac-1"
+        },
+        {
+          "elementId": "gln",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#manufacturingFacility.gln",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "5412345000013"
+        },
+        {
+          "elementId": "name",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#manufacturingFacility.name",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "Cell Plant EU (SAMPLE)"
+        },
+        {
+          "elementId": "country",
+          "dictionaryReference": "https://opendpp-node.eu/ns/dpp#manufacturingFacility.country",
+          "objectType": "SingleValuedDataElement",
+          "valueDataType": "xsd:string",
+          "value": "DE"
+        }
+      ]
+    }
+  ]
+}

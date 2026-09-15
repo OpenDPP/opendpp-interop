@@ -11,8 +11,8 @@
       "controller": "did:web:opendpp-node.eu:tenants:demo",
       "publicKeyJwk": {
         "kty": "EC",
-        "x": "S5RKg_tICfUKG31AzjheHUueABuuvhYg23BFL_BIPHI",
-        "y": "vgoZ3HyVDl2zg_TY4o0hrS-j1tEF0U6R4wBolug-Jrc",
+        "x": "E4yrgr2xbyZ7fuqOjsLs4GF4CNOrKAUeQchZKbsLxek",
+        "y": "0fQr1FrNWzpycru7o7U-3qPi49PK_6cgmI59MI2Fdw0",
         "crv": "P-256",
         "alg": "ES256",
         "use": "sig"

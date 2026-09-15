@@ -8,12 +8,16 @@
 # DPP / battery (ESPR) vertical. They are deliberately a STARTER set: reasonable coverage of
 # the fields OpenDPP authoritatively models, not an exhaustive ESPR battery-regulation rulebook.
 #
-# They are designed against the ACTUAL RDF the sample passport expands to under its inline
-# `@context` (see ../samples/battery-passport.jsonld and `validate/validate.mjs shacl`). Only
-# terms present in that inline context survive JSON-LD → RDF expansion, so the shapes target the
-# `dpp:DigitalProductPassport` root and use property paths; nested `economicOperator` / `Facility`
-# nodes are constrained by PRESENCE (their inner fields are not in the inline context and so do not
-# survive expansion — class-targeting them would be unsound).
+# The document follows EN 18223:2026 clause 5.2: the nine Table 1 header attributes and the
+# server-owned document keys sit at the root, and EVERY data element of the passport body sits
+# at the root beside them, once, under its elementId as the JSON key — there is no wrapping
+# `metadata` object and no second copy. Every root key expands under ONE vocabulary,
+# `https://opendpp-node.eu/ns/dpp#`, through the inline `@context` term map the document carries
+# (see ../samples/battery-passport.jsonld and `validate/validate.mjs shacl`), so the shapes target
+# the `dpp:DigitalProductPassport` root and constrain its element properties directly. Nested
+# `economicOperator` / `manufacturingFacility` nodes are constrained by PRESENCE (their inner fields
+# are not in the inline context and so do not survive expansion — class-targeting them would be
+# unsound).
 #
 # Why these exist: the CIRPASS-2 `dpp-validator` ships PLACEHOLDER `example.org` SHACL shapes; this
 # fills that gap with shapes authored against OpenDPP's real DPP vocabulary. Offered as a
@@ -25,7 +29,6 @@
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 @prefix opdppsh: <https://opendpp-node.eu/shapes/dpp#> .
 @prefix dpp:     <https://opendpp-node.eu/ns/dpp#> .
-@prefix dppx:    <https://opendpp-node.eu/contexts/dpp/v1#> .
 
 # ── Digital Product Passport ──────────────────────────────────────────────────────────────────
 # Targets every node typed dpp:DigitalProductPassport. Constraints reflect what OpenDPP
@@ -34,7 +37,67 @@ opdppsh:DigitalProductPassportShape
     a sh:NodeShape ;
     sh:targetClass dpp:DigitalProductPassport ;
 
-    # Lifecycle status — one of OpenDPP's real Passport lifecycle values. "BOGUS_STATUS" fails here.
+    # ── EN 18223 Table 1 header — the seven attributes of cardinality 1 ───────────────────────
+    sh:property [
+        sh:path dpp:digitalProductPassportId ;
+        sh:name "digitalProductPassportId" ;
+        sh:description "The instance identifier (EN 18223 Table 1) — the document's resolvable Digital Link." ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path dpp:uniqueProductIdentifier ;
+        sh:name "uniqueProductIdentifier" ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path dpp:granularity ;
+        sh:name "granularity" ;
+        sh:description "EN 18223 4.1.2.2 — the closed enumeration, lowercase. Deliberately STRICTER than the kit's JSON Schema, which also accepts the capitalised spelling used by the clause 5.2.4 example; a capitalised value therefore fails here and passes there. See schemas/README.md." ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:in ( "model" "batch" "item" ) ;
+    ] ;
+    sh:property [
+        sh:path dpp:dppSchemaVersion ;
+        sh:name "dppSchemaVersion" ;
+        sh:description "The reference standard the body follows." ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path dpp:dppStatus ;
+        sh:name "dppStatus" ;
+        sh:description "Status of the instance as a digital resource — an OPEN vocabulary, so no value list here." ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path dpp:lastUpdated ;
+        sh:name "lastUpdated" ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path dpp:economicOperatorId ;
+        sh:name "economicOperatorId" ;
+        sh:description "EN 18219 form: ISO/IEC 6523 ICD:identifier for the operator's declared clause 6 scheme." ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    # facilityId (0..1) and contentSpecificationIds (0..*) are optional in the standard and are not
+    # required here: a conformant instance that omits them must still validate.
+
+    # ── Server-owned document keys ────────────────────────────────────────────────────────────
+    # Lifecycle status of the product's passport — one of OpenDPP's real Passport lifecycle values.
     sh:property [
         sh:path dpp:status ;
         sh:name "status" ;
@@ -42,7 +105,7 @@ opdppsh:DigitalProductPassportShape
         sh:datatype xsd:string ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:in ( "DRAFT" "ACTIVE" "PUBLISHED" "ARCHIVED" "DECOMMISSIONED" "RECYCLED" ) ;
+        sh:in ( "DRAFT" "ACTIVE" "RECALLED" "DECOMMISSIONED" ) ;
     ] ;
 
     # Economic operator — present (one node). Its inner fields (name / regId / role) are not in the
@@ -67,17 +130,6 @@ opdppsh:DigitalProductPassportShape
         sh:nodeKind sh:BlankNodeOrIRI ;
     ] ;
 
-    # Battery / ESPR metadata block — present, and its public battery fields are shape-checked.
-    sh:property [
-        sh:path dpp:metadata ;
-        sh:name "metadata" ;
-        sh:description "The public product metadata block (battery characteristics, carbon footprint, durability)." ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:BlankNodeOrIRI ;
-        sh:node opdppsh:BatteryMetadataShape ;
-    ] ;
-
     # eIDAS seal material — the vendor MerkleTreeAttestationProof seal + the signing public key.
     sh:property [
         sh:path dpp:digitalSeal ;
@@ -97,37 +149,9 @@ opdppsh:DigitalProductPassportShape
         sh:pattern "-----BEGIN PUBLIC KEY-----" ;
     ] ;
 
-    # Flattened (top-level) battery fields — OpenDPP mirrors the metadata battery fields at the
-    # root too; require the load-bearing ESPR-battery ones with the same value constraints.
+    # ── Battery / ESPR data elements, at the root under their elementId ───────────────────────
     sh:property [
-        sh:path dppx:category ;
-        sh:name "category" ;
-        sh:datatype xsd:string ;
-        sh:minCount 1 ;
-    ] ;
-    sh:property [
-        sh:path dppx:batteryCategory ;
-        sh:name "batteryCategory" ;
-        sh:description "EU Battery Regulation category." ;
-        sh:datatype xsd:string ;
-        sh:in ( "lmt" "industrial" "ev" "portable" "sli" ) ;
-    ] ;
-    sh:property [
-        sh:path dppx:ratedCapacity ;
-        sh:name "ratedCapacity" ;
-        sh:description "Rated capacity (non-negative integer)." ;
-        sh:datatype xsd:integer ;
-        sh:minInclusive 0 ;
-    ] .
-
-# ── Battery / ESPR metadata block ─────────────────────────────────────────────────────────────
-# Applied to the dpp:metadata node. These terms ARE in the inline JSON-LD context, so they survive
-# expansion and can be value-constrained.
-opdppsh:BatteryMetadataShape
-    a sh:NodeShape ;
-
-    sh:property [
-        sh:path dppx:category ;
+        sh:path dpp:category ;
         sh:name "category" ;
         sh:description "Product category (e.g. \"batteries\")." ;
         sh:datatype xsd:string ;
@@ -135,7 +159,7 @@ opdppsh:BatteryMetadataShape
         sh:maxCount 1 ;
     ] ;
     sh:property [
-        sh:path dppx:batteryCategory ;
+        sh:path dpp:batteryCategory ;
         sh:name "batteryCategory" ;
         sh:description "EU Battery Regulation category." ;
         sh:datatype xsd:string ;
@@ -143,15 +167,16 @@ opdppsh:BatteryMetadataShape
         sh:maxCount 1 ;
     ] ;
     sh:property [
-        sh:path dppx:chemistry ;
+        sh:path dpp:chemistry ;
         sh:name "chemistry" ;
         sh:description "Cell chemistry (free text, e.g. \"LFP (Lithium Iron Phosphate)\")." ;
         sh:datatype xsd:string ;
         sh:maxCount 1 ;
     ] ;
     sh:property [
-        sh:path dppx:ratedCapacity ;
+        sh:path dpp:ratedCapacity ;
         sh:name "ratedCapacity" ;
+        sh:description "Rated capacity (non-negative integer)." ;
         sh:datatype xsd:integer ;
         sh:minInclusive 0 ;
         sh:maxCount 1 ;
@@ -160,7 +185,7 @@ opdppsh:BatteryMetadataShape
     # Carbon footprint — present (ESPR Art. 7 carbon-footprint declaration). Its inner co2eKg / unit
     # fields are not in the inline context, so we check presence only.
     sh:property [
-        sh:path dppx:carbonFootprint ;
+        sh:path dpp:carbonFootprint ;
         sh:name "carbonFootprint" ;
         sh:description "Carbon-footprint declaration. Presence-checked." ;
         sh:minCount 1 ;
@@ -169,7 +194,7 @@ opdppsh:BatteryMetadataShape
 
     # Durability — present (ESPR durability declaration: cycle life, calendar life).
     sh:property [
-        sh:path dppx:durability ;
+        sh:path dpp:durability ;
         sh:name "durability" ;
         sh:description "Durability declaration (cycle life / calendar life). Presence-checked." ;
         sh:minCount 1 ;
@@ -178,7 +203,7 @@ opdppsh:BatteryMetadataShape
 
     # Material composition — present, repeatable (one node per declared material).
     sh:property [
-        sh:path dppx:materialComposition ;
+        sh:path dpp:materialComposition ;
         sh:name "materialComposition" ;
         sh:description "Declared material composition. Presence-checked (repeatable)." ;
         sh:minCount 1 ;

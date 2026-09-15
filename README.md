@@ -79,6 +79,8 @@ node validate.mjs semanticids ../samples/battery-aas-environment.json        # I
 node validate.mjs registry    ../samples/battery-registry-pointer-model.json # CIRPASS-2 EU-registry (NON-NORMATIVE)
 node validate.mjs shacl       ../samples/battery-passport.jsonld             # OpenDPP SHACL shapes (NON-NORMATIVE)
 node validate.mjs sdjwt       ../samples/battery-vc.sdjwt                    # SD-JWT-VC: disclosures + ES256 signature
+node validate.mjs en18223     ../samples/battery-passport.jsonld             # EN 18223:2026 compressed form (OpenDPP-authored, NON-NORMATIVE)
+node validate.mjs en18223-expanded ../samples/battery-passport-expanded.jsonld  # EN 18223:2026 Annex A expanded form
 node validate.mjs epcis       ../samples/epcis-document.json                 # GS1 EPCIS 2.0 document (official 2.0.1 schema)
 node validate.mjs gs1         ../samples/gs1-digital-link.txt               # GS1 Digital Link: grammar + check digits (GS1's engine)
 ```
@@ -136,11 +138,12 @@ opendpp-interop/
 ├── shapes/                 OpenDPP-authored SHACL shapes (NON-NORMATIVE) for the DPP / battery vertical
 │   └── opendpp-dpp-shapes.ttl
 ├── samples/                validated reference artifacts (a battery via both doors + a textile UNTP credential + the EU-registry pointer + the JSON-LD passport + its CIRPASS-2 renderer expansion)
-│   ├── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` door)
+│   ├── battery-passport.jsonld   the public application/ld+json passport (validated by the `shacl` and `en18223` doors)
+│   ├── battery-passport-expanded.jsonld   the same passport in the EN 18223 Annex A expanded form (`en18223-expanded` door)
 │   ├── epcis-document.json       a GS1 EPCIS 2.0 traceability document (validated by the `epcis` door)
 │   └── gs1-digital-link.txt      GS1 Digital Link URIs / AI element strings (validated by the `gs1` door)
 ├── packages/               the @opendpp/* npm client libraries (gs1 · csv · webhooks · eori · aeo · testdata · vies; mirror-managed, see packages/README.md)
-└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl · sdjwt · gs1 · epcis)
+└── validate/               the offline conformance validator (validate.mjs: aas · untp · semanticids · registry · shacl · sdjwt · en18223 · gs1 · epcis)
 ```
 
 ## Official schemas (vendored)
@@ -164,10 +167,11 @@ see [`schemas/README.md`](./schemas/README.md) and [`NOTICE`](./NOTICE)):
 [`shapes/opendpp-dpp-shapes.ttl`](./shapes/opendpp-dpp-shapes.ttl) is an **OpenDPP-authored,
 NON-NORMATIVE** SHACL shapes set for the DPP / battery (ESPR) vertical. It validates OpenDPP's public
 `application/ld+json` passport (the JSON-LD door, e.g. `GET /passport/{id}` with
-`Accept: application/ld+json`) against shapes that target OpenDPP's real DPP vocabulary
-(`https://opendpp-node.eu/ns/dpp#` + `https://opendpp-node.eu/contexts/dpp/v1#`): the lifecycle
-`status`, the responsible `economicOperator`, the `manufacturingFacility`, and the battery metadata
-block (category, battery category, rated capacity, carbon footprint, durability, material composition).
+`Accept: application/ld+json`) against shapes that target OpenDPP's one DPP vocabulary
+(`https://opendpp-node.eu/ns/dpp#`): the EN 18223 header attributes, the lifecycle `status`, the
+responsible `economicOperator`, the `manufacturingFacility`, and the battery data elements, which sit at
+the document root under their elementId as EN 18223 clause 5.2 serialises them (category, battery
+category, rated capacity, carbon footprint, durability, material composition).
 It is a reasonable **starter** set — not an exhaustive ESPR-battery rulebook.
 
 It exists to **fill the gap left by the CIRPASS-2 `dpp-validator`**, which ships placeholder
@@ -226,7 +230,7 @@ the `curl`). Synthetic demo data — see [`NOTICE`](./NOTICE):
 - `cirpass2-renderer-expanded.json` — the **CIRPASS-2 reference renderer** (`dpp-renderer-be`
   `GET /fetch/v1`) output for the JSON-LD passport: the live Jena-parsed + Titanium-JSON-LD-**expanded**
   RDF (30 nodes, every IRI under `opendpp-node.eu`). Captured by running the renderer (reproduction in
-  OpenDPP's `CIRPASS2-Harness.md`), not via `validate.mjs`. NON-NORMATIVE — *reference renderer*, never
+  a dated one-time capture, its runbook retired 2026-09-09), not via `validate.mjs`. NON-NORMATIVE — *reference renderer*, never
   *certified*.
 - `epcis-document.json` — a GS1 **EPCIS 2.0** traceability document (four events: two commissionings, a
   packing aggregation, a shipping) in the shape `POST /api/v1/events/epcis` captures and the lineage walk
@@ -287,7 +291,7 @@ placeholder for any required field it cannot honestly source:
 | Pointer field | OpenDPP source | Encoding / notes |
 | --- | --- | --- |
 | `upi` | MODEL: canonical GS1 Digital Link product key. ITEM: the **compact resolvable unit URL** | MODEL: `https://id.gs1.org/01/<gtin>` for a GTIN-keyed product (or `/8003/<grai>` for a GRAI). ITEM (#932): `${BASE_URL}/u/<22-char base64url of the unit id>` — the live EU DPP Registry caps a registered UPI at **50 characters** and dereferences it, which the 40-fixed-char `id.gs1.org` unit form cannot satisfy for real AI-21 serials; the unit's GS1 identity stays in `modelUpi`/`batchUpi` and its Digital Link. Gated fail-closed at build time (`registryUpiError`, `@opendpp/gs1`). |
-| `reoId` | `EconomicOperator.regId` namespaced by `regIdScheme` | `<SCHEME>-<regId>`, e.g. `EORI-IT12345678`. Recognised schemes `EORI \| VAT \| DUNS \| LEI \| GLN`; max 50 chars. **Refuses if no `regId`.** |
+| `reoId` | `EconomicOperator.regId` namespaced by `regIdScheme` | `<SCHEME>-<regId>`, e.g. `VAT-LT000000000001`. The schemes are the four EN 18219 clause 6 admits — `VAT \| DUNS \| LEI \| GLN`; max 50 chars. **Refuses if no `regId`, and refuses an operator whose scheme is `UNDECLARED`.** |
 | `liveURL` | the public resolver | `${BASE_URL}/passport/<id>` (MODEL) or `/unit/<id>` (ITEM) — the same URL the `vc+jwt` / AAS content-negotiation serve. |
 | `backupURL` | a **distinct** retrieval URL | the stored GS1 Digital Link (`Passport.digitalLinkUri` / `BatteryUnit.digitalLinkUri`), or `${backupBaseUrl}/…` if configured. **Must differ from `liveURL`.** |
 | `commodityCode` | `Passport.metadata.commodityCode` (or `hsCode` / `taricCode` / `hs`) | HS / TARIC code; schema pattern `^[0-9]{4,10}$`. **Refuses to register if absent** — no placeholder. |
@@ -353,7 +357,7 @@ Generated from this same public OpenAPI contract and **version-locked** to it �
 | SDK | Coordinates | Latest | Install |
 | --- | --- | --- | --- |
 | **TypeScript** | [`@opendpp/sdk`](https://www.npmjs.com/package/@opendpp/sdk) | [![@opendpp/sdk version on npm](https://img.shields.io/npm/v/%40opendpp%2Fsdk?style=flat-square&logo=npm&logoColor=white&label=&labelColor=CB3837&color=2F80ED)](https://www.npmjs.com/package/@opendpp/sdk) ![@opendpp/sdk monthly downloads](https://img.shields.io/npm/dm/%40opendpp%2Fsdk?style=flat-square&label=&color=1FA97A) | `npm install @opendpp/sdk` |
-| **Java / Kotlin** | [`eu.opendpp-node:opendpp-sdk`](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) | [![opendpp-sdk version on Maven Central](https://img.shields.io/maven-central/v/eu.opendpp-node/opendpp-sdk?style=flat-square&logo=apachemaven&logoColor=white&label=&labelColor=C71A36&color=2F80ED)](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) ![Java 17+](https://img.shields.io/badge/Java-17%2B-437291?style=flat-square&logo=openjdk&logoColor=white) | `implementation("eu.opendpp-node:opendpp-sdk:1.15.0")` |
+| **Java / Kotlin** | [`eu.opendpp-node:opendpp-sdk`](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) | [![opendpp-sdk version on Maven Central](https://img.shields.io/maven-central/v/eu.opendpp-node/opendpp-sdk?style=flat-square&logo=apachemaven&logoColor=white&label=&labelColor=C71A36&color=2F80ED)](https://central.sonatype.com/artifact/eu.opendpp-node/opendpp-sdk) ![Java 17+](https://img.shields.io/badge/Java-17%2B-437291?style=flat-square&logo=openjdk&logoColor=white) | `implementation("eu.opendpp-node:opendpp-sdk:1.16.0")` |
 | **Python** | [`opendpp-sdk`](https://pypi.org/project/opendpp-sdk/) | [![opendpp-sdk version on PyPI](https://img.shields.io/pypi/v/opendpp-sdk?style=flat-square&logo=pypi&logoColor=white&label=&labelColor=3775A9&color=2F80ED)](https://pypi.org/project/opendpp-sdk/) ![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white) | `pip install opendpp-sdk` |
 
 The Java artifact is built on the JDK `HttpClient` with Jackson; **Kotlin** consumes the very same

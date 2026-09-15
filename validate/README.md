@@ -22,6 +22,8 @@ node validate.mjs untp     ../samples/battery-vc-credential.json
 node validate.mjs registry ../samples/battery-registry-pointer-model.json   # CIRPASS-2 (NON-NORMATIVE)
 node validate.mjs shacl    ../samples/battery-passport.jsonld               # OpenDPP SHACL shapes (NON-NORMATIVE)
 node validate.mjs sdjwt    ../samples/battery-vc.sdjwt                      # SD-JWT-VC: disclosures + ES256 signature
+node validate.mjs en18223  ../samples/battery-passport.jsonld               # EN 18223 compressed form (OpenDPP-authored, NON-NORMATIVE)
+node validate.mjs en18223-expanded ../samples/battery-passport-expanded.jsonld  # EN 18223 Annex A expanded form
 node validate.mjs gs1      ../samples/gs1-digital-link.txt                 # GS1 Digital Link: grammar + check digits (GS1's engine)
 ```
 

@@ -659,7 +659,7 @@
     ],
     "https://opendpp-node.eu/ns/dpp#regId": [
       {
-        "@value": "EU-DEFAULT-001"
+        "@value": "LT000000000001"
       }
     ],
     "https://opendpp-node.eu/ns/dpp#name": [

@@ -7,6 +7,79 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.16.0] — API contract 1.16.0 (aligned with the EN 182xx Digital Product Passport standards)
+
+Carries OpenDPP public API contract **1.16.0** (`openapi.json`): the passport document, its identifiers
+and the API's conduct aligned with the six harmonised CEN/CLC JTC 24 standards — EN 18219, 18220,
+18221, 18222 and 18223, plus the GS1 Digital Link resolver conventions. No vendored standard, schema
+fixture or validator moved; two OpenDPP-authored schemas and two doors are added. Ships under the
+disclosed pre-GA waiver; the diff widens responses and adds operations.
+
+**The XML serialisation (EN 18223 Annex B).** The three passport-resolution doors now also answer
+`Accept: application/xml` with the Annex B form of the same document — the root `DigitalProductPassport`
+in the CEN DPP namespace carrying the Table 1 header, the body's data elements in this node's vocabulary
+namespace. The kit ships no XSD for it: the schema for that annex is part of the licensed publication and
+is not ours to redistribute, so the conformance aid here stays the two OpenDPP-authored JSON Schemas, and
+the XML form is pinned by the node's own tests against the annex's examples.
+
+**The document (EN 18223).** Every passport, unit and tombstone document opens with the clause 4.1.2.1
+header attributes, in the order that clause sets (`digitalProductPassportId`, `uniqueProductIdentifier`,
+`granularity`, `dppSchemaVersion` = `EN 18223:2026`, `dppStatus`, `lastUpdated`, `economicOperatorId`,
+`facilityId`, `contentSpecificationIds` — which of these are required is typed by the shipped
+`en18223` schema), states `productIdScheme`
+beside the identifier, and carries its body as clause 5.2 prescribes — every data element at the root
+under its elementId, no `metadata` wrapper; `proof.sealedKeys` names the keys the seal covers, so the
+seal verifies from the served document alone. Document references are Table 5 RelatedResources
+(`{ contentType, url, language?, resourceTitle? }`, named for the document — `declarationOfConformity`,
+`safetyDatasheet`, `dueDiligenceReport`, …), language-dependent text (`productName`, care instructions,
+e-waste instructions and five prose fields) is a Table 6 array of `{ value, language }`, and the AAS
+export carries each such element as a `MultiLanguageProperty`. `GET /ns/dpp` is the data dictionary of
+clause 4.3, `?representation=full` returns the Annex A form (`PublicPassportJsonLdExpanded`,
+`En18223DataElement`) — `full` being the value EN 18222 clause 8.1 names for the flag, with `expanded`
+accepted as an alias — and every term IRI resolves under the one vocabulary namespace
+(`https://opendpp-node.eu/ns/dpp#`). An element that carries no value is refused at ingest, so a served
+document always satisfies the two schemas below: a grouping element holds at least one member and a
+single-valued one holds a Table 7 value. In the expanded schema `elements` is the whole body — the
+economic operator and the manufacturing facility are data elements there, not root members — and a
+restricted element is admitted by one extra branch: it keeps its dictionary-defined `objectType`, carries
+`redacted: true` and carries no value. That branch is an OpenDPP extension, since the standard models no
+access tiers; a value-bearing element cannot match it. Migration for a client: `data.metadata.<key>` → `data.<key>`;
+`safetyDatasheetUrl: "https://…"` → `safetyDatasheet: { contentType: "application/pdf", url: "https://…" }`;
+`productName: "Cell"` → `productName: [{ value: "Cell", language: "en-GB" }]`.
+
+**Identifiers (EN 18219).** Registering an operator requires `regIdScheme` (`VAT` | `DUNS` | `LEI` |
+`GLN`, each an ISO/IEC 6523 scheme), the identifier checked against the scheme's shape; an EORI travels
+in the optional `eori` field. `economicOperatorId` is `ICD:identifier` (`0223:…` for a VAT-registered
+operator, as in the samples); `EconomicOperatorNode.regIdScheme` is a never-null enum (`UNDECLARED`
+for an operator registered before the declaration). The registry pointer's `reoId` follows. A
+`productId` outside ISO/IEC 646 is refused; an issued identifier is never reassigned (409); a product
+without a GS1 key is issued an EN IEC 61406 Identification Link; owner-tier operations also accept
+the passport's Digital Link URL as `{id}`.
+
+**Carriers (EN 18220).** The QR export operations accept `xDimensionMm` (the width of one module) and
+return an SVG sized in millimetres. Every symbol the node draws carries the 4-module quiet zone
+ISO/IEC 18004 requires — the exports, the public passport page and the workspace preview alike, from one
+published value.
+
+**History (EN 18221).** `GET /api/v1/passports/{id}/history`, `…/history/{version}` and
+`…/history/at?date=` read a passport's archived versions, the last being the point-in-time retrieval
+§4.2 describes. Schemas `PassportHistoryList`, `PassportHistoryVersionSummary`, `PassportHistoryVersion`,
+`PassportHistoryError`.
+
+**API conduct (EN 18222, resolver conventions).** 405 with `Allow` for a served path under another
+method (Table 15); an RFC 8288 `Link` header on every resolver answer, an RFC 9264 linkset on
+`?linkType=all`, `GET /.well-known/gs1resolver`; a Digital Link with a key qualifier the node does
+not model (`AI 10`, `AI 22`) refused with 400 `UNSUPPORTED_KEY_QUALIFIER` while data attributes still
+resolve; https-only webhook subscriptions; the recycled unit's tombstone carrying the header at
+`dppStatus` `archived`. `Error.code` publishes `UNSUPPORTED_KEY_QUALIFIER` and `UNSUPPORTED_REPRESENTATION`.
+
+**Kit additions.** `schemas/en18223-compressed.schema.json` and `schemas/en18223-expanded.schema.json`
+— OpenDPP's reading of clause 5.2 and Annex A, NON-NORMATIVE since the standard publishes examples and
+an XSD rather than a JSON Schema — behind `node validate/validate.mjs en18223 <doc>` and
+`en18223-expanded <doc>`. `samples/battery-passport.jsonld` is regenerated in the aligned shape,
+`samples/battery-passport-expanded.jsonld` is the same passport in the expanded form, and the SHACL
+shapes target the vocabulary namespace and the root elements.
+
 ## [1.15.0] — API contract 1.15.0 (the verifier says what it declines; delivery records state what happened)
 
 Carries OpenDPP public API contract **1.15.0** (`openapi.json`). Two surfaces changed — the public

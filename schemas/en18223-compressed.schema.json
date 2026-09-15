@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opendpp-node.eu/schemas/en18223/compressed.schema.json",
+  "title": "EN 18223:2026 DigitalProductPassport — compressed JSON serialisation (clause 5.2)",
+  "description": "A digital product passport serialised as clause 5.2 prescribes: the nine Table 1 header attributes (seven mandatory) and, beside them, every data element under its elementId as the key — its dictionaryReference and valueDataType omitted because the data dictionary holds them (5.2.2). OpenDPP-authored from the clauses of EN 18223:2026 — the standard publishes examples and an XSD, not a JSON Schema — and NON-NORMATIVE: a conformance aid, not a verdict.",
+  "type": "object",
+  "required": [
+    "digitalProductPassportId",
+    "uniqueProductIdentifier",
+    "granularity",
+    "dppSchemaVersion",
+    "dppStatus",
+    "lastUpdated",
+    "economicOperatorId"
+  ],
+  "properties": {
+    "digitalProductPassportId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The identifier of this DPP instance (4.1.2.1 recommends a URI/URL)."
+    },
+    "uniqueProductIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The unique product identifier the passport describes (EN 18219)."
+    },
+    "granularity": {
+      "type": "string",
+      "pattern": "^([Mm]odel|[Bb]atch|[Ii]tem)$",
+      "description": "The level the identifier addresses: model, batch or item. BOTH spellings pass: 4.1.2.2's prose enumerates the lower-case values, the clause 5.2.4 example spells them capitalised, and the standard is not consistent with itself. The kit's SHACL shape takes the stricter prose reading, so a capitalised value passes here and fails there — deliberately; see schemas/README.md."
+    },
+    "dppSchemaVersion": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The version of the DPP schema the document follows."
+    },
+    "dppStatus": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The status of this digital resource (an open vocabulary)."
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the passport was last changed (ISO 8601, Table 7 xsd:dateTime)."
+    },
+    "economicOperatorId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The identifier of the responsible economic operator (EN 18219 clause 6)."
+    },
+    "facilityId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The identifier of the manufacturing facility, when known (optional)."
+    },
+    "contentSpecificationIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "The content specifications whose data elements the body carries (optional)."
+    }
+  },
+  "additionalProperties": true
+}

@@ -22,3 +22,35 @@ validates against. They are **not** OpenDPP works — each retains its upstream 
 
 > Vendored for convenience and reproducibility. If a copy here ever diverges from upstream, upstream
 > wins — open an issue and we'll refresh it.
+
+## OpenDPP-authored (non-normative)
+
+Two schemas here are **not** vendored: EN 18223:2026 publishes JSON examples and an XSD (Annex B), no JSON
+Schema, so OpenDPP wrote these from the standard's clauses. They are a conformance **aid**, never a
+verdict — *validates against OpenDPP's reading of EN 18223*, not *EN 18223-certified*.
+
+| File | What it checks | Draft | Source |
+| --- | --- | --- | --- |
+| `en18223-compressed.schema.json` | the compressed form of clause 5.2 — the nine Table 1 header attributes (seven mandatory), data elements open beside them under their elementId (5.2.2 leaves their type to the dictionary) | JSON Schema draft-2020-12 | generated from the node's own header constants (`npm run emit:en18223-schema`); Apache-2.0 |
+| `en18223-expanded.schema.json` | the Annex A expanded form — the header, and under `elements[]` one object per element naming its clause 4 subclass and carrying that subclass's members (a collection's `elements`, a single Table 7-typed value, an ordered list of ONE subclass by position, a RelatedResource's Table 5 attributes, a MultiLanguage element's Table 6 values) | JSON Schema draft-2020-12 | same |
+
+Every document the node serves — passport (every tier), unit, tombstone, and the `?representation=full`
+form — is validated against them in the node's own test suite, so the schemas and the documents move
+together.
+
+### Where they knowingly differ from the clauses
+
+An aid that silently disagrees with the text is worse than none, so the four places these schemas do
+not simply mirror EN 18223 are listed here. Two are **lenient** (a document the clause would refuse
+still passes) and two are **strict** (a document the clause allows is refused). None is accidental.
+
+| # | Where | Direction | Why |
+| --- | --- | --- | --- |
+| 1 | `granularity` accepts `Model` as well as `model` | lenient | 4.1.2.2's prose enumerates the lower-case values; the clause 5.2.4 example spells them capitalised. The standard is not consistent with itself, so the schema accepts both. **The kit's own SHACL shape (`../shapes/`) takes the stricter prose reading** — so a capitalised value passes here and fails there. Run both and you will see it. |
+| 2 | `lastUpdated` accepts a UTC offset (`…+02:00`) | lenient | JSON Schema's `date-time` is RFC 3339, which permits an offset. Table 7 fixes the Z-terminated form, so a `+02:00` value is accepted here and is not what the table prints. Every document the node serves is Z-terminated. |
+| 3 | the expanded form **requires** `dictionaryReference` on every element | strict | Table 2 gives it `[0..1]`. The Annex A form exists to carry what the compressed form leaves to the dictionary (5.2.2), so the schema treats it as the shape's point — but a conformant Annex A document that omits it **will be refused here**. |
+| 4 | the expanded form **requires** the `elements` key | strict | 4.1.2.1 holds `[0..*]` data elements, so a header-only passport is structurally valid. Satisfy this with `elements: []`, which the schema accepts; omitting the key entirely is refused. |
+
+Rows 1 and 2 mean a PASS here is not proof of conformance on those two points. Rows 3 and 4 mean a
+FAILURE here is not proof of non-conformance on those two. Everything else the schemas check follows
+the clauses as OpenDPP reads them.

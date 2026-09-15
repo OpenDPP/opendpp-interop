@@ -17,7 +17,9 @@
  *
  * Exit codes: 0 = conformant · 1 = schema/shape errors (printed) · 2 = usage / read error.
  *
- * NOTE: `aas`/`untp`/`registry` check STRUCTURAL conformance against the JSON Schema. `semanticids` checks IDTA
+ * NOTE: `aas`/`untp`/`registry`/`epcis` check STRUCTURAL conformance against the official JSON Schema;
+ * `en18223`/`en18223-expanded` check it against OpenDPP's OWN reading of EN 18223:2026 clause 5.2 / Annex A
+ * (../schemas/en18223-*.schema.json) — the standard ships no JSON Schema, so these are NON-NORMATIVE. `semanticids` checks IDTA
  * template IDENTITY only — it classifies each `semanticId` against the CC-BY IDTA allowlist
  * (../idta-semantic-ids.json), never structural conformance to the template body. `shacl` validates the
  * OpenDPP `application/ld+json` passport against OpenDPP's OWN, NON-NORMATIVE SHACL shapes
@@ -54,6 +56,12 @@ const SCHEMAS = {
   // against and what its lineage `Accept: application/ld+json` projection emits. Note the standard
   // requires CBV SHORT names (`commissioning`) — the legacy urn:epcglobal:cbv:* form is rejected.
   epcis: { file: "epcis-2.0.1.schema.json", Ajv, label: "GS1 EPCIS 2.0 document (official EPCIS 2.0.1 JSON Schema)" },
+  // EN 18223:2026 document structure — OpenDPP-AUTHORED from the standard's clauses (it publishes no JSON
+  // Schema), NON-NORMATIVE. `en18223` is the compressed form the node serves as application/ld+json (clause
+  // 5.2: the Table 1 header, data elements open beside it); `en18223-expanded` is the Annex A expanded form
+  // (`?representation=full`, or its `expanded` alias): every element with its subclass and members.
+  en18223: { file: "en18223-compressed.schema.json", Ajv: Ajv2020, label: "EN 18223:2026 DPP document, compressed form (OpenDPP-authored, non-normative)" },
+  "en18223-expanded": { file: "en18223-expanded.schema.json", Ajv: Ajv2020, label: "EN 18223:2026 DPP document, Annex A expanded form (OpenDPP-authored, non-normative)" },
 };
 
 export const INTEROP_KINDS = Object.keys(SCHEMAS);

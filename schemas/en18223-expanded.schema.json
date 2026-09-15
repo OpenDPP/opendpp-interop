@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opendpp-node.eu/schemas/en18223/expanded.schema.json",
+  "title": "EN 18223:2026 DigitalProductPassport — fully expanded JSON serialisation (Annex A)",
+  "description": "A digital product passport in the Annex A expanded form: the Table 1 header, and under elements[] one object per data element naming its clause 4 subclass (objectType), its relative identifier (elementId), the identifier of its definition (dictionaryReference) and the members that subclass has — a collection's elements, a single value with its Table 7 valueDataType, an ordered list's items by position, a RelatedResource's Table 5 attributes, a MultiLanguage element's Table 6 values. OpenDPP-authored from the clauses of EN 18223:2026 — the standard publishes examples and an XSD, not a JSON Schema — and NON-NORMATIVE: a conformance aid, not a verdict.",
+  "type": "object",
+  "required": [
+    "digitalProductPassportId",
+    "uniqueProductIdentifier",
+    "granularity",
+    "dppSchemaVersion",
+    "dppStatus",
+    "lastUpdated",
+    "economicOperatorId",
+    "elements"
+  ],
+  "properties": {
+    "digitalProductPassportId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The identifier of this DPP instance (4.1.2.1 recommends a URI/URL)."
+    },
+    "uniqueProductIdentifier": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The unique product identifier the passport describes (EN 18219)."
+    },
+    "granularity": {
+      "type": "string",
+      "pattern": "^([Mm]odel|[Bb]atch|[Ii]tem)$",
+      "description": "The level the identifier addresses: model, batch or item. BOTH spellings pass: 4.1.2.2's prose enumerates the lower-case values, the clause 5.2.4 example spells them capitalised, and the standard is not consistent with itself. The kit's SHACL shape takes the stricter prose reading, so a capitalised value passes here and fails there — deliberately; see schemas/README.md."
+    },
+    "dppSchemaVersion": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The version of the DPP schema the document follows."
+    },
+    "dppStatus": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The status of this digital resource (an open vocabulary)."
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the passport was last changed (ISO 8601, Table 7 xsd:dateTime)."
+    },
+    "economicOperatorId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The identifier of the responsible economic operator (EN 18219 clause 6)."
+    },
+    "facilityId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The identifier of the manufacturing facility, when known (optional)."
+    },
+    "contentSpecificationIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "The content specifications whose data elements the body carries (optional)."
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/DataElement"
+      },
+      "description": "The body's data elements, each expanded (Annex A)."
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "valueDataType": {
+      "type": "string",
+      "enum": [
+        "xsd:string",
+        "xsd:boolean",
+        "xsd:decimal",
+        "xsd:integer",
+        "xsd:double",
+        "xsd:float",
+        "xsd:date",
+        "xsd:dateTime",
+        "xsd:anyURI",
+        "xsd:base64Binary"
+      ],
+      "description": "Table 7 — the XSD type of the value."
+    },
+    "nativeValue": {
+      "type": [
+        "string",
+        "number",
+        "boolean"
+      ],
+      "description": "5.2.3 — a JSON native value (a high-precision decimal may travel as a string)."
+    },
+    "MultiLanguageValue": {
+      "type": "object",
+      "required": [
+        "value",
+        "language"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Table 6 — the text in the named language."
+        },
+        "language": {
+          "type": "string",
+          "pattern": "^[a-zA-Z]{2}-[a-zA-Z]{2}$",
+          "description": "Table 6 — a two-letter ISO 639 language code and a two-letter ISO 3166-1 country code (en-GB / en-gb)."
+        }
+      }
+    },
+    "DataElement": {
+      "type": "object",
+      "required": [
+        "elementId",
+        "objectType",
+        "dictionaryReference"
+      ],
+      "properties": {
+        "elementId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Table 2 — the relative identifier of the element within its location."
+        },
+        "objectType": {
+          "type": "string",
+          "enum": [
+            "DataElementCollection",
+            "SingleValuedDataElement",
+            "MultiValuedDataElement",
+            "RelatedResource",
+            "MultiLanguageDataElement"
+          ],
+          "description": "4.1.2.3 — the concrete subclass."
+        },
+        "dictionaryReference": {
+          "type": "string",
+          "format": "uri",
+          "description": "Table 2 — the unique identifier of the element's definition in a data dictionary (4.3)."
+        },
+        "redacted": {
+          "const": true,
+          "description": "OpenDPP extension (the standard does not model access tiers). The element EXISTS on this passport but its value is withheld from the caller's tier, so no value is serialised. The element keeps its own `objectType` — the subclass its `dictionaryReference` defines — rather than being retyped to match a placeholder string, and rather than being dropped, which would make a restricted element indistinguishable from an absent one."
+        }
+      },
+      "oneOf": [
+        {
+          "description": "OpenDPP extension: a restricted element. Matches only when `redacted` is present, and the value-bearing branches below cannot match it (each requires a value or members), so `oneOf` still admits exactly one branch.",
+          "properties": {
+            "redacted": {
+              "const": true
+            }
+          },
+          "required": [
+            "redacted"
+          ]
+        },
+        {
+          "description": "4.1.2.4 / 5.2.5 — a collection holds at least one member, of any subclass.",
+          "properties": {
+            "objectType": {
+              "const": "DataElementCollection"
+            },
+            "elements": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/DataElement"
+              }
+            }
+          },
+          "required": [
+            "elements"
+          ]
+        },
+        {
+          "description": "4.1.2.5 / 5.2.6 — exactly one native value, optionally typed by Table 7.",
+          "properties": {
+            "objectType": {
+              "const": "SingleValuedDataElement"
+            },
+            "valueDataType": {
+              "$ref": "#/$defs/valueDataType"
+            },
+            "value": {
+              "$ref": "#/$defs/nativeValue"
+            }
+          },
+          "required": [
+            "value"
+          ]
+        },
+        {
+          "description": "4.1.2.6 / 5.2.7 — an ordered list whose items are elements of ONE subclass, identified by position.",
+          "properties": {
+            "objectType": {
+              "const": "MultiValuedDataElement"
+            },
+            "valueDataType": {
+              "$ref": "#/$defs/valueDataType"
+            },
+            "value": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/DataElement"
+              },
+              "anyOf": [
+                {
+                  "items": {
+                    "properties": {
+                      "objectType": {
+                        "const": "DataElementCollection"
+                      }
+                    }
+                  }
+                },
+                {
+                  "items": {
+                    "properties": {
+                      "objectType": {
+                        "const": "SingleValuedDataElement"
+                      }
+                    }
+                  }
+                },
+                {
+                  "items": {
+                    "properties": {
+                      "objectType": {
+                        "const": "MultiValuedDataElement"
+                      }
+                    }
+                  }
+                },
+                {
+                  "items": {
+                    "properties": {
+                      "objectType": {
+                        "const": "RelatedResource"
+                      }
+                    }
+                  }
+                },
+                {
+                  "items": {
+                    "properties": {
+                      "objectType": {
+                        "const": "MultiLanguageDataElement"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "required": [
+            "value"
+          ]
+        },
+        {
+          "description": "4.1.2.7 / 5.2.8 — Table 5: contentType [1], url [1], language [0..1], resourceTitle [0..1]; a legal act may add attributes.",
+          "properties": {
+            "objectType": {
+              "const": "RelatedResource"
+            },
+            "contentType": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}$"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "language": {
+              "type": "string",
+              "pattern": "^[a-zA-Z]{2}-[a-zA-Z]{2}$"
+            },
+            "resourceTitle": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "contentType",
+            "url"
+          ]
+        },
+        {
+          "description": "4.1.2.8 / 5.2.9 — one or many Table 6 values.",
+          "properties": {
+            "objectType": {
+              "const": "MultiLanguageDataElement"
+            },
+            "value": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/MultiLanguageValue"
+              }
+            }
+          },
+          "required": [
+            "value"
+          ]
+        }
+      ]
+    }
+  }
+}

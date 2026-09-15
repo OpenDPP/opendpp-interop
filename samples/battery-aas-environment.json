@@ -135,6 +135,15 @@
     {
       "id": "urn:opendpp:submodel:compliance",
       "idShort": "ComplianceMetadata",
+      "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+          {
+            "type": "GlobalReference",
+            "value": "urn:opendpp:submodel-spec:compliance:1.0.0"
+          }
+        ]
+      },
       "modelType": "Submodel",
       "submodelElements": [
         {

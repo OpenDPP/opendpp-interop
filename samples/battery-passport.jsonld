@@ -5,20 +5,28 @@
       "DigitalProductPassport": "https://opendpp-node.eu/ns/dpp#DigitalProductPassport",
       "economicOperator": "https://opendpp-node.eu/ns/dpp#economicOperator",
       "manufacturingFacility": "https://opendpp-node.eu/ns/dpp#manufacturingFacility",
-      "metadata": "https://opendpp-node.eu/ns/dpp#metadata",
       "digitalSeal": "https://opendpp-node.eu/ns/dpp#digitalSeal",
       "signingPublicKey": "https://opendpp-node.eu/ns/dpp#signingPublicKey",
       "status": "https://opendpp-node.eu/ns/dpp#status",
       "archivedAt": "https://opendpp-node.eu/ns/dpp#archivedAt",
       "retentionUntil": "https://opendpp-node.eu/ns/dpp#retentionUntil",
-      "category": "https://opendpp-node.eu/contexts/dpp/v1#category",
-      "batteryCategory": "https://opendpp-node.eu/contexts/dpp/v1#batteryCategory",
-      "chemistry": "https://opendpp-node.eu/contexts/dpp/v1#chemistry",
-      "ratedCapacity": "https://opendpp-node.eu/contexts/dpp/v1#ratedCapacity",
-      "carbonFootprint": "https://opendpp-node.eu/contexts/dpp/v1#carbonFootprint",
-      "durability": "https://opendpp-node.eu/contexts/dpp/v1#durability",
-      "materialComposition": "https://opendpp-node.eu/contexts/dpp/v1#materialComposition",
-      "facilityDetails": "https://opendpp-node.eu/contexts/dpp/v1#facilityDetails"
+      "productIdScheme": "https://opendpp-node.eu/ns/dpp#productIdScheme",
+      "digitalProductPassportId": "https://opendpp-node.eu/ns/dpp#digitalProductPassportId",
+      "uniqueProductIdentifier": "https://opendpp-node.eu/ns/dpp#uniqueProductIdentifier",
+      "granularity": "https://opendpp-node.eu/ns/dpp#granularity",
+      "dppSchemaVersion": "https://opendpp-node.eu/ns/dpp#dppSchemaVersion",
+      "dppStatus": "https://opendpp-node.eu/ns/dpp#dppStatus",
+      "lastUpdated": "https://opendpp-node.eu/ns/dpp#lastUpdated",
+      "economicOperatorId": "https://opendpp-node.eu/ns/dpp#economicOperatorId",
+      "facilityId": "https://opendpp-node.eu/ns/dpp#facilityId",
+      "contentSpecificationIds": "https://opendpp-node.eu/ns/dpp#contentSpecificationIds",
+      "category": "https://opendpp-node.eu/ns/dpp#category",
+      "batteryCategory": "https://opendpp-node.eu/ns/dpp#batteryCategory",
+      "chemistry": "https://opendpp-node.eu/ns/dpp#chemistry",
+      "carbonFootprint": "https://opendpp-node.eu/ns/dpp#carbonFootprint",
+      "durability": "https://opendpp-node.eu/ns/dpp#durability",
+      "materialComposition": "https://opendpp-node.eu/ns/dpp#materialComposition",
+      "facilityDetails": "https://opendpp-node.eu/ns/dpp#facilityDetails"
     }
   ],
   "@type": "DigitalProductPassport",
@@ -26,6 +34,18 @@
   "id": "demo-battery-passport",
   "productId": "09521234543213",
   "digitalLinkUri": "https://id.gs1.org/01/09521234543213",
+  "productIdScheme": "GS1_DIGITAL_LINK",
+  "digitalProductPassportId": "https://opendpp-node.eu/passport/demo-battery-passport",
+  "uniqueProductIdentifier": "https://id.gs1.org/01/09521234543213",
+  "granularity": "model",
+  "dppSchemaVersion": "EN 18223:2026",
+  "dppStatus": "active",
+  "lastUpdated": "2026-02-18T00:00:00.000Z",
+  "economicOperatorId": "0223:IT12345678901",
+  "facilityId": "https://id.gs1.org/414/5412345000013",
+  "contentSpecificationIds": [
+    "https://opendpp-node.eu/api/v1/schemas/batteries"
+  ],
   "digitalSeal": "MEQCIElESAMPLEdemoSealSignatureBase64DerNotARealSignatureAAAA==",
   "signingPublicKey": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIEXAMPLEdemoPublicKeyNotReal0000000000000000\n-----END PUBLIC KEY-----",
   "status": "ACTIVE",
@@ -42,7 +62,18 @@
     "verificationMethod": "https://opendpp-node.eu/passport/demo-battery-passport#key-1",
     "signatureValue": "MEQCIElESAMPLEdemoSealSignatureBase64DerNotARealSignatureAAAA==",
     "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIEXAMPLEdemoPublicKeyNotReal0000000000000000\n-----END PUBLIC KEY-----",
-    "merkleRoot": "9fff6119fbf1c08fa9cf6c5c8c94ff05349563c7e5cd1b0225a46f3b9c8b7b4e"
+    "merkleRoot": "9fff6119fbf1c08fa9cf6c5c8c94ff05349563c7e5cd1b0225a46f3b9c8b7b4e",
+    "sealedKeys": [
+      "batteryCategory",
+      "carbonFootprint",
+      "category",
+      "chemistry",
+      "durability",
+      "materialComposition"
+    ],
+    "redactedLeaves": {
+      "ratedCapacity": "124d922fdf8a54157285c345fbdf021ce1c14d47798d7e32aaea3241d1ebce08"
+    }
   },
   "createdAt": "2026-02-18T00:00:00.000Z",
   "updatedAt": "2026-02-18T00:00:00.000Z",
@@ -50,7 +81,8 @@
     "@type": "EconomicOperator",
     "id": "op-eu-default",
     "name": "OpenDPP Demo Manufacturing — NOT A REAL COMPANY",
-    "regId": "IT12345678",
+    "regId": "IT12345678901",
+    "regIdScheme": "VAT",
     "role": "manufacturer"
   },
   "manufacturingFacility": {
@@ -61,40 +93,9 @@
     "activity": null,
     "country": "DE"
   },
-  "metadata": {
-    "category": "batteries",
-    "batteryCategory": "ev",
-    "chemistry": "LFP (Lithium Iron Phosphate)",
-    "ratedCapacity": 100000,
-    "carbonFootprint": {
-      "co2eKg": 4200.5,
-      "unit": "kg CO2e",
-      "calculationMethod": "ISO 14067"
-    },
-    "durability": {
-      "cycleLife": 3000,
-      "calendarLifeYears": 12
-    },
-    "materialComposition": [
-      {
-        "material": "Lithium",
-        "percent": 7
-      },
-      {
-        "material": "Iron",
-        "percent": 30
-      },
-      {
-        "material": "Phosphate",
-        "percent": 20
-      }
-    ],
-    "facilityDetails": "[REDACTED - Privileged Access Required]"
-  },
   "category": "batteries",
   "batteryCategory": "ev",
   "chemistry": "LFP (Lithium Iron Phosphate)",
-  "ratedCapacity": 100000,
   "carbonFootprint": {
     "co2eKg": 4200.5,
     "unit": "kg CO2e",
