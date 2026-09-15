@@ -140,6 +140,8 @@ import {
   parseEori,
   classifyEoriCountry,
   REG_ID_SCHEMES,
+  ISO6523_ICD_BY_SCHEME,
+  economicOperatorIdentifier,
 } from "@opendpp/eori";
 
 isValidEoriSyntax("DE1234567890"); // true
@@ -151,9 +153,15 @@ parseEori("ie2025292w");
 classifyEoriCountry("GB123456789000");
 // { countryCode: "GB", scope: "great-britain", euAuthoritative: false, note: "GB … validated by HMRC …" }
 
-// regId / scheme validation used on operator create/update paths (EORI | VAT | DUNS | NATIONAL | OTHER):
-validateOperatorRegId("DE1234567890", "EORI"); // null (ok)
-validateOperatorRegId("EORI-MOCK-1");          // "Fabricated registration ids (EORI-MOCK…) are not accepted…"
+// Operator identifier validation under the EN 18219 clause 6 schemes (VAT | DUNS | LEI | GLN) — each has an
+// ISO/IEC 6523 ICD, so `economicOperatorIdentifier` renders the EN 18223 header value. The EORI is a customs
+// identifier with no ICD: it is not a scheme, and travels beside the identifier.
+validateOperatorRegId("DE811907980", "VAT");            // null (ok)
+validateOperatorRegId("529900T8BM49AURSDO55", "LEI");   // null (ok — ISO 17442 check digits verified)
+validateOperatorRegId("DE1234567890", "EORI");          // "regIdScheme must be one of: VAT, DUNS, LEI, GLN"
+validateOperatorRegId("EORI-MOCK-1", "VAT");            // "Fabricated registration ids (EORI-MOCK…) are not accepted…"
+economicOperatorIdentifier("DE811907980", "VAT");       // "0223:DE811907980"
+ISO6523_ICD_BY_SCHEME.GLN;                               // "0088"
 ```
 
 ## Notes

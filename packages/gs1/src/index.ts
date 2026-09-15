@@ -157,15 +157,16 @@ export const NON_GS1_PRODUCT_ID_WARNING_CODE = "NON_GS1_PRODUCT_ID";
 
 /**
  * #249: the single non-blocking advisory for a non-GS1 productId, shared by every ingest path
- * (create / bulk / AAS / validate-only) so the wording can't drift. The passport still saves and
- * resolves via `/passport/{id}`; it just has no scannable GS1 Digital Link / QR. The `code` is a
- * permanent machine handle; the `message`/`friendlyMessage` wording may change, the code will not.
+ * (create / bulk / AAS / validate-only) so the wording can't drift. The passport still saves; its
+ * identifier is an Identification Link (see `generateDigitalLinkUri`) rather than a GS1 Digital Link,
+ * so it is scannable but invisible to GS1 resolvers. The `code` is a permanent machine handle; the
+ * `message`/`friendlyMessage` wording may change, the code will not.
  */
 export function nonGs1Warning(productId: string): { code: string; path: string; message: string; friendlyMessage: string } {
   return {
     code: NON_GS1_PRODUCT_ID_WARNING_CODE,
     path: "productId",
-    message: `productId "${productId.trim()}" is not a GS1 GTIN-14 or GRAI; this passport resolves via /passport/{id} and has no scannable GS1 Digital Link / QR.`,
+    message: `productId "${productId.trim()}" is not a GS1 GTIN-14 or GRAI; this passport is issued under EN 18219 Scheme 2 as an EN IEC 61406 Identification Link (/passport/{id}?.P={productId}) — scannable, but not a GS1 Digital Link, so GS1 resolvers will not find it.`,
     friendlyMessage: "This product has no GS1 GTIN, so it won't have a scannable GS1 QR code — it resolves via its internal link instead.",
   };
 }
@@ -217,8 +218,9 @@ export interface DigitalLinkOptions {
 }
 
 /**
- * Generates a valid GS1 Digital Link conforming URI for the SKU/type-level passport
- * based on its identifier (GTIN key '01' or GRAI key '8003') and database passport ID (serial number key '21').
+ * Generates the SKU/type-level passport's identifier URI: a GS1 Digital Link for a GS1 key (GTIN → `/01`,
+ * GRAI → `/8003`), or — for a productId that is not a GS1 key — an EN IEC 61406 Identification Link
+ * on the passport's own route with the product code as the `.P` Data Identifier (EN 18219 Scheme 2).
  *
  * NOTE: this is the SKU/type-level link; AI-21 here carries the passport id, not a physical
  * unit serial. Individual serialised units (e.g. each battery, Art. 77(2)) use
@@ -237,25 +239,47 @@ export function generateDigitalLinkUri(productId: string, passportId: string, op
   // a valid GRAI key-qualifier; both are REJECTED by GS1's Barcode Syntax Engine (#155 T2).
   if (isGTINVal(trimId)) return `${baseUrl}/01/${trimId}`;
   if (isGRAIVal(trimId)) return `${baseUrl}/8003/${encodeURIComponent(trimId)}`;
-  // Non-GS1 SKU identifier (no GTIN/GRAI): there is no conformant GS1 Digital Link for it, so resolve
-  // via the internal passport route rather than emit a malformed `/01/<non-gtin>` link.
-  return `${baseUrl}/passport/${encodeURIComponent(passportId.trim())}`;
+  // Not a GS1 key: there is no conformant GS1 Digital Link for it. The identifier is instead an EN 18219
+  // Scheme 2 Identification Link (EN IEC 61406-1 + 61406-2): the passport's own URL carries the unique
+  // string in its path and the MODEL-level product code as the `.P` Data Identifier in its query —
+  // EN 18219 §5.3.2.2 / Table B.15. An unstructured IL would be item-level only (§5.3.2.1), and a
+  // `/01/<non-gtin>` path would be a malformed GS1 link, so neither is emitted.
+  return `${baseUrl}/passport/${encodeURIComponent(passportId.trim())}?.P=${encodeURIComponent(trimId)}`;
+}
+
+/** Options for the unit-link builder: the resolver host, plus the unit's own id for a unit whose passport is not GTIN-keyed. */
+export interface UnitLinkOptions extends DigitalLinkOptions {
+  /**
+   * The BatteryUnit id. REQUIRED when the passport's productId is not a GTIN — the unit is then
+   * identified by an Identification Link on its own `/unit/{id}` route, so the id must exist first.
+   */
+  unitId?: string;
 }
 
 /**
- * Generates a GS1 Digital Link URI for an INDIVIDUAL serialised unit:
- * /{01|8003}/{productId}/21/{serialNumber}, where AI-21 carries the real physical serial.
- * This is what makes a battery passport "unique to each individual battery" (Art. 77(2)).
+ * Generates an INDIVIDUAL serialised unit's identifier URI. Under a GTIN-keyed passport it is the GS1
+ * Digital Link `/01/{gtin}/21/{serialNumber}`, AI 21 carrying the real physical serial — what makes a
+ * battery passport "unique to each individual battery" (Art. 77(2)). Under any other passport — a GRAI,
+ * whose key admits no AI 21 qualifier, or a non-GS1 productId — it is an EN IEC 61406 Identification
+ * Link on the unit's own route, `/unit/{unitId}?.P={productId}&.S={serialNumber}`: item-level by
+ * construction, carrying the product code and serial as 61406-2 Data Identifiers (EN 18219 §5.3.2.2).
+ * That branch needs the unit id, and refuses rather than emit a malformed `/01/<non-gtin>` path.
  *
  * `opts.baseUrl` overrides the resolver host; when omitted it falls back to `process.env.BASE_URL`
  * then the canonical app host (back-compat).
  */
-export function generateUnitDigitalLinkUri(productId: string, serialNumber: string, opts?: DigitalLinkOptions): string {
+export function generateUnitDigitalLinkUri(productId: string, serialNumber: string, opts?: UnitLinkOptions): string {
   const trimId = productId.trim();
   const cleanSerial = encodeURIComponent(serialNumber.trim());
   const baseUrl = (opts?.baseUrl || process.env.BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, "");
-  const ai = resolvePrimaryAi(trimId);
-  return `${baseUrl}/${ai}/${encodeURIComponent(trimId)}/21/${cleanSerial}`;
+  if (isGTINVal(trimId)) return `${baseUrl}/01/${trimId}/21/${cleanSerial}`;
+  const unitId = opts?.unitId?.trim();
+  if (!unitId) {
+    throw new Error(
+      `generateUnitDigitalLinkUri: "${trimId}" is not a GTIN, so its unit is identified by an Identification Link on the unit's own /unit/{id} route — pass opts.unitId`
+    );
+  }
+  return `${baseUrl}/unit/${encodeURIComponent(unitId)}?.P=${encodeURIComponent(trimId)}&.S=${cleanSerial}`;
 }
 
 /** Canonical app host — the BASE_URL fallback when the env var is unset (dev/test only; prod always

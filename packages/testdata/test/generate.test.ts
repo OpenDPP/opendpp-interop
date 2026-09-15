@@ -37,7 +37,7 @@ test("every ESPR category generates a structurally coherent sample", () => {
     assert.ok(p.productId.startsWith(TESTDATA_GS1_PREFIX), `${category}: fictional prefix expected`);
     const m = p.metadata as Record<string, any>;
     assert.equal(m.category, category);
-    assert.match(String(m.productName), / \(SAMPLE\)$/, `${category}: synthetic marker expected`);
+    assert.match(String(m.productName?.[0]?.value), / \(SAMPLE\)$/, `${category}: synthetic marker expected (productName is a translated text)`);
     // Universal regulatory base shape.
     const shares = (m.materialComposition as { percentage: number }[]).map((x) => x.percentage);
     assert.equal(shares.reduce((a, b) => a + b, 0), 100, `${category}: composition must sum to 100`);

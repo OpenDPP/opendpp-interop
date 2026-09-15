@@ -62,6 +62,7 @@ canonicalProductUpi("09501101531000");   // "https://id.gs1.org/01/0950110153100
 // Resolver links (see the baseUrl note below):
 generateDigitalLinkUri("09501101531000", "passport-id");        // ".../01/09501101531000"
 generateUnitDigitalLinkUri("09501101531000", "BATTERY-SERIAL"); // ".../01/09501101531000/21/BATTERY-SERIAL"
+generateUnitDigitalLinkUri("WIDGET-1", "SN-7", { unitId: "u-1" }); // ".../unit/u-1?.P=WIDGET-1&.S=SN-7" (EN IEC 61406 Identification Link; unitId required)
 
 parseDigitalLinkPath("09501101531000/21/ABC");
 // { primaryId: "09501101531000", additionalAttributes: { "21": "ABC" } }
@@ -102,7 +103,7 @@ Beyond the helpers shown above, the package also exports:
 | `isValidGLN(gln)` | GLN-13 (Global Location Number) check — 13 digits + mod-10. |
 | `isGRAIVal(val)` | GRAI (AI 8003) check — 14-digit asset id (mod-10) + optional CSET-82 serial (≤ 16 chars). |
 | `gs1CheckDigit(body)` | The GS1 mod-10 check digit for a numeric body — the algorithm behind `makeGtin`/`makeGln`. |
-| `nonGs1Warning(productId)` | The non-blocking `warnings[]` advisory for a non-GS1 `productId` (it saves, but gets no scannable GS1 Digital Link / QR). |
+| `nonGs1Warning(productId)` | The non-blocking `warnings[]` advisory for a non-GS1 `productId` (it saves, and is issued an EN IEC 61406 Identification Link — `/passport/{id}?.P={productId}`, EN 18219 Scheme 2 — instead of a GS1 Digital Link). |
 | `NON_GS1_PRODUCT_ID_WARNING_CODE` | That advisory's machine-stable `code` (`"NON_GS1_PRODUCT_ID"`). |
 
 ## The OpenDPP toolkit

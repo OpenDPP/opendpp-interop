@@ -98,8 +98,16 @@ function composition(rng: Rng, pool: readonly string[], key: "material" | "fiber
   return names.map((name, i) => ({ [key]: name, percentage: shares[i] }));
 }
 
-const docUrl = (rng: Rng, kind: string): string =>
-  `https://compliance.example.opendpp-node.eu/docs/${kind}-${rng.hex(8)}.pdf`;
+/** A translated text (EN 18223 MultiLanguageDataElement) in the samples' one language. */
+const text = (value: string): Record<string, unknown>[] => [{ value, language: "en-GB" }];
+
+/** A document reference (EN 18223 RelatedResource) — the shape every `*Url` field became. */
+const docRef = (rng: Rng, kind: string, resourceTitle: string): Record<string, unknown> => ({
+  contentType: "application/pdf",
+  url: `https://compliance.example.opendpp-node.eu/docs/${kind}-${rng.hex(8)}.pdf`,
+  resourceTitle,
+  language: "en-GB",
+});
 
 function certificates(rng: Rng, category: EsprCategory): Record<string, unknown>[] {
   return rng.pickN(CERT_NAMES[category], rng.int(1, 2)).map((name) => ({
@@ -133,9 +141,10 @@ function facilityDetails(rng: Rng, category: EsprCategory): Record<string, unkno
   if (category === "textiles" || category === "electronics") {
     detail.traceabilityDocs = [
       {
-        documentName: "Supply Chain Origin Attestation (SAMPLE)",
+        resourceTitle: "Supply Chain Origin Attestation (SAMPLE)",
         documentHash: rng.hex(64),
-        documentUrl: `https://traceability.example.opendpp-node.eu/docs/origin-${rng.hex(8)}.pdf`,
+        contentType: "application/pdf",
+        url: `https://traceability.example.opendpp-node.eu/docs/origin-${rng.hex(8)}.pdf`,
       },
     ];
   }
@@ -150,7 +159,7 @@ export function buildMetadata(category: EsprCategory, rng: Rng): Record<string, 
   const facilities = facilityDetails(rng, category);
   const m: Record<string, unknown> = {
     category,
-    productName: `${rng.pick(PRODUCT_NAMES[category])} (SAMPLE)`,
+    productName: text(`${rng.pick(PRODUCT_NAMES[category])} (SAMPLE)`),
     materialComposition: composition(rng, MATERIALS[category], "material"),
     carbonFootprint: { unit: "kg CO2e", co2eKg: scope1 + scope2 + scope3, scope1, scope2, scope3 },
     originCountry: (facilities[0].eori as string).slice(0, 2),
@@ -158,7 +167,7 @@ export function buildMetadata(category: EsprCategory, rng: Rng): Record<string, 
     regulatoryCompliance: {
       ceMarking: true,
       certificates: certificates(rng, category),
-      declarationOfConformityUrl: docUrl(rng, "conformity"),
+      declarationOfConformity: docRef(rng, "conformity", "EU Declaration of Conformity (SAMPLE)"),
     },
   };
 
@@ -169,7 +178,7 @@ export function buildMetadata(category: EsprCategory, rng: Rng): Record<string, 
       m.careInstructions = rng.pickN(
         ["Machine wash cold", "Do not tumble dry", "Iron on low heat", "Wash inside out", "Line dry in shade"],
         rng.int(2, 3),
-      );
+      ).map(text);
       m.recycledContent = {
         percentage: rng.int(10, 80),
         source: rng.pick(["pre-consumer", "post-consumer", "mixed"]),
@@ -179,7 +188,7 @@ export function buildMetadata(category: EsprCategory, rng: Rng): Record<string, 
       m.batteryCategory = rng.pick(["industrial", "ev", "portable", "lmt"]);
       m.chemistry = rng.pick(["LFP", "NMC 811", "LTO", "Sodium-ion"]);
       // Keep the flagship category coherent: the display name reflects the drawn chemistry.
-      m.productName = `${m.chemistry} ${rng.pick(["Industrial Cell", "EV Module", "Storage Pack", "Transit Battery"])} (SAMPLE)`;
+      m.productName = text(`${m.chemistry} ${rng.pick(["Industrial Cell", "EV Module", "Storage Pack", "Transit Battery"])} (SAMPLE)`);
       m.electrochemicalCapacity = { value: rng.int(20, 300), unit: "Ah" };
       m.stateOfCharge = rng.int(20, 80);
       m.durability = { cycleLife: rng.int(2000, 8000), calendarLifeYears: rng.int(8, 20) };
@@ -195,7 +204,7 @@ export function buildMetadata(category: EsprCategory, rng: Rng): Record<string, 
         nickel: rng.int(0, 20),
       };
       m.esgDueDiligence = {
-        dueDiligenceReportUrl: docUrl(rng, "diligence"),
+        dueDiligenceReport: docRef(rng, "diligence", "Battery due-diligence report (SAMPLE)"),
         cobaltCountryOfOrigin: rng.pick(["CD", "AU", "MA"]),
         lithiumCountryOfOrigin: rng.pick(["CL", "AU", "PT"]),
         nickelCountryOfOrigin: rng.pick(["ID", "CA", "FI"]),
@@ -206,7 +215,7 @@ export function buildMetadata(category: EsprCategory, rng: Rng): Record<string, 
       // The CPR Declaration of Performance is its OWN document, distinct from the Declaration of
       // Conformity in the regulatory block — this used to copy that URL, which made every generated
       // construction sample claim one document was both.
-      m.declarationOfPerformanceUrl = docUrl(rng, "dop");
+      m.declarationOfPerformance = docRef(rng, "dop", "Declaration of Performance (SAMPLE)");
       break;
     }
     case "electronics":
@@ -215,11 +224,11 @@ export function buildMetadata(category: EsprCategory, rng: Rng): Record<string, 
       m.batteryLife = rng.int(8, 72);
       m.recycledPlasticContent = rng.int(10, 60);
       m.circularityIndices = { repairabilityScore: rng.int(5, 10), durabilityScore: rng.int(5, 10) };
-      m.electronicWasteInstructions = "Return via a WEEE collection point; never dispose of in household waste.";
+      m.electronicWasteInstructions = text("Return via a WEEE collection point; never dispose of in household waste.");
       break;
     case "chemicals":
       m.hazardClassification = rng.pickN(["H315", "H319", "H412", "H302"], 2);
-      m.safetyDatasheetUrl = docUrl(rng, "sds");
+      m.safetyDatasheet = docRef(rng, "sds", "Safety Data Sheet (SAMPLE)");
       m.presenceOfSVHC = false;
       break;
     case "cosmetics":

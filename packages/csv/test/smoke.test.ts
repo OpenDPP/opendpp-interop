@@ -116,6 +116,6 @@ test("templates expose the canonical columns per category", () => {
   assert.equal(tpl.columns.find((c) => c.name === "productId")?.required, true);
 
   const header = passportCsvTemplateHeader("textiles");
-  assert.ok(header.startsWith("productId,operatorId,facilityId,category,materials,origin,facilities"));
+  assert.ok(header.startsWith("productId,operatorId,facilityId,category,language,materials,origin,facilities"));
   assert.ok(header.includes("fiberComposition"));
 });

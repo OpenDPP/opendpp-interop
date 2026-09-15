@@ -23,6 +23,20 @@ const joinPairs = (items: { percentage: number }[] | undefined, key: string): st
 
 const joinList = (items: string[] | undefined): string | undefined => items?.join("|");
 
+/** The text of a translated value (the generated samples carry one language, which the row's `language` cell names). */
+const textOf = (v: Meta[] | undefined): string | undefined => v?.[0]?.value;
+
+/** A document reference as its `contentType|url|title|language` cell (trailing blanks trimmed). */
+const resourceCell = (r: Meta | undefined): string | undefined =>
+  r ? trimTrailingPipes([r.contentType, r.url, r.resourceTitle ?? "", r.language ?? ""].join("|")) : undefined;
+
+/** Drop empty trailing segments of a `|` micro-format cell (a loop, not a regex — no backtracking to reason about). */
+function trimTrailingPipes(cell: string): string {
+  let end = cell.length;
+  while (end > 0 && cell[end - 1] === "|") end -= 1;
+  return cell.slice(0, end);
+}
+
 function facilityCell(facilities: Meta[] | undefined): string | undefined {
   if (!facilities?.length) return undefined;
   return facilities
@@ -35,7 +49,7 @@ function facilityCell(facilities: Meta[] | undefined): string | undefined {
         segs.push([plot.plotId, plot.polygonType, ...coords].join("|"));
       }
       const doc = f.traceabilityDocs?.[0];
-      if (doc) segs.push([doc.documentName, doc.documentHash, doc.documentUrl].join("|"));
+      if (doc) segs.push(trimTrailingPipes([doc.contentType, doc.url, doc.resourceTitle, doc.documentHash, doc.language ?? ""].join("|")));
       return segs.join(":");
     })
     .join("||");
@@ -45,6 +59,12 @@ const certificatesCell = (certs: Meta[] | undefined): string | undefined =>
   certs?.length
     ? certs.map((c) => [c.name, c.referenceNumber, c.issuer, c.validUntil].join(":")).join("|")
     : undefined;
+
+/** The one language the sample's translated texts carry (the CSV template holds one per row). */
+function languageOf(m: Meta): string | undefined {
+  const first = m.productName?.[0] ?? m.careInstructions?.[0]?.[0] ?? m.electronicWasteInstructions?.[0];
+  return first?.language ?? "en-GB";
+}
 
 /**
  * Serializes one generated passport to the cells of its category's public CSV template.
@@ -58,11 +78,12 @@ export function passportToCsvRow(passport: PassportCreateInput): Record<string, 
   setCell(row, "operatorId", passport.operatorId);
   setCell(row, "facilityId", passport.facilityId);
   setCell(row, "category", m.category);
+  setCell(row, "language", languageOf(m));
   setCell(row, "materials", joinPairs(m.materialComposition, "material"));
   setCell(row, "origin", m.originCountry);
   setCell(row, "facilities", facilityCell(m.facilityDetails));
   setCell(row, "regulatoryCertificates", certificatesCell(m.regulatoryCompliance?.certificates));
-  setCell(row, "declarationOfConformityUrl", m.regulatoryCompliance?.declarationOfConformityUrl);
+  setCell(row, "declarationOfConformity", resourceCell(m.regulatoryCompliance?.declarationOfConformity));
   setCell(row, "ceMarking", m.regulatoryCompliance?.ceMarking);
   setCell(row, "carbonFootprint", m.carbonFootprint?.co2eKg);
   setCell(row, "scope1", m.carbonFootprint?.scope1);
@@ -73,9 +94,11 @@ export function passportToCsvRow(passport: PassportCreateInput): Record<string, 
     case "textiles":
       setCell(row, "fiberComposition", joinPairs(m.fiberComposition, "fiber"));
       setCell(row, "size", m.size);
-      setCell(row, "careInstructions", joinList(m.careInstructions));
+      setCell(row, "careInstructions", joinList((m.careInstructions as Meta[][] | undefined)?.map((step) => textOf(step) ?? "")));
       setCell(row, "recycledContentPct", m.recycledContent?.percentage);
       setCell(row, "recycledContentSource", m.recycledContent?.source);
+      setCell(row, "takeBackScheme", resourceCell(m.circularityAttributes?.takeBackScheme));
+      setCell(row, "repairabilityGuide", resourceCell(m.circularityAttributes?.repairabilityGuide));
       break;
     case "batteries":
       setCell(row, "batteryCategory", m.batteryCategory);
@@ -90,7 +113,8 @@ export function passportToCsvRow(passport: PassportCreateInput): Record<string, 
       setCell(row, "recycledLithium", m.recycledContentShare?.lithium);
       setCell(row, "recycledLead", m.recycledContentShare?.lead);
       setCell(row, "recycledNickel", m.recycledContentShare?.nickel);
-      setCell(row, "dueDiligenceReportUrl", m.esgDueDiligence?.dueDiligenceReportUrl);
+      setCell(row, "disassemblyManual", resourceCell(m.circularityAndDisassembly?.disassemblyManual));
+      setCell(row, "dueDiligenceReport", resourceCell(m.esgDueDiligence?.dueDiligenceReport));
       setCell(row, "cobaltCountryOfOrigin", m.esgDueDiligence?.cobaltCountryOfOrigin);
       setCell(row, "lithiumCountryOfOrigin", m.esgDueDiligence?.lithiumCountryOfOrigin);
       setCell(row, "nickelCountryOfOrigin", m.esgDueDiligence?.nickelCountryOfOrigin);
@@ -107,16 +131,17 @@ export function passportToCsvRow(passport: PassportCreateInput): Record<string, 
       setCell(row, "recycledPlasticContent", m.recycledPlasticContent);
       setCell(row, "repairabilityScore", m.circularityIndices?.repairabilityScore);
       setCell(row, "durabilityScore", m.circularityIndices?.durabilityScore);
-      setCell(row, "electronicWasteInstructions", m.electronicWasteInstructions);
+      setCell(row, "electronicWasteInstructions", textOf(m.electronicWasteInstructions));
+      setCell(row, "upgradeabilityInstructions", resourceCell(m.circularityAndMaintenance?.upgradeabilityInstructions));
       break;
     case "chemicals":
       setCell(row, "hazardClassification", joinList(m.hazardClassification));
-      setCell(row, "safetyDatasheetUrl", m.safetyDatasheetUrl);
+      setCell(row, "safetyDatasheet", resourceCell(m.safetyDatasheet));
       setCell(row, "presenceOfSVHC", m.presenceOfSVHC);
       break;
     case "construction":
       setCell(row, "declarationOfPerformanceNumber", m.declarationOfPerformanceNumber);
-      setCell(row, "declarationOfPerformanceUrl", m.declarationOfPerformanceUrl);
+      setCell(row, "declarationOfPerformance", resourceCell(m.declarationOfPerformance));
       break;
     case "cosmetics":
       setCell(row, "ingredientList", joinList(m.ingredientList));

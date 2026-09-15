@@ -93,7 +93,7 @@ test("Digital Link path parsing", () => {
 
 test("URI builders (suffix-asserted — resolver host is env-dependent)", () => {
   assert.ok(generateDigitalLinkUri(VALID_GTIN14, "pp_1").endsWith(`/01/${VALID_GTIN14}`));
-  assert.ok(generateDigitalLinkUri("WIDGET-1", "pp_9").endsWith("/passport/pp_9"));
+  assert.ok(generateDigitalLinkUri("WIDGET-1", "pp_9").endsWith("/passport/pp_9?.P=WIDGET-1"));
   assert.ok(
     generateUnitDigitalLinkUri(VALID_GTIN14, "SER-42").endsWith(`/01/${VALID_GTIN14}/21/SER-42`),
   );
@@ -131,7 +131,7 @@ test("resolver builders honour an explicit { baseUrl } (no implicit env read)", 
   );
   assert.equal(
     generateDigitalLinkUri("WIDGET-1", "pp_9", { baseUrl }),
-    `${baseUrl}/passport/pp_9`,
+    `${baseUrl}/passport/pp_9?.P=WIDGET-1`,
   );
   assert.equal(
     generateUnitDigitalLinkUri(VALID_GTIN14, "SER-42", { baseUrl }),
@@ -186,4 +186,18 @@ test("toNdefUriRecord wraps a Digital Link as an NFC URI record (#403, carrier-a
   assert.equal("https://" + remainder, uri, "an NFC tag carries the SAME resolvable URL as the QR");
   // http://www. picks the two-byte-shorter www-abbreviated code (0x01), proving longest-prefix match.
   assert.equal(toNdefUriRecord("http://www.example.com/x")[4], 0x01);
+});
+
+test("a unit under a non-GTIN passport gets an Identification Link on its own route, and needs the unit id", () => {
+  const baseUrl = "https://dpp.example.com";
+  assert.equal(
+    generateUnitDigitalLinkUri("WIDGET-1", "SN-7", { baseUrl, unitId: "u-1" }),
+    `${baseUrl}/unit/u-1?.P=WIDGET-1&.S=SN-7`,
+  );
+  // A GRAI admits no AI 21 qualifier, so its units take the same form.
+  assert.equal(
+    generateUnitDigitalLinkUri(`${VALID_GTIN14}RACK01`, "SN-7", { baseUrl, unitId: "u-2" }),
+    `${baseUrl}/unit/u-2?.P=${VALID_GTIN14}RACK01&.S=SN-7`,
+  );
+  assert.throws(() => generateUnitDigitalLinkUri("WIDGET-1", "SN-7", { baseUrl }), /unitId/);
 });

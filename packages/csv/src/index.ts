@@ -106,6 +106,34 @@ const pipeList = (v: string | undefined): string[] | undefined => {
 const set = (obj: Record<string, unknown>, key: string, val: unknown): void => {
   if (val !== undefined) obj[key] = val;
 };
+/**
+ * A document-reference cell — `contentType|url[|title[|language]]`, e.g.
+ * `application/pdf|https://example.com/doc.pdf|EU Declaration of Conformity|en-GB` (the EN 18223
+ * RelatedResource shape the node stores). Only the segments present are set: a partial cell is passed
+ * through as-is so the hosted node reports what is missing, never completed with a guessed media type.
+ */
+/**
+ * A translated text (EN 18223 MultiLanguageDataElement): the cell's text under the row's `language`. With no
+ * language the value is passed alone, so the hosted node reports the missing tag rather than one being guessed.
+ */
+const multiLanguage = (v: string | undefined, language: string | undefined): Record<string, unknown>[] | undefined => {
+  const s = str(v);
+  if (!s) return undefined;
+  const item: Record<string, unknown> = { value: s };
+  set(item, "language", language);
+  return [item];
+};
+const relatedResource = (v: string | undefined): Record<string, unknown> | undefined => {
+  const s = str(v);
+  if (!s) return undefined;
+  const p = s.split("|");
+  const r: Record<string, unknown> = {};
+  set(r, "contentType", str(p[0]));
+  set(r, "url", str(p[1]));
+  set(r, "resourceTitle", str(p[2]));
+  set(r, "language", str(p[3]));
+  return Object.keys(r).length ? r : undefined;
+};
 
 // Split a facility cell on ':' but re-join any URL that was split on the ':' in 'https://'.
 function splitFacilitySegments(fStr: string): string[] {
@@ -171,8 +199,8 @@ function parseFacilities(cell: string | undefined): Record<string, unknown>[] | 
     set(fac, "location", str(segs[1]));
     set(fac, "activity", str(segs[2]));
     // Field order after name/location/activity varies by sector (eori, eudrPlots, traceabilityDocs are
-    // all optional). Detect each by content: a URL-bearing `|` group is the traceability doc, a non-URL
-    // `|` group is the EUDR plot, a bare value is the EORI.
+    // all optional). Detect each by content: a URL-bearing `|` group is the traceability document, a
+    // non-URL `|` group is the EUDR plot, a bare value is the EORI.
     let eori: string | undefined;
     let eudrRaw: string | undefined;
     let traceRaw: string | undefined;
@@ -198,11 +226,14 @@ function parseFacilities(cell: string | undefined): Record<string, unknown>[] | 
       fac.eudrPlots = [plot];
     }
     if (traceRaw) {
+      // A traceability document is a document reference plus its SHA-256: contentType|url|title|hash[|language].
       const p = traceRaw.split("|");
       const doc: Record<string, unknown> = {};
-      set(doc, "documentName", str(p[0]));
-      set(doc, "documentHash", str(p[1]));
-      set(doc, "documentUrl", str(p[2]));
+      set(doc, "contentType", str(p[0]));
+      set(doc, "url", str(p[1]));
+      set(doc, "resourceTitle", str(p[2]));
+      set(doc, "documentHash", str(p[3]));
+      set(doc, "language", str(p[4]));
       fac.traceabilityDocs = [doc];
     }
     return fac;
@@ -235,13 +266,173 @@ function scalarUnit(cell: string | undefined, defaultUnit: string): Record<strin
   return { value: v, unit: str(unit) ?? defaultUnit };
 }
 
+function mapTextiles(row: PassportCsvRow, m: Record<string, unknown>, language: string | undefined): void {
+  set(m, "fiberComposition", parseFibers(str(row.fiberComposition)));
+  set(m, "size", str(row.size));
+  set(m, "careInstructions", pipeList(row.careInstructions)?.map((step) => multiLanguage(step, language)));
+  const pct = num(row.recycledContentPct);
+  if (pct !== undefined) {
+    const r: Record<string, unknown> = { percentage: pct };
+    set(r, "source", str(row.recycledContentSource));
+    m.recycledContent = r;
+  }
+  const takeBack = relatedResource(row.takeBackScheme);
+  const repairGuide = relatedResource(row.repairabilityGuide);
+  if (takeBack || repairGuide) {
+    const c: Record<string, unknown> = {};
+    set(c, "takeBackScheme", takeBack);
+    set(c, "repairabilityGuide", repairGuide);
+    m.circularityAttributes = c;
+  }
+}
+
+function mapBatteries(row: PassportCsvRow, m: Record<string, unknown>, _language: string | undefined): void {
+  set(m, "batteryCategory", str(row.batteryCategory));
+  set(m, "chemistry", str(row.chemistry));
+  set(m, "electrochemicalCapacity", scalarUnit(str(row.electrochemicalCapacity), "Ah"));
+  set(m, "stateOfCharge", num(row.stateOfCharge));
+  const cycleLife = num(row.durabilityCycleLife);
+  const cal = num(row.durabilityCalendarLifeYears);
+  if (cycleLife !== undefined || cal !== undefined) {
+    const d: Record<string, unknown> = {};
+    set(d, "cycleLife", cycleLife);
+    set(d, "calendarLifeYears", cal);
+    m.durability = d;
+  }
+  const co = num(row.recycledCobalt);
+  const li = num(row.recycledLithium);
+  const pb = num(row.recycledLead);
+  const ni = num(row.recycledNickel);
+  if (co !== undefined || li !== undefined || pb !== undefined || ni !== undefined) {
+    const s: Record<string, unknown> = {};
+    set(s, "cobalt", co);
+    set(s, "lithium", li);
+    set(s, "lead", pb);
+    set(s, "nickel", ni);
+    m.recycledContentShare = s;
+  }
+  const disassembly = relatedResource(row.disassemblyManual);
+  if (disassembly) m.circularityAndDisassembly = { disassemblyManual: disassembly };
+  const ddReport = relatedResource(row.dueDiligenceReport);
+  const coO = str(row.cobaltCountryOfOrigin);
+  const liO = str(row.lithiumCountryOfOrigin);
+  const niO = str(row.nickelCountryOfOrigin);
+  if (ddReport || coO || liO || niO) {
+    const e: Record<string, unknown> = {};
+    set(e, "dueDiligenceReport", ddReport);
+    set(e, "cobaltCountryOfOrigin", coO);
+    set(e, "lithiumCountryOfOrigin", liO);
+    set(e, "nickelCountryOfOrigin", niO);
+    m.esgDueDiligence = e;
+  }
+  // Annex XIII battery identity (audit H4): manufacturer / date / place of manufacture.
+  set(m, "dateOfManufacture", str(row.dateOfManufacture));
+  const mfrName = str(row.manufacturerName);
+  const mfrAddress = str(row.manufacturerAddress);
+  if (mfrName || mfrAddress) {
+    const mf: Record<string, unknown> = {};
+    set(mf, "name", mfrName);
+    set(mf, "address", mfrAddress);
+    m.manufacturer = mf;
+  }
+  const pomCountry = str(row.placeOfManufactureCountry);
+  const pomCity = str(row.placeOfManufactureCity);
+  if (pomCountry || pomCity) {
+    const pom: Record<string, unknown> = {};
+    set(pom, "country", pomCountry);
+    set(pom, "city", pomCity);
+    m.placeOfManufacture = pom;
+  }
+}
+
+function mapElectronics(row: PassportCsvRow, m: Record<string, unknown>, language: string | undefined): void {
+  set(m, "model", str(row.model));
+  set(m, "standbyPower", scalarUnit(str(row.standbyPower), "W"));
+  set(m, "batteryLife", num(row.batteryLife));
+  set(m, "recycledPlasticContent", num(row.recycledPlasticContent));
+  const rep = num(row.repairabilityScore);
+  const dur = num(row.durabilityScore);
+  if (rep !== undefined || dur !== undefined) {
+    const c: Record<string, unknown> = {};
+    set(c, "repairabilityScore", rep);
+    set(c, "durabilityScore", dur);
+    m.circularityIndices = c;
+  }
+  set(m, "electronicWasteInstructions", multiLanguage(row.electronicWasteInstructions, language));
+  const upgrade = relatedResource(row.upgradeabilityInstructions);
+  if (upgrade) m.circularityAndMaintenance = { upgradeabilityInstructions: upgrade };
+}
+
+function mapChemicals(row: PassportCsvRow, m: Record<string, unknown>, _language: string | undefined): void {
+  set(m, "hazardClassification", pipeList(row.hazardClassification));
+  set(m, "safetyDatasheet", relatedResource(row.safetyDatasheet));
+  m.presenceOfSVHC = bool(row.presenceOfSVHC);
+}
+
+function mapConstruction(row: PassportCsvRow, m: Record<string, unknown>, _language: string | undefined): void {
+  set(m, "declarationOfPerformanceNumber", str(row.declarationOfPerformanceNumber));
+  // The CPR Declaration of Performance — its OWN column. It used to be fed from the
+  // declarationOfConformity cell, which made a construction row carry the same URL as both its
+  // DoP and its Declaration of Conformity; they are different documents.
+  set(m, "declarationOfPerformance", relatedResource(row.declarationOfPerformance));
+}
+
+function mapCosmetics(row: PassportCsvRow, m: Record<string, unknown>, _language: string | undefined): void {
+  set(m, "ingredientList", pipeList(row.ingredientList));
+  const pr = str(row.packagingRecyclability);
+  if (pr) {
+    m.packagingRecyclability = pr.includes(":")
+      ? { recycledContentPercentage: num(pr.split(":")[1]) }
+      : num(pr);
+  }
+}
+
+function mapToys(row: PassportCsvRow, m: Record<string, unknown>, _language: string | undefined): void {
+  set(m, "ageGrading", str(row.ageGrading));
+  set(m, "chemicalContentCertificates", pipeList(row.chemicalContentCertificates));
+  m.physicalSafetyParameters = {
+    chokingHazardWarning: bool(row.chokingHazardWarning),
+    sharpEdgesChecked: bool(row.sharpEdgesChecked),
+    flammabilityCertified: bool(row.flammabilityCertified),
+  };
+}
+
+function mapIronSteel(row: PassportCsvRow, m: Record<string, unknown>, _language: string | undefined): void {
+  set(m, "scrapMetalContentRatio", num(row.scrapMetalContentRatio));
+  set(m, "tensileStrengthClass", str(row.tensileStrengthClass));
+  set(m, "carbonEmissionIntensityPerTon", num(row.carbonEmissionIntensityPerTon));
+}
+
+function mapAluminium(row: PassportCsvRow, m: Record<string, unknown>, _language: string | undefined): void {
+  set(m, "postConsumerScrapContent", num(row.postConsumerScrapContent));
+  set(m, "smelterElectricitySource", str(row.smelterElectricitySource));
+  set(m, "energyIntensityPerKg", num(row.energyIntensityPerKg));
+
+}
+
+/** One mapper per category — the branch bodies of what was a single nine-way function; each reads only its own columns. */
+const CATEGORY_MAPPERS: Record<EsprCategory, (row: PassportCsvRow, m: Record<string, unknown>, language: string | undefined) => void> = {
+  textiles: mapTextiles,
+  batteries: mapBatteries,
+  electronics: mapElectronics,
+  chemicals: mapChemicals,
+  construction: mapConstruction,
+  cosmetics: mapCosmetics,
+  toys: mapToys,
+  "iron-steel": mapIronSteel,
+  aluminium: mapAluminium,
+};
+
 /**
  * Maps a CSV row's cells to the per-category ESPR `metadata` object. Mirrors the column conventions of
  * the public `opendpp_*_template.csv` templates: lists use `|`, facilities use `||` between facilities
- * and `:` between a facility's fields, and `scalar:unit` / `material:percentage` pairs use `:`.
+ * and `:` between a facility's fields, `scalar:unit` / `material:percentage` pairs use `:`, and a
+ * document cell is `contentType|url[|title[|language]]`; free-text cells are stored as translated texts in the
+ * row's `language`.
  */
 function rowToMetadata(row: PassportCsvRow): Record<string, unknown> {
   const cat = str(row.category);
+  const language = str(row.language);
   const m: Record<string, unknown> = {};
   set(m, "category", cat);
   set(m, "materialComposition", parseMaterials(str(row.materials)));
@@ -253,123 +444,10 @@ function rowToMetadata(row: PassportCsvRow): Record<string, unknown> {
     ceMarking: bool(row.ceMarking),
     certificates: parseCertificates(str(row.regulatoryCertificates)),
   };
-  set(rc, "declarationOfConformityUrl", str(row.declarationOfConformityUrl));
+  set(rc, "declarationOfConformity", relatedResource(row.declarationOfConformity));
   m.regulatoryCompliance = rc;
 
-  if (cat === "textiles") {
-    set(m, "fiberComposition", parseFibers(str(row.fiberComposition)));
-    set(m, "size", str(row.size));
-    set(m, "careInstructions", pipeList(row.careInstructions));
-    const pct = num(row.recycledContentPct);
-    if (pct !== undefined) {
-      const r: Record<string, unknown> = { percentage: pct };
-      set(r, "source", str(row.recycledContentSource));
-      m.recycledContent = r;
-    }
-  } else if (cat === "batteries") {
-    set(m, "batteryCategory", str(row.batteryCategory));
-    set(m, "chemistry", str(row.chemistry));
-    set(m, "electrochemicalCapacity", scalarUnit(str(row.electrochemicalCapacity), "Ah"));
-    set(m, "stateOfCharge", num(row.stateOfCharge));
-    const cycleLife = num(row.durabilityCycleLife);
-    const cal = num(row.durabilityCalendarLifeYears);
-    if (cycleLife !== undefined || cal !== undefined) {
-      const d: Record<string, unknown> = {};
-      set(d, "cycleLife", cycleLife);
-      set(d, "calendarLifeYears", cal);
-      m.durability = d;
-    }
-    const co = num(row.recycledCobalt);
-    const li = num(row.recycledLithium);
-    const pb = num(row.recycledLead);
-    const ni = num(row.recycledNickel);
-    if (co !== undefined || li !== undefined || pb !== undefined || ni !== undefined) {
-      const s: Record<string, unknown> = {};
-      set(s, "cobalt", co);
-      set(s, "lithium", li);
-      set(s, "lead", pb);
-      set(s, "nickel", ni);
-      m.recycledContentShare = s;
-    }
-    const ddUrl = str(row.dueDiligenceReportUrl);
-    const coO = str(row.cobaltCountryOfOrigin);
-    const liO = str(row.lithiumCountryOfOrigin);
-    const niO = str(row.nickelCountryOfOrigin);
-    if (ddUrl || coO || liO || niO) {
-      const e: Record<string, unknown> = {};
-      set(e, "dueDiligenceReportUrl", ddUrl);
-      set(e, "cobaltCountryOfOrigin", coO);
-      set(e, "lithiumCountryOfOrigin", liO);
-      set(e, "nickelCountryOfOrigin", niO);
-      m.esgDueDiligence = e;
-    }
-    // Annex XIII battery identity (audit H4): manufacturer / date / place of manufacture.
-    set(m, "dateOfManufacture", str(row.dateOfManufacture));
-    const mfrName = str(row.manufacturerName);
-    const mfrAddress = str(row.manufacturerAddress);
-    if (mfrName || mfrAddress) {
-      const mf: Record<string, unknown> = {};
-      set(mf, "name", mfrName);
-      set(mf, "address", mfrAddress);
-      m.manufacturer = mf;
-    }
-    const pomCountry = str(row.placeOfManufactureCountry);
-    const pomCity = str(row.placeOfManufactureCity);
-    if (pomCountry || pomCity) {
-      const pom: Record<string, unknown> = {};
-      set(pom, "country", pomCountry);
-      set(pom, "city", pomCity);
-      m.placeOfManufacture = pom;
-    }
-  } else if (cat === "electronics") {
-    set(m, "model", str(row.model));
-    set(m, "standbyPower", scalarUnit(str(row.standbyPower), "W"));
-    set(m, "batteryLife", num(row.batteryLife));
-    set(m, "recycledPlasticContent", num(row.recycledPlasticContent));
-    const rep = num(row.repairabilityScore);
-    const dur = num(row.durabilityScore);
-    if (rep !== undefined || dur !== undefined) {
-      const c: Record<string, unknown> = {};
-      set(c, "repairabilityScore", rep);
-      set(c, "durabilityScore", dur);
-      m.circularityIndices = c;
-    }
-    set(m, "electronicWasteInstructions", str(row.electronicWasteInstructions));
-  } else if (cat === "chemicals") {
-    set(m, "hazardClassification", pipeList(row.hazardClassification));
-    set(m, "safetyDatasheetUrl", str(row.safetyDatasheetUrl));
-    m.presenceOfSVHC = bool(row.presenceOfSVHC);
-  } else if (cat === "construction") {
-    set(m, "declarationOfPerformanceNumber", str(row.declarationOfPerformanceNumber));
-    // The CPR Declaration of Performance — its OWN column. It used to be fed from the
-    // declarationOfConformityUrl cell, which made a construction row carry the same URL as both its
-    // DoP and its Declaration of Conformity; they are different documents.
-    set(m, "declarationOfPerformanceUrl", str(row.declarationOfPerformanceUrl));
-  } else if (cat === "cosmetics") {
-    set(m, "ingredientList", pipeList(row.ingredientList));
-    const pr = str(row.packagingRecyclability);
-    if (pr) {
-      m.packagingRecyclability = pr.includes(":")
-        ? { recycledContentPercentage: num(pr.split(":")[1]) }
-        : num(pr);
-    }
-  } else if (cat === "toys") {
-    set(m, "ageGrading", str(row.ageGrading));
-    set(m, "chemicalContentCertificates", pipeList(row.chemicalContentCertificates));
-    m.physicalSafetyParameters = {
-      chokingHazardWarning: bool(row.chokingHazardWarning),
-      sharpEdgesChecked: bool(row.sharpEdgesChecked),
-      flammabilityCertified: bool(row.flammabilityCertified),
-    };
-  } else if (cat === "iron-steel") {
-    set(m, "scrapMetalContentRatio", num(row.scrapMetalContentRatio));
-    set(m, "tensileStrengthClass", str(row.tensileStrengthClass));
-    set(m, "carbonEmissionIntensityPerTon", num(row.carbonEmissionIntensityPerTon));
-  } else if (cat === "aluminium") {
-    set(m, "postConsumerScrapContent", num(row.postConsumerScrapContent));
-    set(m, "smelterElectricitySource", str(row.smelterElectricitySource));
-    set(m, "energyIntensityPerKg", num(row.energyIntensityPerKg));
-  }
+  if (isEsprCategory(cat)) CATEGORY_MAPPERS[cat](row, m, language);
   return m;
 }
 
@@ -415,12 +493,12 @@ const SHARED_COLUMNS: CsvColumn[] = [
   { name: "operatorId", required: false, description: "Economic operator id; omit only if your workspace has exactly one bound operator." },
   { name: "facilityId", required: false, description: "Manufacturing Facility id; required for a Verifiable Credential (makes the passport vcReady)." },
   { name: "category", required: true, description: "ESPR category slug (one of the nine ESPR_CATEGORIES)." },
+  { name: "language", required: true, description: "Language of the row's free-text cells (care instructions, e-waste instructions) as a two-letter language and two-letter country tag, e.g. en-GB." },
   { name: "materials", required: true, description: "materialComposition as material:percentage pairs joined by | (e.g. Cotton:85|Polyester:15; must sum to 100)." },
   { name: "origin", required: true, description: "originCountry as an ISO 3166-1 alpha-2 code (e.g. PT)." },
   { name: "facilities", required: true, description: "facilityDetails as name:location:activity:eori, multiple joined by ||." },
   { name: "regulatoryCertificates", required: false, description: "certificates as name:reference:issuer:validUntil, joined by |." },
-  { name: "declarationOfConformityUrl", required: false, description: "URL of the declaration of conformity." },
-  { name: "declarationOfPerformanceUrl", required: false, description: "Construction only: URL of the CPR Declaration of Performance (a different document from the declaration of conformity)." },
+  { name: "declarationOfConformity", required: false, description: "The EU Declaration of Conformity as a document reference: contentType|url|title|language (e.g. application/pdf|https://example.com/doc.pdf|EU Declaration of Conformity|en-GB)." },
   { name: "ceMarking", required: false, description: "true / false." },
   { name: "carbonFootprint", required: false, description: "Total product carbon footprint in kg CO2e." },
   { name: "scope1", required: false, description: "GHG scope 1 emissions (kg CO2e)." },
@@ -434,9 +512,11 @@ const CATEGORY_COLUMNS: Record<EsprCategory, CsvColumn[]> = {
   textiles: [
     col("fiberComposition", "fiber:percentage pairs joined by | (e.g. Cotton:80|Elastane:20).", true),
     col("size", "Garment size."),
-    col("careInstructions", "Care instructions joined by |."),
+    col("careInstructions", "Care instructions joined by |, each stored as a translated text in the row's language."),
     col("recycledContentPct", "Recycled-content percentage."),
     col("recycledContentSource", "Recycled-content source."),
+    col("takeBackScheme", "Take-back scheme as a document reference: contentType|url|title|language."),
+    col("repairabilityGuide", "Repairability guide as a document reference: contentType|url|title|language."),
   ],
   batteries: [
     col("batteryCategory", "Battery category (e.g. EV, LMT, industrial).", true),
@@ -449,7 +529,8 @@ const CATEGORY_COLUMNS: Record<EsprCategory, CsvColumn[]> = {
     col("recycledLithium", "Recycled lithium share (%)."),
     col("recycledLead", "Recycled lead share (%)."),
     col("recycledNickel", "Recycled nickel share (%)."),
-    col("dueDiligenceReportUrl", "Supply-chain due-diligence report URL."),
+    col("disassemblyManual", "Disassembly manual as a document reference: contentType|url|title|language."),
+    col("dueDiligenceReport", "Supply-chain due-diligence report as a document reference: contentType|url|title|language."),
     col("cobaltCountryOfOrigin", "Cobalt country of origin (ISO 3166-1 alpha-2)."),
     col("lithiumCountryOfOrigin", "Lithium country of origin (ISO 3166-1 alpha-2)."),
     col("nickelCountryOfOrigin", "Nickel country of origin (ISO 3166-1 alpha-2)."),
@@ -466,16 +547,17 @@ const CATEGORY_COLUMNS: Record<EsprCategory, CsvColumn[]> = {
     col("recycledPlasticContent", "Recycled plastic content (%)."),
     col("repairabilityScore", "Repairability score."),
     col("durabilityScore", "Durability score."),
-    col("electronicWasteInstructions", "WEEE / e-waste handling instructions."),
+    col("electronicWasteInstructions", "WEEE / e-waste handling instructions, stored as a translated text in the row's language."),
+    col("upgradeabilityInstructions", "Upgrade instructions as a document reference: contentType|url|title|language."),
   ],
   chemicals: [
     col("hazardClassification", "Hazard classes joined by |."),
-    col("safetyDatasheetUrl", "Safety datasheet URL."),
+    col("safetyDatasheet", "Safety Data Sheet as a document reference: contentType|url|title|language.", true),
     col("presenceOfSVHC", "true / false — presence of substances of very high concern."),
   ],
   construction: [
     col("declarationOfPerformanceNumber", "Declaration of Performance (DoP) number."),
-    col("declarationOfPerformanceUrl", "Declaration of Performance (DoP) URL."),
+    col("declarationOfPerformance", "The CPR Declaration of Performance as a document reference: contentType|url|title|language (a different document from the Declaration of Conformity).", true),
   ],
   cosmetics: [
     col("ingredientList", "INCI ingredients joined by |."),

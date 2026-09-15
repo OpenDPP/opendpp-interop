@@ -65,12 +65,15 @@ test("parseEori — splits country prefix from identifier", () => {
   assert.equal(prefixOnly.validSyntax, false);
 });
 
-test("validateOperatorRegId — scheme rules + fabricated-id rejection", () => {
-  assert.equal(validateOperatorRegId("DE1234567890", "EORI"), null);
-  assert.equal(validateOperatorRegId("anything"), null); // no scheme → only presence checked
-  assert.equal(validateOperatorRegId(""), "regId is required");
-  assert.match(validateOperatorRegId("EORI-MOCK-1") ?? "", /Fabricated registration ids/);
-  assert.match(validateOperatorRegId("DE123", "BOGUS") ?? "", /regIdScheme must be one of/);
-  assert.match(validateOperatorRegId("not-an-eori", "EORI") ?? "", /not a syntactically valid EORI/);
-  assert.deepEqual([...REG_ID_SCHEMES], ["EORI", "VAT", "DUNS", "NATIONAL", "OTHER"]);
+test("validateOperatorRegId — the scheme is required, and each clause 6 scheme checks its own shape", () => {
+  assert.equal(validateOperatorRegId("DE811907980", "VAT"), null);
+  assert.equal(validateOperatorRegId("150483782", "duns"), null, "scheme is matched case-insensitively");
+  assert.equal(validateOperatorRegId("", "VAT"), "regId is required");
+  assert.match(validateOperatorRegId("EORI-MOCK-1", "VAT") ?? "", /Fabricated registration ids/);
+  assert.match(validateOperatorRegId("DE811907980") ?? "", /regIdScheme is required — one of VAT, DUNS, LEI, GLN/);
+  assert.match(validateOperatorRegId("DE811907980", null) ?? "", /regIdScheme is required/);
+  assert.match(validateOperatorRegId("DE123", "BOGUS") ?? "", /regIdScheme must be one of: VAT, DUNS, LEI, GLN/);
+  assert.match(validateOperatorRegId("DE1234567890", "EORI") ?? "", /regIdScheme must be one of/, "an EORI is not a clause 6 scheme");
+  assert.match(validateOperatorRegId("not-a-vat", "VAT") ?? "", /not a valid EU VAT/);
+  assert.deepEqual([...REG_ID_SCHEMES], ["VAT", "DUNS", "LEI", "GLN"]);
 });

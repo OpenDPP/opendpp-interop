@@ -57,11 +57,17 @@ passportCsvTemplateHeader("batteries");
 
 Shared columns apply to every category; each category adds its own. Lists use
 `|`; facilities use `||` between facilities and `:` between a facility's fields;
-`scalar:unit` and `material:percentage` pairs use `:`.
+`scalar:unit` and `material:percentage` pairs use `:`. A **document** (the
+Declaration of Conformity, a safety data sheet, a take-back scheme, …) is one
+cell in the form `contentType|url|title|language` — the EN 18223 RelatedResource
+the node stores — and a facility's traceability document adds its SHA-256 after
+the title: `contentType|url|title|hash`. Free-text cells (care instructions, e-waste
+instructions) are stored as translated texts in the row's `language` (`en-GB`), so a
+row without one is rejected by the hosted node rather than tagged with a guess.
 
 ```
-productId,category,materials,origin,facilities,ceMarking
-09501101531000,batteries,Lithium:60|Cobalt:40,PT,Cell Plant:Lisbon:manufacturing:PT123456789,true
+productId,category,language,materials,origin,facilities,ceMarking,declarationOfConformity
+09501101531000,batteries,en-GB,Lithium:60|Cobalt:40,PT,Cell Plant:Lisbon:manufacturing:PT123456789,true,application/pdf|https://example.com/doc.pdf|EU Declaration of Conformity|en-GB
 ```
 
 `passportCsvTemplate(category)` returns the full typed column set (with a
