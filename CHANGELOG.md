@@ -7,6 +7,25 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.17.0] — API contract 1.17.0 (the EN 18222 Life Cycle API)
+
+### Added
+
+- **The CEN EN 18222:2026 Life Cycle API is now served at the clause 8 paths**, and so appears in the
+  bundled `openapi.json`: `ReadDPPById`, `ReadDPPByProductId`, `ReadDPPVersionByIdAndDate`,
+  `ReadDPPIdsByProductIds`, `CreateDPP`, `UpdateDPPById`, `DeleteDPPById`, `ReadDataElement` and
+  `UpdateDataElement`, under the standard's own method names.
+- **A fifth declared divergence** in [`schemas/README.md`](schemas/README.md): `elementIdPath` accepts
+  the deterministic single-node subset of RFC 9535 JSONPath, and refuses the rest rather than
+  resolving a multi-node address to its first match.
+
+### Notes
+
+- The `v1` in these paths is **EN 18222's own version segment** (clause 8.1), not the contract major
+  this kit tracks. A kit for contract 2.x would still carry `v1/dpps` paths if EN 18222 is still at v1.
+- Success bodies carry **no envelope** (EN 18222 Table 16 excepts the status code); failures carry the
+  **clause 7.2 Result object** (Table 12/13/14).
+
 ## [1.16.0] — API contract 1.16.0 (aligned with the EN 182xx Digital Product Passport standards)
 
 Carries OpenDPP public API contract **1.16.0** (`openapi.json`): the passport document, its identifiers

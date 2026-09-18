@@ -40,9 +40,14 @@ together.
 
 ### Where they knowingly differ from the clauses
 
-An aid that silently disagrees with the text is worse than none, so the four places these schemas do
-not simply mirror EN 18223 are listed here. Two are **lenient** (a document the clause would refuse
-still passes) and two are **strict** (a document the clause allows is refused). None is accidental.
+An aid that silently disagrees with the text is worse than none, so the five places this kit does not
+simply mirror the clauses are listed here. Two are **lenient** (a document the clause would refuse
+still passes), two are **strict** (a document the clause allows is refused), and one is a **declared
+subset** of a referenced specification. None is accidental.
+
+Rows 1 to 4 are about the EN 18223 schemas in this directory. Row 5 is about EN 18222 and describes the
+node's served API rather than a schema here — it is listed with them because it is the same kind of
+statement, and a reader checking what this kit promises should find all of them in one place.
 
 | # | Where | Direction | Why |
 | --- | --- | --- | --- |
@@ -50,7 +55,10 @@ still passes) and two are **strict** (a document the clause allows is refused). 
 | 2 | `lastUpdated` accepts a UTC offset (`…+02:00`) | lenient | JSON Schema's `date-time` is RFC 3339, which permits an offset. Table 7 fixes the Z-terminated form, so a `+02:00` value is accepted here and is not what the table prints. Every document the node serves is Z-terminated. |
 | 3 | the expanded form **requires** `dictionaryReference` on every element | strict | Table 2 gives it `[0..1]`. The Annex A form exists to carry what the compressed form leaves to the dictionary (5.2.2), so the schema treats it as the shape's point — but a conformant Annex A document that omits it **will be refused here**. |
 | 4 | the expanded form **requires** the `elements` key | strict | 4.1.2.1 holds `[0..*]` data elements, so a header-only passport is structurally valid. Satisfy this with `elements: []`, which the schema accepts; omitting the key entirely is refused. |
+| 5 | `elementIdPath` resolves a **single-node subset** of RFC 9535 JSONPath | subset | EN 18222 clause 8.1 binds `elementIdPath` to RFC 9535. The node accepts the root identifier, name selectors (`$.name`, `$['name']`, `$["name"]`) and the index selector including the negative form (`$.materials[0]`, `$.materials[-1]`). The **wildcard, descendant (`..`), slice and filter selectors, and a comma union**, are refused with `400` naming the construct. Why: EN 18222 Table 9 and Table 10 each return one `DataElement`, while RFC 9535 is a query language whose result is a nodelist of any length — the series gives no rule for what a multi-node address means to a method that returns a single element. Resolving such a path to its first match would be a wrong answer wearing a `200`, so it is refused instead. |
 
 Rows 1 and 2 mean a PASS here is not proof of conformance on those two points. Rows 3 and 4 mean a
-FAILURE here is not proof of non-conformance on those two. Everything else the schemas check follows
-the clauses as OpenDPP reads them.
+FAILURE here is not proof of non-conformance on those two. Row 5 means a client using the full RFC 9535
+grammar will be refused where the standard's own text would arguably allow it — the refusal is explicit
+and names the construct, so it can never be mistaken for the element being absent. Everything else the
+schemas check follows the clauses as OpenDPP reads them.
