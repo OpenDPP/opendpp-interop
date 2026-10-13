@@ -110,8 +110,9 @@ Honesty is part of the contract. OpenDPP does **not**:
 - claim **structural conformance** to an IDTA submodel template merely because a submodel reuses that
   template's `semanticId`. The `semanticids` check above verifies template **identity** (the id is the
   authentic, registry-pinned IDTA id) — not that the submodel body fills the template's mandated elements.
-- present itself as a certified compliance authority. OpenDPP is an ESPR-readiness / interoperability
-  node: it produces validator-conformant, independently verifiable output. Regulatory compliance is a
+- present itself as a certified compliance authority. OpenDPP is a Digital Product Passport service
+  built to the harmonised EU DPP standards: it produces validator-conformant, independently verifiable
+  output, and its conformance to those standards is self-assessed. Regulatory compliance is a
   determination for the operator and the competent authority.
 
 For the **CIRPASS-2** reference ecosystem specifically:

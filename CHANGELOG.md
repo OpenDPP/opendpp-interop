@@ -7,6 +7,110 @@ This kit's version **tracks the OpenDPP API contract version it carries** (`open
 `v<api-contract-version>`. The vendored standards keep their own versions (IDTA AAS v3.1 /
 IDTA-01001-3-1; UNTP DPP v0.7.0). Format: [Keep a Changelog](https://keepachangelog.com).
 
+## [1.18.0] — API contract 1.18.0 (the node states its EN 18222 clause 4.1 role)
+
+### Added
+
+- **Battery-unit refusals carry a stable reason code**, and so does the bundled `openapi.json`.
+  Serialising units returns `reasons` beside `errors`, the validate pre-flight returns `reason` on each
+  refused result (a `BatteryUnitRefusalReason`), and a physically impossible telemetry reading's `400`
+  returns `reasons`. Additive; the message strings are unchanged.
+
+- **`GET /api/v1/version` now returns `providerRole`**, and so does the bundled `openapi.json`: the
+  CEN EN 18222:2026 clause 4.1 DPP service-provider role the node operates as, `main` or `backup`.
+  Clause 4.1 assigns different method obligations to the creator, the main service provider and the
+  back-up service provider, so a client — or an assessor — reading this kit against a live node can
+  now ask the node which set of duties applies to it.
+- **The carrier declaration records a presence mark** — `carrier.presenceMark`, for an NFC or RFID
+  carrier only, stating how a person can tell a tag they cannot see is there (EN 18220 §5.7.1, a
+  recommendation). A radio carrier declared without one is accepted with the new
+  `CARRIER_PRESENCE_UNMARKED` warning; a mark on a printed symbol is refused, because a printed symbol
+  is visible.
+
+### Notes
+
+- A node serving this contract **always sends** the field, and sends `main` when it is configured
+  with no other role. It is **not declared required**, because a node serving an earlier contract
+  does not send it and a client must not refuse that response — so an absent field means an older
+  build, never "no role".
+- It is the **node's** role. The operation is anonymous, so it cannot answer for an individual
+  operator agreement, which may record a different one.
+
+### Changed
+
+- **A battery unit's `manufacturedAt` no longer accepts a day-and-month form that reads either way
+  round** (`03/04/2026`, `03-04-2026`, `3.4.26`). Serialising units and the validate pre-flight refuse
+  such a value per item, with the reason code `MANUFACTURED_AT_AMBIGUOUS`; ISO 8601 dates and
+  date-times are unchanged.
+
+- **The revocation status list is limited to 30 requests per minute per IP.** Each fetch is signed
+  with the issuing workspace's key, so the route now has its own per-IP limit instead of relying on the
+  global one. A verifier that caches one list per issuer is unaffected.
+
+- **A sealed passport can be edited; the edit is a new, unsealed version.** Updating a sealed
+  passport (`updatePassport`, AAS re-ingest, bulk upsert, `updateDPPById`, `updateDataElement`) is
+  accepted. The sealed version stays in the archive unchanged and still verifies; the current passport
+  reads not sealed until it is sealed again, and the update response says so with
+  `resealRequired: true`. The `PASSPORT_SEALED_IMMUTABLE` code is kept in the enum and no longer sent.
+- **`registerOperator` refuses a duplicate identifier with `409` and the new `Error.code`
+  `OPERATOR_DUPLICATE`**, where it used to answer `201` with the existing operator.
+- **`402` responses carry `code: "subscription_inactive"`** and are never sent for a read.
+- Clearer messages on the duplicate-GLN `409`, unit serialisation failures, and validation findings.
+
+- **`readDPPVersionByIdAndDate` declares, and serves, the representations `readDPPById` does**, and
+  honours `representation`, which it previously ignored. An archived version is served as JSON-LD in
+  either form, XML or HTML, and a signed representation of it (AAS, verifiable credential) is refused
+  with `406`; the three document reads document that `406`.
+- **`productId` on `readDPPByProductId` and `readDPPIdsByProductIds` also accepts the
+  `uniqueProductIdentifier` a passport document carries**, matched exactly as the node issued it.
+- **The passport lifetime is per product group, and no fixed number of years applies.** The EN 18221
+  clause 3.4 lifetime is what each group's own instrument sets, and this node now holds it that way.
+  A battery model ends once it is decommissioned and every battery under it has been recycled
+  (Regulation (EU) 2023/1542 Art. 77(8)). That sets `retentionUntil` 30 days ahead. Inside that grace
+  window, reactivating the model or serialising a live battery takes the end back. After it, the
+  passport takes no new units and no status change (`409 PASSPORT_LIFETIME_ENDED`). Every other ESPR category has no
+  period fixed in law yet, so its passports are never stamped and never purged. Decommissioning and
+  archiving no longer set `retentionUntil`; a value already written is kept.
+- **DeleteDPPById deletes what the law allows** (EN 18222 clause 4.8: "access rules control whether
+  deletion of DPPs is allowed"). A main node deletes a never-published draft, or a passport whose
+  lifetime has ended, and refuses the rest with `409`. A back-up node offers the method and never
+  deletes a copy on request (`409`, formerly `405`): the origin holds the back-up workspace's
+  credential, so a copy it could delete would not survive it. A deleted passport's credential now
+  reads revoked in the issuer's status list.
+- **A carrier's print-quality grade is structured by its method** (EN 18220 §5.6.2). `printQuality`
+  is an ISO/IEC 15415:2024 grade with all three parts the clause names (grade, aperture as % of the X
+  dimension, wavelength), or an ISO/IEC 29158 direct-part-mark grade. The method follows the placement,
+  and `printMethod` records the print method and media (§5.5.2). The recommendations are advised, not
+  refused: an ungraded printed symbol, a grade below the typical 1.5, a free-text grade, and a label
+  with no durability assessment. `printQualityGrade` is deprecated and still accepted.
+- **A never-published draft is never replicated.** A draft's creation, edits and bulk archival
+  queue nothing for the back-up, the appointment replay skips drafts, and the drain settles any draft
+  state unsent. Publishing queues the published state, so a back-up's archive of a passport begins at
+  its publication. A back-up's CreateDPP refuses a document that declares itself a draft (`400`).
+- **A back-up copy is masked for its reader by the main provider's own rule, and kept for good.** A
+  portal session reads a copy at the public tier, as it reads the original; owner tier needs a Bearer
+  API key in both roles. The masked copy still verifies against the origin's seal. A back-up cannot see
+  a passport's lifetime end, so it never deletes a copy, and a workspace holding copies cannot be
+  deleted. A version archived before whole-document snapshots existed is not replicated: it predates
+  the back-up duty, and is kept at the origin.
+
+### Fixed
+
+- AAS ingest verifies an embedded environment seal and reports it, but never stores it as the
+  passport seal; re-ingesting a sealed passport with unchanged metadata keeps its seal, and a change to
+  the metadata clears it with `resealRequired: true`.
+- `PATCH v1/dpps/{dppId}` and the element PATCH answer `x-opendpp-reseal-required: true` when a seal
+  was cleared, and `x-opendpp-warnings` with any advisory codes.
+- A back-up node answers `415` for a non-JSON document and `400` for a malformed sequence header,
+  identifier or `lastUpdated`, where it used to answer `500` or accept the value.
+- Battery-unit routes answer `409` when a `productId` is used by two economic operators in the
+  workspace, and `400` for a `manufacturedAt` that names no real day.
+- `GET /api/v1/grants` accepts a `status` filter.
+- A GS1 Digital Link scanned on a brand's BYOD custom domain now resolves within that brand's
+  workspace, like a branded subdomain, instead of answering the ambiguous-identifier `400` or another
+  workspace's passport. The `400` example on `GET /01/{productId}` and `GET /8003/{productId}` names
+  `brand.<the node's own base domain>` rather than `brand.opendpp.eu`, which the node does not serve.
+
 ## [1.17.0] — API contract 1.17.0 (the EN 18222 Life Cycle API)
 
 ### Added
