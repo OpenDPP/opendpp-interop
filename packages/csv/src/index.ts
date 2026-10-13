@@ -33,6 +33,28 @@
  * "OpenDPP" is a trademark of Opendpp UAB; the Apache-2.0 license grants no rights to the marks.
  */
 
+// --- battery units -----------------------------------------------------------------------------
+// The unit half lives in its own module: a unit CSV maps to a different endpoint and names its
+// passport per row, which is a second concern rather than more of this one.
+export {
+  BATTERY_UNIT_STATUSES,
+  BATTERY_UNIT_TEMPLATE_COLUMNS,
+  BATTERY_UNIT_COLUMNS_IGNORED_ON_IMPORT,
+  isBatteryUnitStatus,
+  csvCell,
+  tryMapCsvRowToBatteryUnit,
+  batteryUnitCsvTemplate,
+  batteryUnitCsvTemplateHeader,
+  isIsoDateString,
+  isEmptyBatteryUnitRow,
+  mapCsvRowToBatteryUnit,
+  mapCsvRowsToBatteryUnits,
+  type BatteryUnitStatus,
+  type BatteryUnitCsvRow,
+  type BatteryUnitCsvMapping,
+  type BatteryUnitCsvRowResult,
+} from "./battery-units.js";
+
 /** One parsed CSV row: a map of column header → cell value (an absent/blank cell is `undefined`). */
 export type PassportCsvRow = Record<string, string | undefined>;
 

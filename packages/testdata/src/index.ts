@@ -54,5 +54,13 @@ export {
 } from "./events.js";
 
 export { passportToCsvRow, passportsToCsv } from "./csv.js";
+export { generateBatteryUnits, batteryUnitsToCsv, MAX_BATTERY_UNITS, type GenerateBatteryUnitsOptions } from "./battery-units.js";
+// Re-exported so a consumer generating unit fixtures does not need @opendpp/csv as a second import.
+export {
+  BATTERY_UNIT_STATUSES,
+  batteryUnitCsvTemplateHeader,
+  type BatteryUnitStatus,
+  type BatteryUnitCsvMapping,
+} from "@opendpp/csv";
 
 export { MAX_ITEMS_PER_CATEGORY, TESTDATA_GS1_PREFIX, sampleGtin, sgtinEpc } from "./identifiers.js";
