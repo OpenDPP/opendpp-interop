@@ -12,9 +12,9 @@ running service and the product backend are **separate** (see [README](./README.
 | Where the issue is | How to report |
 | --- | --- |
 | **This kit** — the validator (`validate/`), CI/release workflows, a vendored schema copy, or a sample | Use GitHub **private vulnerability reporting**: the repository **Security** tab → **Report a vulnerability**. |
-| **The live OpenDPP service** (`https://opendpp-node.eu`) or the product backend | Disclose responsibly via <https://opendpp-node.eu/security>. |
+| **The live OpenDPP service** (`https://opendpp-node.eu`) or the product backend | Disclose responsibly by email to **security@opendpp-node.eu**. |
 
-If you're unsure which applies, use <https://opendpp-node.eu/security> and we'll route it.
+If you're unsure which applies, email **security@opendpp-node.eu** and we'll route it.
 
 Please include enough to reproduce: affected file/endpoint, version (`openapi.json` `info.version`
 or the validator commit), and a minimal proof of concept. We aim to acknowledge within a few business
